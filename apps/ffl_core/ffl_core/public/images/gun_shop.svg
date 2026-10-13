@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="14" fill="#0f766e"/>
+  <g fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- shop facade -->
+    <path d="M14 26 L14 50 L50 50 L50 26"/>
+    <path d="M11 26 L53 26 L50 16 L14 16 Z"/>
+    <!-- door -->
+    <path d="M28 50 L28 36 L36 36 L36 50"/>
+    <!-- window slats hint -->
+    <path d="M19 22 L19 30"/>
+    <path d="M27 22 L27 30"/>
+    <path d="M37 22 L37 30"/>
+    <path d="M45 22 L45 30"/>
+  </g>
+</svg>

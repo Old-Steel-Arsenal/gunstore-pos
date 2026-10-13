@@ -1,0 +1,265 @@
+{
+ "actions": [],
+ "creation": "2026-05-05 14:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "issingle": 1,
+ "field_order": [
+  "tab_account",
+  "section_api",
+  "api_enabled",
+  "dealer_account",
+  "dealer_password",
+  "column_api",
+  "fulfillment_account",
+  "fulfillment_password",
+  "section_catalog_feed",
+  "ftp_host",
+  "ftp_port",
+  "key_dealer",
+  "column_catalog_feed",
+  "ftp_username",
+  "ftp_password",
+  "ftps_skip_verify",
+  "section_advanced",
+  "api_base_url",
+  "tab_ordering",
+  "section_ordering",
+  "pos_indicator",
+  "column_ordering",
+  "order_email",
+  "hold_escalate_days",
+  "tab_freight",
+  "section_freight",
+  "store_free_freight",
+  "free_freight_threshold",
+  "column_freight",
+  "rate_ground",
+  "rate_2day",
+  "fee_signature",
+  "freight_variance_alert"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_account",
+   "fieldtype": "Tab Break",
+   "label": "Account"
+  },
+  {
+   "fieldname": "section_api",
+   "fieldtype": "Section Break",
+   "label": "Direct Connect"
+  },
+  {
+   "fieldname": "api_enabled",
+   "fieldtype": "Check",
+   "label": "Allow live orders",
+   "default": "0",
+   "description": "Off: nothing is sent to RSR; the catalog still syncs through Data Service."
+  },
+  {
+   "fieldname": "dealer_account",
+   "fieldtype": "Data",
+   "label": "Dealer account #",
+   "mandatory_depends_on": "eval:doc.api_enabled",
+   "description": "Stocking and procure-to-store orders."
+  },
+  {
+   "fieldname": "dealer_password",
+   "fieldtype": "Password",
+   "label": "Dealer API password"
+  },
+  {
+   "fieldname": "column_api",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fulfillment_account",
+   "fieldtype": "Data",
+   "label": "Fulfillment account #",
+   "description": "Drop-ship orders (blank: drop-ship is unavailable)."
+  },
+  {
+   "fieldname": "fulfillment_password",
+   "fieldtype": "Password",
+   "label": "Fulfillment API password"
+  },
+  {
+   "fieldname": "section_catalog_feed",
+   "fieldtype": "Section Break",
+   "label": "Catalog feed (local catalog)",
+   "depends_on": "eval:doc.__onload && doc.__onload.catalog_local",
+   "description": "RSR's FTPS feed files, which this site downloads itself because Data Service Settings › Catalog source is Local."
+  },
+  {
+   "fieldname": "ftp_host",
+   "fieldtype": "Data",
+   "label": "FTP host",
+   "default": "ftp.rsrgroup.com",
+   "description": "The feed server RSR gave you, normally ftp.rsrgroup.com."
+  },
+  {
+   "fieldname": "ftp_port",
+   "fieldtype": "Int",
+   "label": "FTP port",
+   "default": "2222",
+   "description": "RSR's explicit-FTPS port, normally 2222."
+  },
+  {
+   "fieldname": "key_dealer",
+   "fieldtype": "Check",
+   "label": "Key dealer feed",
+   "default": "0",
+   "description": "Tick when RSR set your login up as a key dealer, whose files sit in the keydealer folder."
+  },
+  {
+   "fieldname": "column_catalog_feed",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ftp_username",
+   "fieldtype": "Data",
+   "label": "FTP username",
+   "description": "The FTP login RSR issued for the inventory feed, not your Direct Connect account."
+  },
+  {
+   "fieldname": "ftp_password",
+   "fieldtype": "Password",
+   "label": "FTP password"
+  },
+  {
+   "fieldname": "ftps_skip_verify",
+   "fieldtype": "Check",
+   "label": "Skip TLS certificate check (not recommended)",
+   "default": "0",
+   "description": "Only for a feed server whose certificate fails the check: the login is then sent without proof of who receives it."
+  },
+  {
+   "fieldname": "section_advanced",
+   "fieldtype": "Section Break",
+   "label": "Advanced",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "api_base_url",
+   "fieldtype": "Data",
+   "label": "API base URL",
+   "default": "https://www.rsrgroup.com",
+   "description": "Production; RSR's testing environment uses test.rsrgroup.com."
+  },
+  {
+   "fieldname": "tab_ordering",
+   "fieldtype": "Tab Break",
+   "label": "Ordering"
+  },
+  {
+   "fieldname": "section_ordering",
+   "fieldtype": "Section Break",
+   "label": "Sent with every order"
+  },
+  {
+   "fieldname": "pos_indicator",
+   "fieldtype": "Data",
+   "label": "POS indicator",
+   "mandatory_depends_on": "eval:doc.api_enabled",
+   "description": "The POS code RSR assigned to this integration."
+  },
+  {
+   "fieldname": "column_ordering",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "order_email",
+   "fieldtype": "Data",
+   "label": "Order email",
+   "options": "Email",
+   "mandatory_depends_on": "eval:doc.api_enabled",
+   "description": "The shop's email sent on every order (RSR requires it)."
+  },
+  {
+   "fieldname": "hold_escalate_days",
+   "fieldtype": "Int",
+   "label": "Flag a hold after (days)",
+   "default": "3",
+   "description": "A Distributor Order held this long shows as trouble on the Pending Order queue."
+  },
+  {
+   "fieldname": "tab_freight",
+   "fieldtype": "Tab Break",
+   "label": "Freight"
+  },
+  {
+   "fieldname": "section_freight",
+   "fieldtype": "Section Break",
+   "label": "Freight estimates",
+   "description": "Used by the Create Order fulfillment plan; the distributor's invoiced freight always wins."
+  },
+  {
+   "fieldname": "store_free_freight",
+   "fieldtype": "Check",
+   "label": "Free freight on ship-to-store orders",
+   "default": "0",
+   "description": "Tick when your RSR account ships orders to the store at no charge."
+  },
+  {
+   "fieldname": "free_freight_threshold",
+   "fieldtype": "Currency",
+   "label": "Store orders ship free above",
+   "default": "500",
+   "description": "Merchandise value; below it the rates apply."
+  },
+  {
+   "fieldname": "column_freight",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rate_ground",
+   "fieldtype": "Currency",
+   "label": "Ground",
+   "default": "10"
+  },
+  {
+   "fieldname": "rate_2day",
+   "fieldtype": "Currency",
+   "label": "2Day (handguns)",
+   "default": "15"
+  },
+  {
+   "fieldname": "fee_signature",
+   "fieldtype": "Currency",
+   "label": "Adult signature (firearm orders)",
+   "default": "5"
+  },
+  {
+   "fieldname": "freight_variance_alert",
+   "fieldtype": "Currency",
+   "label": "Alert when invoiced freight differs by more than",
+   "default": "5",
+   "description": "The poll compares the freight the house invoiced with the figure booked at placement; a larger gap sends an alert."
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-10 07:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "RSR Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

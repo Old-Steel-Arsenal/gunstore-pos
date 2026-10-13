@@ -1,0 +1,79 @@
+[pre_model_sync]
+# Patches added in this section will be executed before doctypes are migrated
+# Read docs to understand patches: https://frappeframework.com/docs/v14/user/en/database-migrations
+# Product names for the category mirror: DocType OSA Category -> Catalog Category, Item.osa_category ->
+# catalog_category. Before the model sync, or the sync creates an empty Catalog Category table first.
+ffl_core.patches.rename_catalog_category
+
+[post_model_sync]
+# Patches added in this section will be executed after doctypes are migrated
+ffl_core.patches.unify_used_firearm_serial
+ffl_core.patches.backfill_is_firearm
+ffl_core.patches.backfill_item_upc
+ffl_core.patches.split_long_gun_item_group
+ffl_core.patches.seed_receive_sources
+ffl_core.patches.backfill_serial_purchase_rate
+ffl_core.patches.migrate_destination_ffl_to_atf_link
+ffl_core.patches.issue_stock_for_orphan_dispositions
+ffl_core.patches.seed_transfer_fee
+ffl_core.patches.backfill_serial_firearm_attrs
+ffl_core.patches.backfill_serial_model_caliber
+ffl_core.patches.backfill_serial_firearm_type
+ffl_core.patches.replace_payroc_partial_with_status
+
+ffl_core.patches.backfill_standard_selling_prices
+ffl_core.patches.add_create_order_workspace_shortcuts
+ffl_core.patches.seed_shipping_charge
+ffl_core.patches.migrate_condition_grade_to_osa_tiers
+ffl_core.patches.add_sales_report_workspace_entry
+ffl_core.patches.backfill_serial_purchase_rate_from_acquisition
+ffl_core.patches.stamp_legacy_shipstation_shipped
+ffl_core.patches.add_shipstation_settings_workspace_link
+# GunBroker channel: the Settings workspace shortcut for the channel Single.
+# Twin of the settings.json entry — the JSON only reaches fresh installs.
+ffl_core.patches.add_gunbroker_settings_shortcut
+ffl_core.patches.rename_gunbroker_settings_shortcut
+# Consignment Out moved to the osa_consignment extension: drop the three Page
+# records and the two Gun Shop cards the core used to ship (data is untouched).
+ffl_core.patches.consignment_out_moved_out
+# NOT registered: ffl_core.patches.backfill_consignment_serials — deliberately
+# NOT auto-run on migrate (INBOUND consignment — a consignor's gun sold on the
+# counter — not the outbound extension). See the patch module's own docstring:
+# existing consignment guns have real, per-gun commissions that differ from the
+# flat DEFAULT_COMMISSION_PCT, so stamping that default here would apply wrong
+# commissions and silently retro-change reports for already-sold guns with no
+# matching GL. The correction is a deliberate, manually-run data operation
+# with owner-provided per-gun commissions instead.
+# NOT registered: ffl_core.patches.backfill_pay_on_sale_serials — same rationale.
+# It only writes the per-serial pay-on-sale STAMP (zero GL — the cost is already
+# parked in SRBNB), but which existing in-stock guns are pay-on-sale is an
+# owner/CPA-reviewed judgement (supplier flagged + cost still in SRBNB), not a
+# blanket migrate step. Run manually after the pay_on_sale Supplier flags are set:
+#   bench --site <site> execute ffl_core.patches.backfill_pay_on_sale_serials.execute
+ffl_core.patches.add_data_service_settings_shortcut
+ffl_core.patches.add_extensions_page_shortcut
+ffl_core.patches.seed_pending_order_age_alert
+ffl_core.patches.retire_legacy_item_groups
+ffl_core.patches.add_4473_records_workspace_entry
+ffl_core.patches.backfill_form_4473_log
+ffl_core.patches.retire_new_used_firearm_item_groups
+ffl_core.patches.add_distributor_orders_workspace_entry
+ffl_core.patches.add_inventory_count_workspace_entry
+# Cash drawer: accounts + POS Closing Entry fields, and the workspace entries.
+ffl_core.patches.ensure_cash_drawer_accounts
+ffl_core.patches.add_cash_drawer_workspace_entries
+ffl_core.patches.add_storage_locations_workspace_entry
+# Locked lines: lock field, Item Price tombstones, drafts re-pinned.
+ffl_core.patches.pin_locked_invoice_lines
+# Refactor R1: a cash drawer journal entry is cancelled only from the Cash Drawer page.
+ffl_core.patches.stamp_cash_drawer_journal_entries
+# Gun Shop home page: Needs-attention cards + four groups (the sidebar is app content, no patch).
+ffl_core.patches.rewrite_gun_shop_workspace
+ffl_core.patches.add_shipstation_settings_to_settings_workspace
+# Special Order retired (2026-10-08): report, number card, link fields, deposit item; Customer Deposits stays.
+ffl_core.patches.retire_special_orders
+# Dealer (wholesale) WooCommerce store removed (owner 2026-10-09): its custom fields, its settings
+# doctype and the Dealer Portal switch go; Item.dealer_price and the other "dealer" fields stay.
+ffl_core.patches.remove_dealer_store
+# 0.1.0 restarts the version line below 1.15.1: stored What's New versions above it go back to 0.0.1.
+ffl_core.patches.v0_1_0_reset_last_known_versions

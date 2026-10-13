@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "creation": "2026-10-07 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "id_type",
+  "id_number",
+  "issuing_authority",
+  "issue_date",
+  "expiry_date",
+  "attachment"
+ ],
+ "fields": [
+  {
+   "fieldname": "id_type",
+   "fieldtype": "Select",
+   "label": "ID Type",
+   "options": "Driver License\nState ID\nLEO\nMilitary\nPassport\nCCW\nOther",
+   "in_list_view": 1,
+   "columns": 2,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:frappe.boot.ffl_store_customer_id_numbers",
+   "fieldname": "id_number",
+   "fieldtype": "Data",
+   "label": "ID Number",
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "issuing_authority",
+   "fieldtype": "Data",
+   "label": "Issued By",
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "label": "Issue Date"
+  },
+  {
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Expiry Date",
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Copy of ID",
+   "description": "Kept as a private file."
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-07 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Customer ID Document",
+ "owner": "Administrator",
+ "states": [],
+ "istable": 1,
+ "editable_grid": 1,
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}

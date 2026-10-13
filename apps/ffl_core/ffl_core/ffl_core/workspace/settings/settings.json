@@ -1,0 +1,242 @@
+{
+ "app": "ffl_core",
+ "charts": [],
+ "content": "[{\"id\":\"hdr_integrations\",\"type\":\"header\",\"data\":{\"text\":\"<span class='h4'><b>Integrations</b></span>\",\"col\":12}},{\"id\":\"sc_payment_hub\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payments (Credit Card)\",\"col\":4}},{\"id\":\"sc_distributor_hub\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Distributors\",\"col\":4}},{\"id\":\"sc_fastbound_settings\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"FastBound (A&D Book)\",\"col\":4}},{\"id\":\"sc_woocommerce_settings\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"WooCommerce (Online Store)\",\"col\":4}},{\"id\":\"sc_gunbroker_settings\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"GunBroker (Marketplace)\",\"col\":4}},{\"id\":\"sc_data_service_settings\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Data Service (FFL & Catalog)\",\"col\":4}},{\"id\":\"sc_extensions\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Extensions\",\"col\":4}},{\"id\":\"hdr_lists\",\"type\":\"header\",\"data\":{\"text\":\"<span class='h4'><b>Configuration</b></span>\",\"col\":12}},{\"id\":\"card_ffl\",\"type\":\"card\",\"data\":{\"card_name\":\"FFL & Compliance\",\"col\":4}},{\"id\":\"card_pos\",\"type\":\"card\",\"data\":{\"card_name\":\"POS & Sales\",\"col\":4}},{\"id\":\"card_reference\",\"type\":\"card\",\"data\":{\"card_name\":\"Catalog Reference\",\"col\":4}}]",
+ "creation": "2026-05-07 00:00:00",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "settings",
+ "idx": 0,
+ "indicator_color": "grey",
+ "is_hidden": 0,
+ "label": "Settings",
+ "link_type": "DocType",
+ "links": [
+  {
+   "hidden": 0,
+   "icon": "non_profit",
+   "is_query_report": 0,
+   "label": "FFL & Compliance",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "FFL Settings",
+   "link_count": 0,
+   "link_to": "FFL Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "MCP Settings",
+   "link_count": 0,
+   "link_to": "MCP Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "ATF FFL Record",
+   "link_count": 0,
+   "link_to": "ATF FFL Record",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "selling",
+   "is_query_report": 0,
+   "label": "POS & Sales",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "ShipStation Settings",
+   "link_count": 0,
+   "link_to": "ShipStation Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Cash Drawer Settings",
+   "link_count": 0,
+   "link_to": "Cash Drawer Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Profile",
+   "link_count": 0,
+   "link_to": "POS Profile",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mode of Payment",
+   "link_count": 0,
+   "link_to": "Mode of Payment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Selling Settings",
+   "link_count": 0,
+   "link_to": "Selling Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "stock",
+   "is_query_report": 0,
+   "label": "Catalog Reference",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item Group",
+   "link_count": 0,
+   "link_to": "Item Group",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Brand",
+   "link_count": 0,
+   "link_to": "Brand",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Caliber",
+   "link_count": 0,
+   "link_to": "Caliber",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Warehouse",
+   "link_count": 0,
+   "link_to": "Warehouse",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock Settings",
+   "link_count": 0,
+   "link_to": "Stock Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-08-18 12:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Settings",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "Gun Shop",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Green",
+   "doc_view": "",
+   "label": "Payments (Credit Card)",
+   "link_to": "payment-hub",
+   "type": "Page"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "",
+   "label": "Distributors",
+   "link_to": "distributor-hub",
+   "type": "Page"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "FastBound (A&D Book)",
+   "link_to": "FastBound Settings",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "",
+   "label": "WooCommerce (Online Store)",
+   "link_to": "WooCommerce Settings",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "GunBroker (Marketplace)",
+   "link_to": "GunBroker Settings",
+   "type": "DocType"
+  },
+  {
+   "color": "Gray",
+   "doc_view": "",
+   "label": "Data Service (FFL & Catalog)",
+   "link_to": "Data Service Settings",
+   "type": "DocType"
+  },
+  {
+   "color": "Gray",
+   "doc_view": "",
+   "label": "Extensions",
+   "link_to": "extensions",
+   "type": "Page"
+  }
+ ],
+ "title": "Settings",
+ "type": "Workspace"
+}

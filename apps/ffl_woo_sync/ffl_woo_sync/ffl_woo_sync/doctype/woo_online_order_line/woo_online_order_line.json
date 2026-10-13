@@ -1,0 +1,127 @@
+{
+ "actions": [],
+ "creation": "2026-06-16 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "serial",
+  "woo_line_id",
+  "col_break_1",
+  "qty",
+  "unit_price",
+  "subtotal",
+  "line_total",
+  "line_tax",
+  "reservation_error",
+  "lane",
+  "source_distributor",
+  "source_sku",
+  "storage_location"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "search_index": 1
+  },
+  {
+   "description": "DEPRECATED / vestigial — firearm serials now live in the `serials` (Woo Online Order Serial) child table, one row per gun. Kept as a column for non-destructive migration; no longer read or written by the firearm flow. Hidden from the form.",
+   "fieldname": "serial",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Serial No"
+  },
+  {
+   "fieldname": "woo_line_id",
+   "fieldtype": "Data",
+   "label": "Woo Line ID"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "qty",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "fieldname": "unit_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Unit Price"
+  },
+  {
+   "description": "WooCommerce line subtotal (before discounts).",
+   "fieldname": "subtotal",
+   "fieldtype": "Currency",
+   "label": "Subtotal"
+  },
+  {
+   "description": "WooCommerce line total (after discounts, before tax).",
+   "fieldname": "line_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Line Total"
+  },
+  {
+   "description": "WooCommerce line tax.",
+   "fieldname": "line_tax",
+   "fieldtype": "Currency",
+   "label": "Line Tax"
+  },
+  {
+   "fieldname": "reservation_error",
+   "fieldtype": "Small Text",
+   "label": "Reservation Error",
+   "read_only": 1
+  },
+  {
+   "description": "Who fills this line, recorded at checkout: local / to_store / fds / direct. Blank on lines taken before it was recorded.",
+   "fieldname": "lane",
+   "fieldtype": "Data",
+   "label": "Lane",
+   "read_only": 1
+  },
+  {
+   "description": "The distributor this line was sold under — routing and invoicing read it, not the product's current source.",
+   "fieldname": "source_distributor",
+   "fieldtype": "Data",
+   "label": "Source Distributor",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_sku",
+   "fieldtype": "Data",
+   "label": "Source SKU",
+   "read_only": 1
+  },
+  {
+   "fieldname": "storage_location",
+   "fieldtype": "Link",
+   "options": "Storage Location",
+   "label": "Taken From Location",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "Where in the store the staff took this line's units from when the order shipped. Carried to the order's invoice and delivery."
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-02 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Woo Sync",
+ "name": "Woo Online Order Line",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

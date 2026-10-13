@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Customer Display</title>
+	<!-- Cache-bust the stylesheet with the ?v= the POS window opened us with, so a
+	     rebuilt customer_display.css is never served stale from the 12h asset cache.
+	     Frappe desk CSS is injected at runtime by customer_display.js (hash-correct
+	     href from the channel); our own cart styling loads here. -->
+	<script>
+		(function () {
+			var v = new URLSearchParams(location.search).get('v') || '';
+			var q = v ? ('?v=' + encodeURIComponent(v)) : '';
+			document.write('<link id="ffl-cd-css" rel="stylesheet" href="/assets/ffl_core/customer_display/customer_display.css' + q + '">');
+		})();
+	</script>
+</head>
+<body>
+	<div class="point-of-sale-app ffl-cd">
+
+		<!-- Welcome / idle -->
+		<section id="screen-welcome" class="ffl-cd-screen">
+			<div class="ffl-cd-welcome pos-card">
+				<img id="brand-logo" class="ffl-cd-logo" alt="" hidden>
+				<div id="brand-name" class="ffl-cd-brand-name"></div>
+				<div class="ffl-cd-welcome-text">Welcome</div>
+			</div>
+		</section>
+
+		<!-- Cart / payment — mirrors ERPNext POS ItemCart markup/classes -->
+		<section id="screen-cart" class="ffl-cd-screen" hidden>
+			<div class="customer-cart-container">
+				<div class="cart-container pos-card">
+					<div class="abs-cart-container">
+						<div class="cart-label" id="cart-label">Item Cart</div>
+						<div class="cart-header">
+							<div class="name-header">Item</div>
+							<div class="qty-header">Quantity</div>
+							<div class="rate-amount-header">Amount</div>
+						</div>
+						<div class="cart-items-section" id="lines-body"></div>
+						<div class="cart-totals-section">
+							<div class="net-total-container">
+								<div>Net Total</div>
+								<div id="t-subtotal">0.00</div>
+							</div>
+							<div class="taxes-container" id="discount-container" hidden>
+								<div class="tax-row"><div>Discount</div><div id="t-discount">0.00</div></div>
+							</div>
+							<div class="taxes-container" id="tax-container" hidden>
+								<div class="tax-row"><div>Tax</div><div id="t-tax">0.00</div></div>
+							</div>
+							<div class="grand-total-container">
+								<div>Grand Total</div>
+								<div id="t-grand">0.00</div>
+							</div>
+							<div class="pay-block" id="pay-block" hidden>
+								<div class="net-total-container"><div>Amount Due</div><div id="p-due">0.00</div></div>
+								<div class="net-total-container"><div>Paid</div><div id="p-paid">0.00</div></div>
+								<div class="grand-total-container change-row"><div>Change</div><div id="p-change">0.00</div></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Thank you -->
+		<section id="screen-thankyou" class="ffl-cd-screen" hidden>
+			<div class="ffl-cd-thankyou pos-card">
+				<div class="ffl-cd-thankyou-text">Thank you!</div>
+			</div>
+		</section>
+
+	</div>
+
+	<script>
+		(function () {
+			var v = new URLSearchParams(location.search).get('v') || '';
+			var q = v ? ('?v=' + encodeURIComponent(v)) : '';
+			document.write('<script src="/assets/ffl_core/js/customer_display_logic.js' + q + '"><\/script>');
+			document.write('<script src="/assets/ffl_core/customer_display/customer_display.js' + q + '"><\/script>');
+		})();
+	</script>
+</body>
+</html>

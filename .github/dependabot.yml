@@ -1,0 +1,22 @@
+# Keeps the SHA-pinned actions in .github/workflows current, against develop
+# (the branch model's integration base). Dependabot reads the `# vX.Y.Z` comment
+# beside each pinned SHA and updates both.
+# - Every update — major, minor and patch — shares ONE weekly PR (separate major-bump PRs conflicted with
+#   each other while being merged). A breaking major is still caught before merge:
+#   the grouped PR carries ci:full, so every workflow step it touches runs.
+# - Every Dependabot PR carries `ci:full`: a develop PR otherwise runs only
+#   build + api-docs, and setup-python / setup-node / cache / upload-artifact
+#   are exercised only by the test jobs.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+    labels: ["dependencies", "ci:full"]
+    groups:
+      github-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci

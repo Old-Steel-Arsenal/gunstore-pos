@@ -1,0 +1,131 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-16 20:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_invoice",
+  "amount",
+  "status",
+  "column_break_a",
+  "unique_reference",
+  "approval_code",
+  "card_summary",
+  "payment_entry",
+  "section_gateway",
+  "instruction_id",
+  "response"
+ ],
+ "fields": [
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "description": "Requested while the terminal holds the card; the authorized amount once it answers.",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "IN_PROGRESS\nCHARGED\nDECLINED\nCANCELED",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_a",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "unique_reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Payroc Reference",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approval_code",
+   "fieldtype": "Data",
+   "label": "Approval Code",
+   "read_only": 1
+  },
+  {
+   "description": "Card type + masked digits from the gateway, e.g. \"Visa Debit •5938\".",
+   "fieldname": "card_summary",
+   "fieldtype": "Data",
+   "label": "Card",
+   "read_only": 1
+  },
+  {
+   "description": "The ledger side of a charged card: the Payment Entry booked against the Sales Invoice.",
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_gateway",
+   "fieldtype": "Section Break",
+   "label": "Gateway"
+  },
+  {
+   "fieldname": "instruction_id",
+   "fieldtype": "Data",
+   "label": "Instruction ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "response",
+   "fieldtype": "Code",
+   "label": "Gateway Response",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "istable": 0,
+ "links": [],
+ "modified": "2026-09-16 20:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "Payroc Terminal Payment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager"
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

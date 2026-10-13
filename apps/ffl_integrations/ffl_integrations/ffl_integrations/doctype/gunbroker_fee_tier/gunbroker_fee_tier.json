@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "creation": "2026-08-26 10:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "istable": 1,
+ "field_order": [
+  "upper_bound",
+  "rate"
+ ],
+ "fields": [
+  {
+   "columns": 4,
+   "default": "0",
+   "description": "Applies to the portion of an item's price up to this amount. 0 means 'no upper limit' and belongs on the last row only.",
+   "fieldname": "upper_bound",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Upper Bound"
+  },
+  {
+   "columns": 4,
+   "fieldname": "rate",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Fee Rate",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-08-26 10:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "GunBroker Fee Tier",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

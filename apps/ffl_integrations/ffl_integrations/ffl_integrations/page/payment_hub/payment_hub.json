@@ -1,0 +1,22 @@
+{
+ "content": null,
+ "creation": "2026-08-18 12:00:00",
+ "docstatus": 0,
+ "doctype": "Page",
+ "icon": "octicon octicon-credit-card",
+ "idx": 0,
+ "modified": "2026-08-18 12:00:00",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "module": "FFL Integrations",
+ "name": "payment-hub",
+ "page_name": "payment-hub",
+ "roles": [
+  {"role": "System Manager"}
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Payments"
+}

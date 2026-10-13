@@ -1,0 +1,93 @@
+{
+ "actions": [],
+ "creation": "2026-08-01 15:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "amount",
+  "status",
+  "card_summary",
+  "unique_reference",
+  "column_break_charge",
+  "refunded_amount",
+  "attempt",
+  "instruction_id",
+  "response"
+ ],
+ "fields": [
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Captured Amount",
+   "read_only": 1
+  },
+  {
+   "description": "A refunded card still reads Charged here. What went back to the card is recorded on the row separately.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "IN_PROGRESS\nCHARGED\nDECLINED\nCANCELED\nVOIDED\nREFUNDED",
+   "read_only": 1
+  },
+  {
+   "description": "Card type + masked digits from the gateway, e.g. \"Visa Debit \u20225938\" \u2014 what the receipt prints.",
+   "fieldname": "card_summary",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Card",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unique_reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Payroc Reference",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_charge",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Cumulative referenced-refund total already pushed back to this card (returns).",
+   "fieldname": "refunded_amount",
+   "fieldtype": "Currency",
+   "label": "Refunded Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attempt",
+   "fieldtype": "Int",
+   "label": "Attempt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "instruction_id",
+   "fieldtype": "Data",
+   "label": "Instruction ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "response",
+   "fieldtype": "Code",
+   "label": "Gateway Response",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-01 15:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "Payroc Charge",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

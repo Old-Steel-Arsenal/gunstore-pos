@@ -1,0 +1,8 @@
+# path (fnmatch glob) :: exact allowed substring  # reason
+# The substring is blanked out of a line before it is matched: it allows that text and nothing else.
+# At most 15 entries. An entry that allows nothing any more fails the guard, so this list only shrinks.
+apps/*/pyproject.toml :: info@oldsteelarsenal.com  # the project contact address
+apps/*/*/hooks.py :: info@oldsteelarsenal.com  # app_email, the same contact address
+README.md :: Old Steel Arsenal  # the copyright holder line
+apps/ffl_core/ffl_core/tests/test_store_identity.py :: osa-logo  # negative assertion: no receipt prints the retired logo file name
+apps/ffl_core/ffl_core/tests/test_no_retired_product_ids.py :: osa-logo  # the product-id guard's KEEP entry and its tokenizer self-test input for that same logo file name

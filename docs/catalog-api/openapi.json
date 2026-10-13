@@ -1,0 +1,3591 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Gunstore POS Catalog API",
+    "version": "1.1",
+    "description": "The read-only distributor catalog contract the POS consumes. Any service that implements these endpoints with these shapes and the HMAC request signature can serve the POS's catalog reads. See README.md for semantics; run ffl_integrations.catalog_contract against your service to verify the core endpoints."
+  },
+  "servers": [
+    {
+      "url": "https://your-catalog-service.example.com",
+      "description": "Base URL configured on Data Service Settings → Endpoint (or per Distributor)"
+    }
+  ],
+  "paths": {
+    "/v1/catalog/health": {
+      "get": {
+        "description": "Last successful ingest per feed (from sync_runs), the catalog version token (= last catalog ingest time, cache key material), and row counts. The POS watchdog reads `last_quantity_sync_at` as the feed heartbeat. Scope: `catalog:read`.",
+        "operationId": "get_health_v1_catalog_health_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "distributor",
+            "required": false,
+            "schema": {
+              "default": "rsr",
+              "title": "Distributor",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogHealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "Feed heartbeat + catalog version",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/item/{upc}": {
+      "get": {
+        "description": "Single-product read with HTTP caching: the response carries a weak `ETag` derived from the item's highest offer change_seq and `Cache-Control: private, max-age=60`; send `If-None-Match` to get a free **304** while nothing changed. Scope: `catalog:read`.",
+        "operationId": "get_item_v1_catalog_item__upc__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "upc",
+            "required": true,
+            "schema": {
+              "title": "Upc",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "304": {
+            "description": "Not modified (If-None-Match matched)"
+          },
+          "404": {
+            "description": "Unknown UPC"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "One product with all its offers",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/restrictions/{distributor}/{sku}": {
+      "get": {
+        "description": "Verbatim [municipality, state, territory_type, detail] entries from the distributor's restrictions feed; empty list when none. The POS keeps its own vocabulary/derivation (blocked states etc.) on top. Scope: `catalog:read`.",
+        "operationId": "get_restrictions_v1_catalog_restrictions__distributor___sku__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "distributor",
+            "required": true,
+            "schema": {
+              "title": "Distributor",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "sku",
+            "required": true,
+            "schema": {
+              "title": "Sku",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictionsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "Ship-restriction entries for one SKU",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/rows": {
+      "post": {
+        "description": "Up to 200 SKUs per call; unknown SKUs are simply absent from the response. The POS thin client prefetches its sync batches here. Scope: `catalog:read`.",
+        "operationId": "post_rows_v1_catalog_rows_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RowsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RowsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "Batch full offer rows by SKU",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/search": {
+      "post": {
+        "description": "Typeahead over the distributor catalog. Hits are grouped by UPC (one product, N offers, best_offer = in-stock cheapest); offers with no UPC surface as standalone orphan hits. Deleted rows excluded unless `include_removed=true` (archive lookup — best_offer is null when every offer on a hit is Deleted). Pass `distributor` to scope results to one distributor_code; omitted searches every distributor. Scope: `catalog:read`.",
+        "operationId": "post_search_v1_catalog_search_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "UPC-aggregated catalog search",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/products": {
+      "get": {
+        "description": "One row per product — a UPC, or `<distributor>:<sku>` for an offer with no UPC — with every live offer and this service's best_offer. Filters match OFFERS (a product is listed when one of its offers meets them all): `brand` (brand_key, repeatable), `product_class` (Handgun / Long Gun / Other Firearm / NFA / Gun Parts / Ammunition / Accessory), `distributor`, `department` (`<distributor>:<code>`), `min_cost` / `max_cost`, `in_stock`, `ffl_required`, `q` (UPC / SKU / mfg number / text), `include_discontinued`, `category` (a node slug: its whole subtree, repeatable), `platform` (fits_platform, repeatable). `sort=key` pages by `cursor` (the full scan); `brand` / `cost` / `qty` page by `offset`. `count=true` adds the total. Scope: `catalog:read`.",
+        "operationId": "get_products_v1_catalog_products_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "brand",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Brand"
+            }
+          },
+          {
+            "in": "query",
+            "name": "product_class",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Class"
+            }
+          },
+          {
+            "in": "query",
+            "name": "distributor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Distributor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "department",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_cost",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Cost"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_cost",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Cost"
+            }
+          },
+          {
+            "in": "query",
+            "name": "in_stock",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "In Stock",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ffl_required",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ffl Required"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_discontinued",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Discontinued",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "in": "query",
+            "name": "platform",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Platform"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "key",
+              "pattern": "^(key|brand|cost|qty)$",
+              "title": "Sort",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 100000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Count",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "Products across every distributor (paged)",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/products/batch": {
+      "post": {
+        "description": "The listing sync's read: fresh offers from every distributor for the products it lists. A 13-digit UPC with a leading zero is read as its 12-digit UPC-A (reported in `keys`); unknown keys are absent. Scope: `catalog:read`.",
+        "operationId": "post_products_batch_v1_catalog_products_batch_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductsBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductsBatchResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "Products by key (≤200)",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/products/changes": {
+      "get": {
+        "description": "Like `/changes`, across every distributor and by product: each product whose offers changed — or that an offer left on a UPC change — appears once. The cursor holds one sequence number per distributor (each house commits in sequence order; the global sequence does not): omit `since` on the first call, then pass back `cursor` while `more`. `limit` is per distributor. Scope: `catalog:read`.",
+        "operationId": "get_product_changes_v1_catalog_products_changes_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 500,
+              "title": "Since",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 5000,
+              "maximum": 5000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductChangesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "Change cursor — products changed since a sequence number",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/products/facets": {
+      "get": {
+        "description": "Brands (brand_key + the most common spelling), product classes, each distributor's departments, category-tree nodes (a node counts its subtree) and fits_platform values, over live offers. `distributor` counts that house's offers only. Scope: `catalog:read`.",
+        "operationId": "get_product_facets_v1_catalog_products_facets_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "distributor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 40,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Distributor"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductFacetsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "Filter values with product counts",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/categories": {
+      "get": {
+        "description": "Full read (no `since`): `categories` = the active tree nested, root first, siblings in menu order (a product's `category.slug` is one of these); `nodes` = every node flat (inactive too) with `store_hint`, `path` and `seq`; `cursor` = the tree's latest sequence number. `?since=<cursor>`: only the nodes created, renamed, re-sorted, moved, (de)activated or re-hinted after it — each once, in its current state, oldest change first, plus their unchanged ancestors (`changed: false`) — and a new `cursor`; while `more`, call again at once. Nodes are never deleted. Scope: `catalog:read`.",
+        "operationId": "get_categories_v1_catalog_categories_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 1000,
+              "maximum": 5000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "The category tree, and its change feed",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/ops/status": {
+      "get": {
+        "description": "One round trip for 'is this catalog service healthy, and am I up to date?'.\n\n- `feeds` is one entry per feed, in a fixed per-distributor order; the count varies by distributor (rsr: quantity, catalog, restrictions, deleted, attributes; ss: quantity, catalog, snapshot, dimensions, text; a distributor with fewer feeds lists fewer, quantity first), each with its own `threshold_seconds` — read the names and thresholds rather than hardcoding one distributor's set or length.\n- Every `age_seconds` is measured against the single `server_time` in the same response, so you can check the arithmetic without trusting your own clock.\n- `since` (your stored change cursor, ≥ 0) adds `cursor_lag.offers_pending` — a **count of offers** waiting for you, not a sequence delta: `change_seq` is global across distributors and has gaps.\n- `last_failure.error_class` is the exception class name only; the message is withheld because it can carry feed hostnames and paths.\n\nAn unrecognised `distributor` is **200**, not 404: `known: false` with zeroed counts and every feed `never_synced`. A dashboard asking about a distributor we don't carry should render an empty panel, not an error.\n\nScope: `catalog:ops`.",
+        "operationId": "get_status_v1_catalog_ops_status_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "distributor",
+            "required": false,
+            "schema": {
+              "default": "rsr",
+              "pattern": "^[a-z0-9_]{1,32}$",
+              "title": "Distributor",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpsStatusResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing/invalid HMAC auth"
+          },
+          "403": {
+            "description": "Missing catalog:ops"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "Feed freshness, catalog size, and how far behind your cursor is",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/ops/history": {
+      "get": {
+        "description": "Newest first, across the distributor's feeds. `error_class` carries the exception class name for failed runs and is empty for successes; raw messages stay in our console.\n\nScope: `catalog:ops`.",
+        "operationId": "get_history_v1_catalog_ops_history_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "distributor",
+            "required": false,
+            "schema": {
+              "default": "rsr",
+              "pattern": "^[a-z0-9_]{1,32}$",
+              "title": "Distributor",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpsHistoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing/invalid HMAC auth"
+          },
+          "403": {
+            "description": "Missing catalog:ops"
+          },
+          "422": {
+            "description": "limit outside 1..100"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "Recent ingest runs for one distributor",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/catalog/ops/flags": {
+      "get": {
+        "description": "Stock/lifecycle counts, UPC coverage, and the data-quality flags (MAP of zero, cost above MAP, missing image, orphan UPC) plus the top ten departments by offer count.\n\nThese flags describe the **distributor's feed data**, not faults in this service — a SKU shipped without a promised MAP price is the distributor's editorial gap, and knowing the count is how you decide what to list. `map_zero` is policy-aware for distributors that ship price-policy marks (ss: only MFPRTYP='M' rows can be missing a MAP).\n\nAn unrecognised `distributor` is **200**, not 404: `known: false` with zeroed counts and every feed `never_synced`. A dashboard asking about a distributor we don't carry should render an empty panel, not an error.\n\nScope: `catalog:ops`.",
+        "operationId": "get_flags_v1_catalog_ops_flags_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "distributor",
+            "required": false,
+            "schema": {
+              "default": "rsr",
+              "pattern": "^[a-z0-9_]{1,32}$",
+              "title": "Distributor",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-client-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-timestamp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Timestamp"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpsFlagsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing/invalid HMAC auth"
+          },
+          "403": {
+            "description": "Missing catalog:ops"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "ClientId": [],
+            "Signature": [],
+            "Timestamp": []
+          }
+        ],
+        "summary": "Catalog composition and data-quality flags",
+        "tags": [
+          "catalog"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CatalogHealthResponse": {
+        "properties": {
+          "catalog_version": {
+            "title": "Catalog Version",
+            "type": "string"
+          },
+          "contract_version": {
+            "default": "1.0",
+            "title": "Contract Version",
+            "type": "string"
+          },
+          "distributor": {
+            "title": "Distributor",
+            "type": "string"
+          },
+          "last_catalog_sync_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Catalog Sync At"
+          },
+          "last_quantity_sync_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Quantity Sync At"
+          },
+          "last_restrictions_sync_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Restrictions Sync At"
+          },
+          "offers_active": {
+            "title": "Offers Active",
+            "type": "integer"
+          },
+          "offers_total": {
+            "title": "Offers Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "distributor",
+          "last_catalog_sync_at",
+          "last_quantity_sync_at",
+          "last_restrictions_sync_at",
+          "catalog_version",
+          "offers_total",
+          "offers_active"
+        ],
+        "title": "CatalogHealthResponse",
+        "type": "object"
+      },
+      "CatalogSearchRequest": {
+        "properties": {
+          "distributor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Scope results to one distributor_code (e.g. 'rsr'); omit to search across every distributor.",
+            "title": "Distributor"
+          },
+          "include_removed": {
+            "default": false,
+            "description": "Archive lookup: also match offers the distributor has removed (status_flag 'Deleted'). Discontinued and out-of-stock rows are searchable regardless. Default false keeps the purchasing typeahead clean. Not a strict superset of the default results: removed rows compete for the same scan budget and FTS candidate cap, so narrow broad queries with a second word.",
+            "title": "Include Removed",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 10,
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "q": {
+            "minLength": 1,
+            "title": "Q",
+            "type": "string"
+          }
+        },
+        "required": [
+          "q"
+        ],
+        "title": "CatalogSearchRequest",
+        "type": "object"
+      },
+      "CatalogSearchResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ProductHit"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "title": "CatalogSearchResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ItemResponse": {
+        "properties": {
+          "best_offer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OfferFull"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The offer the merge rule would buy from right now: in-stock first, then lowest cost, ties to the lower content_priority distributor (rsr wins), then sku. None only when the product has no offers at all."
+          },
+          "offers": {
+            "items": {
+              "$ref": "#/components/schemas/OfferFull"
+            },
+            "title": "Offers",
+            "type": "array"
+          },
+          "product": {
+            "$ref": "#/components/schemas/ProductOut"
+          }
+        },
+        "required": [
+          "product",
+          "offers"
+        ],
+        "title": "ItemResponse",
+        "type": "object"
+      },
+      "OfferFull": {
+        "properties": {
+          "caliber": {
+            "title": "Caliber",
+            "type": "string"
+          },
+          "cost": {
+            "title": "Cost",
+            "type": "number"
+          },
+          "department": {
+            "title": "Department",
+            "type": "string"
+          },
+          "discontinued": {
+            "title": "Discontinued",
+            "type": "boolean"
+          },
+          "distributor": {
+            "title": "Distributor",
+            "type": "string"
+          },
+          "dropship_blocked": {
+            "title": "Dropship Blocked",
+            "type": "boolean"
+          },
+          "ffl_required": {
+            "title": "Ffl Required",
+            "type": "boolean"
+          },
+          "image_name": {
+            "title": "Image Name",
+            "type": "string"
+          },
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "image_url_hires": {
+            "title": "Image Url Hires",
+            "type": "string"
+          },
+          "long_description": {
+            "title": "Long Description",
+            "type": "string"
+          },
+          "manufacturer": {
+            "title": "Manufacturer",
+            "type": "string"
+          },
+          "map": {
+            "title": "Map",
+            "type": "number"
+          },
+          "map_policy": {
+            "default": "",
+            "description": "Manufacturer price-policy mark when the distributor ships one (ss: 'M' = enforceable MAP, 'U' = suggested MSRP, '' = no policy — render '' as 'no policy', never as MAP $0). Always '' for rsr.",
+            "title": "Map Policy",
+            "type": "string"
+          },
+          "mfg_number": {
+            "title": "Mfg Number",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "msrp": {
+            "title": "Msrp",
+            "type": "number"
+          },
+          "prop65": {
+            "title": "Prop65",
+            "type": "boolean"
+          },
+          "qty": {
+            "title": "Qty",
+            "type": "integer"
+          },
+          "ships_ground_only": {
+            "title": "Ships Ground Only",
+            "type": "boolean"
+          },
+          "short_description": {
+            "title": "Short Description",
+            "type": "string"
+          },
+          "signature_required": {
+            "title": "Signature Required",
+            "type": "boolean"
+          },
+          "sku": {
+            "title": "Sku",
+            "type": "string"
+          },
+          "status_flag": {
+            "title": "Status Flag",
+            "type": "string"
+          },
+          "upc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upc"
+          },
+          "vendor_approval_required": {
+            "title": "Vendor Approval Required",
+            "type": "boolean"
+          },
+          "weight_lb": {
+            "title": "Weight Lb",
+            "type": "number"
+          },
+          "product_class": {
+            "type": "string",
+            "title": "Product Class",
+            "default": "",
+            "description": "Handgun / Long Gun / Other Firearm / Ammunition / Accessory, from this distributor's own department code — the one class table; a client keeps none of its own."
+          }
+        },
+        "required": [
+          "distributor",
+          "sku",
+          "upc",
+          "manufacturer",
+          "model",
+          "department",
+          "cost",
+          "map",
+          "msrp",
+          "qty",
+          "ffl_required",
+          "dropship_blocked",
+          "vendor_approval_required",
+          "image_url",
+          "discontinued",
+          "status_flag",
+          "short_description",
+          "mfg_number",
+          "caliber",
+          "long_description",
+          "image_name",
+          "image_url_hires",
+          "weight_lb",
+          "prop65",
+          "ships_ground_only",
+          "signature_required"
+        ],
+        "title": "OfferFull",
+        "type": "object"
+      },
+      "OfferOut": {
+        "properties": {
+          "cost": {
+            "title": "Cost",
+            "type": "number"
+          },
+          "department": {
+            "title": "Department",
+            "type": "string"
+          },
+          "discontinued": {
+            "title": "Discontinued",
+            "type": "boolean"
+          },
+          "distributor": {
+            "title": "Distributor",
+            "type": "string"
+          },
+          "dropship_blocked": {
+            "title": "Dropship Blocked",
+            "type": "boolean"
+          },
+          "ffl_required": {
+            "title": "Ffl Required",
+            "type": "boolean"
+          },
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "manufacturer": {
+            "title": "Manufacturer",
+            "type": "string"
+          },
+          "map": {
+            "title": "Map",
+            "type": "number"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "msrp": {
+            "title": "Msrp",
+            "type": "number"
+          },
+          "qty": {
+            "title": "Qty",
+            "type": "integer"
+          },
+          "short_description": {
+            "title": "Short Description",
+            "type": "string"
+          },
+          "sku": {
+            "title": "Sku",
+            "type": "string"
+          },
+          "status_flag": {
+            "title": "Status Flag",
+            "type": "string"
+          },
+          "upc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upc"
+          },
+          "vendor_approval_required": {
+            "title": "Vendor Approval Required",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "distributor",
+          "sku",
+          "upc",
+          "manufacturer",
+          "model",
+          "department",
+          "cost",
+          "map",
+          "msrp",
+          "qty",
+          "ffl_required",
+          "dropship_blocked",
+          "vendor_approval_required",
+          "image_url",
+          "discontinued",
+          "status_flag",
+          "short_description"
+        ],
+        "title": "OfferOut",
+        "type": "object"
+      },
+      "ProductHit": {
+        "properties": {
+          "best_offer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OfferOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The offer the merge rule would buy from right now. Deleted offers never qualify, so this is null only for hits that exist purely of Deleted rows — reachable only with include_removed=true; the default population always has one."
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "ffl_required": {
+            "title": "Ffl Required",
+            "type": "boolean"
+          },
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "manufacturer": {
+            "title": "Manufacturer",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "offers": {
+            "items": {
+              "$ref": "#/components/schemas/OfferOut"
+            },
+            "title": "Offers",
+            "type": "array"
+          },
+          "upc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upc"
+          }
+        },
+        "required": [
+          "upc",
+          "manufacturer",
+          "model",
+          "description",
+          "image_url",
+          "ffl_required",
+          "offers"
+        ],
+        "title": "ProductHit",
+        "type": "object"
+      },
+      "ProductOut": {
+        "properties": {
+          "content_locked": {
+            "title": "Content Locked",
+            "type": "boolean"
+          },
+          "content_source": {
+            "title": "Content Source",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "ffl_required": {
+            "title": "Ffl Required",
+            "type": "boolean"
+          },
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "long_description": {
+            "default": "",
+            "title": "Long Description",
+            "type": "string"
+          },
+          "manufacturer": {
+            "title": "Manufacturer",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "upc": {
+            "title": "Upc",
+            "type": "string"
+          }
+        },
+        "required": [
+          "upc",
+          "manufacturer",
+          "model",
+          "description",
+          "image_url",
+          "ffl_required",
+          "content_source",
+          "content_locked"
+        ],
+        "title": "ProductOut",
+        "type": "object"
+      },
+      "RestrictionsResponse": {
+        "properties": {
+          "entries": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "entry_count": {
+            "title": "Entry Count",
+            "type": "integer"
+          },
+          "sku": {
+            "title": "Sku",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sku",
+          "entries",
+          "entry_count"
+        ],
+        "title": "RestrictionsResponse",
+        "type": "object"
+      },
+      "RowsRequest": {
+        "properties": {
+          "distributor": {
+            "title": "Distributor",
+            "type": "string"
+          },
+          "skus": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Skus",
+            "type": "array"
+          }
+        },
+        "required": [
+          "distributor",
+          "skus"
+        ],
+        "title": "RowsRequest",
+        "type": "object"
+      },
+      "RowsResponse": {
+        "properties": {
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/OfferFull"
+            },
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows"
+        ],
+        "title": "RowsResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "CatalogProduct": {
+        "properties": {
+          "best_offer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductOffer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "This service's ranking (in stock, then cheapest, then distributor priority). Which offer ships is the client's decision."
+          },
+          "category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductCategory"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null until the product is classified (a new product, until the next classify run)."
+          },
+          "content_locked": {
+            "default": false,
+            "title": "Content Locked",
+            "type": "boolean"
+          },
+          "content_optimized": {
+            "default": false,
+            "description": "Any optimized field is set.",
+            "title": "Content Optimized",
+            "type": "boolean"
+          },
+          "content_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Source"
+          },
+          "description": {
+            "description": "The product title: the optimized one when set, else the distributor's (`original.description`).",
+            "title": "Description",
+            "type": "string"
+          },
+          "ffl_required": {
+            "title": "Ffl Required",
+            "type": "boolean"
+          },
+          "fits_platform": {
+            "description": "Platforms the part fits (AR-15, AR-10, AK, Glock, SIG P320, SIG P365, 1911, Ruger 10/22, Rem 700, Shotgun, Universal).",
+            "items": {
+              "type": "string"
+            },
+            "title": "Fits Platform",
+            "type": "array"
+          },
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "key": {
+            "description": "The UPC, or `<distributor>:<sku>` for an offer with no UPC (an orphan is its own product).",
+            "title": "Key",
+            "type": "string"
+          },
+          "legal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductLegal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "long_description": {
+            "default": "",
+            "description": "The long description: the optimized one when set, else the distributor's (`original.long_description`).",
+            "title": "Long Description",
+            "type": "string"
+          },
+          "manufacturer": {
+            "title": "Manufacturer",
+            "type": "string"
+          },
+          "map": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The product's one MAP (map_db): a manual or manufacturer record, else the lowest MAP > 0 among its current (not discontinued) offers, else a retailer reference; null with no current offer or no MAP at all. Each offer keeps its own `map`. Any change to the served value puts the product on /products/changes.",
+            "title": "Map"
+          },
+          "map_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where `map` comes from: `manual`, `manufacturer`, a distributor code (the higher-priority house on a tie), or `retailer:<ref>` (e.g. `retailer:primaryarms`); null with `map`.",
+            "title": "Map Source"
+          },
+          "meta_description": {
+            "default": "",
+            "description": "Optimized search result snippet; empty when none.",
+            "title": "Meta Description",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "offers": {
+            "description": "Every live (not Deleted) offer on the product, discontinued ones included and flagged.",
+            "items": {
+              "$ref": "#/components/schemas/ProductOffer"
+            },
+            "title": "Offers",
+            "type": "array"
+          },
+          "original": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OriginalCopy"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "short_description": {
+            "default": "",
+            "description": "Optimized short description; empty when none (distributors have no such field).",
+            "title": "Short Description",
+            "type": "string"
+          },
+          "total_qty": {
+            "default": 0,
+            "description": "Units on hand across every distributor: the sum of the current (not discontinued) offers' qty. Raw distributor counts — a client's own buffers and exclusions are its to apply.",
+            "title": "Total Qty",
+            "type": "integer"
+          },
+          "upc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upc"
+          }
+        },
+        "required": [
+          "description",
+          "key",
+          "upc",
+          "manufacturer",
+          "model",
+          "image_url",
+          "ffl_required",
+          "offers"
+        ],
+        "title": "CatalogProduct",
+        "type": "object"
+      },
+      "CategoriesResponse": {
+        "properties": {
+          "categories": {
+            "description": "The active tree, nested (full read only; empty with `since`).",
+            "items": {
+              "$ref": "#/components/schemas/CategoryNode"
+            },
+            "title": "Categories",
+            "type": "array"
+          },
+          "cursor": {
+            "default": 0,
+            "description": "Pass back as `since`.",
+            "title": "Cursor",
+            "type": "integer"
+          },
+          "more": {
+            "default": false,
+            "description": "More changes past `limit` — call again with `cursor`.",
+            "title": "More",
+            "type": "boolean"
+          },
+          "nodes": {
+            "description": "Flat, parents before children. Full read: every node, inactive ones too. With `since`: the nodes changed after it (and their ancestors).",
+            "items": {
+              "$ref": "#/components/schemas/CategoryEntry"
+            },
+            "title": "Nodes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "categories"
+        ],
+        "title": "CategoriesResponse",
+        "type": "object"
+      },
+      "CategoryCrumb": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name"
+        ],
+        "title": "CategoryCrumb",
+        "type": "object"
+      },
+      "CategoryEntry": {
+        "properties": {
+          "active": {
+            "description": "False = retired: hide it, never delete it.",
+            "title": "Active",
+            "type": "boolean"
+          },
+          "changed": {
+            "description": "True: this node changed after `since` (always true on a full read). False: an unchanged ancestor included so the page is self-contained.",
+            "title": "Changed",
+            "type": "boolean"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "menu": {
+            "description": "Shown in the store menu.",
+            "title": "Menu",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Display name; reads on its own (a store term takes it).",
+            "title": "Name",
+            "type": "string"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Parent slug; null for a root.",
+            "title": "Parent"
+          },
+          "path": {
+            "description": "Root first, the node last.",
+            "items": {
+              "$ref": "#/components/schemas/CategoryCrumb"
+            },
+            "title": "Path",
+            "type": "array"
+          },
+          "position": {
+            "description": "Order among siblings (ascending).",
+            "title": "Position",
+            "type": "integer"
+          },
+          "seq": {
+            "description": "Tree sequence number of the node's last change.",
+            "title": "Seq",
+            "type": "integer"
+          },
+          "slug": {
+            "description": "Stable id — never changes (a rename or a move keeps it).",
+            "title": "Slug",
+            "type": "string"
+          },
+          "store_hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The store's existing product category slug to link this node to on first contact (editable data; null = none — match by name under the parent).",
+            "title": "Store Hint"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "parent",
+          "level",
+          "position",
+          "active",
+          "menu",
+          "store_hint",
+          "path",
+          "seq",
+          "changed"
+        ],
+        "title": "CategoryEntry",
+        "type": "object"
+      },
+      "CategoryFacet": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent"
+          },
+          "products": {
+            "description": "Products in the node's whole subtree.",
+            "title": "Products",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "parent",
+          "level",
+          "products"
+        ],
+        "title": "CategoryFacet",
+        "type": "object"
+      },
+      "CategoryNode": {
+        "properties": {
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryNode"
+            },
+            "title": "Children",
+            "type": "array"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "menu": {
+            "description": "Shown in the store menu (third-level landing pages, Ammunition and Services are not).",
+            "title": "Menu",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "level",
+          "menu"
+        ],
+        "title": "CategoryNode",
+        "type": "object"
+      },
+      "OpsCursorLag": {
+        "properties": {
+          "offers_pending": {
+            "description": "Offers with change_seq > since. A COUNT OF ROWS, not a sequence delta: change_seq is global across distributors and has gaps, so a delta would overstate how far behind you are.",
+            "title": "Offers Pending",
+            "type": "integer"
+          },
+          "since": {
+            "title": "Since",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "since",
+          "offers_pending"
+        ],
+        "title": "OpsCursorLag",
+        "type": "object"
+      },
+      "OpsDepartment": {
+        "properties": {
+          "ffl_required": {
+            "title": "Ffl Required",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "number": {
+            "title": "Number",
+            "type": "string"
+          },
+          "offers": {
+            "title": "Offers",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "number",
+          "name",
+          "ffl_required",
+          "offers"
+        ],
+        "title": "OpsDepartment",
+        "type": "object"
+      },
+      "OpsFeedState": {
+        "properties": {
+          "age_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "server_time − last_success_at; null when never synced",
+            "title": "Age Seconds"
+          },
+          "feed": {
+            "description": "Per-distributor lane name. rsr: quantity | catalog | restrictions | deleted | attributes; ss: quantity | catalog | snapshot | dimensions | text.",
+            "title": "Feed",
+            "type": "string"
+          },
+          "last_success_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Success At"
+          },
+          "reason": {
+            "description": "fresh | stale | never_synced",
+            "title": "Reason",
+            "type": "string"
+          },
+          "stale": {
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "threshold_seconds": {
+            "description": "Staleness budget for this feed. Read it rather than hardcoding: the POS keeps its own copy and the two must be comparable on screen.",
+            "title": "Threshold Seconds",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "feed",
+          "last_success_at",
+          "age_seconds",
+          "threshold_seconds",
+          "stale",
+          "reason"
+        ],
+        "title": "OpsFeedState",
+        "type": "object"
+      },
+      "OpsFlagCounts": {
+        "properties": {
+          "cost_over_map": {
+            "title": "Cost Over Map",
+            "type": "integer"
+          },
+          "map_zero": {
+            "title": "Map Zero",
+            "type": "integer"
+          },
+          "no_image": {
+            "title": "No Image",
+            "type": "integer"
+          },
+          "orphan_upc": {
+            "title": "Orphan Upc",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "map_zero",
+          "cost_over_map",
+          "no_image",
+          "orphan_upc"
+        ],
+        "title": "OpsFlagCounts",
+        "type": "object"
+      },
+      "OpsFlagsResponse": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "integer"
+          },
+          "deleted": {
+            "title": "Deleted",
+            "type": "integer"
+          },
+          "departments": {
+            "description": "Top 10 by offer count.",
+            "items": {
+              "$ref": "#/components/schemas/OpsDepartment"
+            },
+            "title": "Departments",
+            "type": "array"
+          },
+          "discontinued": {
+            "title": "Discontinued",
+            "type": "integer"
+          },
+          "distributor": {
+            "title": "Distributor",
+            "type": "string"
+          },
+          "flags": {
+            "$ref": "#/components/schemas/OpsFlagCounts",
+            "description": "Data-quality flags about the DISTRIBUTOR'S catalog (missing MAP, missing images, orphan UPCs) — not service faults. map_zero is policy-aware: for distributors that ship price-policy marks (ss), only rows whose policy PROMISES a MAP count as missing one."
+          },
+          "in_stock": {
+            "title": "In Stock",
+            "type": "integer"
+          },
+          "upc_have": {
+            "title": "Upc Have",
+            "type": "integer"
+          },
+          "upc_orphan": {
+            "title": "Upc Orphan",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "distributor",
+          "active",
+          "in_stock",
+          "discontinued",
+          "deleted",
+          "upc_have",
+          "upc_orphan",
+          "flags",
+          "departments"
+        ],
+        "title": "OpsFlagsResponse",
+        "type": "object"
+      },
+      "OpsHistoryResponse": {
+        "properties": {
+          "distributor": {
+            "title": "Distributor",
+            "type": "string"
+          },
+          "runs": {
+            "items": {
+              "$ref": "#/components/schemas/OpsHistoryRun"
+            },
+            "title": "Runs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "distributor",
+          "runs"
+        ],
+        "title": "OpsHistoryResponse",
+        "type": "object"
+      },
+      "OpsHistoryRun": {
+        "properties": {
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
+          },
+          "error_class": {
+            "title": "Error Class",
+            "type": "string"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "rows_total": {
+            "title": "Rows Total",
+            "type": "integer"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "finished_at",
+          "source",
+          "status",
+          "rows_total",
+          "duration_seconds",
+          "error_class"
+        ],
+        "title": "OpsHistoryRun",
+        "type": "object"
+      },
+      "OpsLastFailure": {
+        "properties": {
+          "at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          },
+          "error_class": {
+            "description": "Exception class name only (e.g. 'SSHException'). The message is withheld — it can carry feed hostnames and paths.",
+            "title": "Error Class",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "at",
+          "error_class"
+        ],
+        "title": "OpsLastFailure",
+        "type": "object"
+      },
+      "OpsStatusResponse": {
+        "properties": {
+          "change_seq_max": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Seq Max"
+          },
+          "changed_24h": {
+            "title": "Changed 24H",
+            "type": "integer"
+          },
+          "cursor_lag": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OpsCursorLag"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "distributor": {
+            "title": "Distributor",
+            "type": "string"
+          },
+          "failures_24h": {
+            "title": "Failures 24H",
+            "type": "integer"
+          },
+          "feeds": {
+            "description": "One entry per feed in a fixed per-distributor order; the length varies by distributor — rsr: quantity, catalog, restrictions, deleted, attributes; ss: quantity, catalog, snapshot, dimensions, text; fewer for a distributor with fewer feeds. Read the names rather than assuming one distributor's set or length.",
+            "items": {
+              "$ref": "#/components/schemas/OpsFeedState"
+            },
+            "title": "Feeds",
+            "type": "array"
+          },
+          "ingest_enabled": {
+            "title": "Ingest Enabled",
+            "type": "boolean"
+          },
+          "known": {
+            "description": "False when the code has neither a credentials row nor any offers. Still a 200 with zeroed counts — an unknown code is a question, not an error.",
+            "title": "Known",
+            "type": "boolean"
+          },
+          "last_failure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OpsLastFailure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "next_catalog_due_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Catalog Due At"
+          },
+          "offers_active": {
+            "title": "Offers Active",
+            "type": "integer"
+          },
+          "offers_total": {
+            "title": "Offers Total",
+            "type": "integer"
+          },
+          "products_total": {
+            "description": "Distinct UPCs among this distributor's offers.",
+            "title": "Products Total",
+            "type": "integer"
+          },
+          "server_time": {
+            "format": "date-time",
+            "title": "Server Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "distributor",
+          "known",
+          "ingest_enabled",
+          "server_time",
+          "feeds",
+          "offers_total",
+          "offers_active",
+          "products_total",
+          "changed_24h",
+          "change_seq_max",
+          "next_catalog_due_at",
+          "failures_24h",
+          "last_failure",
+          "cursor_lag"
+        ],
+        "title": "OpsStatusResponse",
+        "type": "object"
+      },
+      "OriginalCopy": {
+        "properties": {
+          "description": {
+            "description": "The distributor's title (the merged short description), whatever is served.",
+            "title": "Description",
+            "type": "string"
+          },
+          "long_description": {
+            "description": "The distributor's long copy (the best offer in merge order that has any; the content bench's own when locked).",
+            "title": "Long Description",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "long_description"
+        ],
+        "title": "OriginalCopy",
+        "type": "object"
+      },
+      "ProductCategory": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "path": {
+            "description": "Root first, the node last.",
+            "items": {
+              "$ref": "#/components/schemas/CategoryCrumb"
+            },
+            "title": "Path",
+            "type": "array"
+          },
+          "slug": {
+            "description": "The product's node in the category tree (`/v1/catalog/categories`); slugs are stable ids.",
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "path"
+        ],
+        "title": "ProductCategory",
+        "type": "object"
+      },
+      "ProductChangesResponse": {
+        "properties": {
+          "cursor": {
+            "description": "One sequence number per distributor (`rsr:120;ss:95`) — pass it back as `since`.",
+            "title": "Cursor",
+            "type": "string"
+          },
+          "keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Keys",
+            "type": "array"
+          },
+          "more": {
+            "title": "More",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "keys",
+          "cursor",
+          "more"
+        ],
+        "title": "ProductChangesResponse",
+        "type": "object"
+      },
+      "ProductFacet": {
+        "properties": {
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "distributor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distributor"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "products": {
+            "title": "Products",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "products"
+        ],
+        "title": "ProductFacet",
+        "type": "object"
+      },
+      "ProductFacetsResponse": {
+        "properties": {
+          "brands": {
+            "items": {
+              "$ref": "#/components/schemas/ProductFacet"
+            },
+            "title": "Brands",
+            "type": "array"
+          },
+          "categories": {
+            "description": "Tree order; nodes with no classified product are absent.",
+            "items": {
+              "$ref": "#/components/schemas/CategoryFacet"
+            },
+            "title": "Categories",
+            "type": "array"
+          },
+          "classes": {
+            "items": {
+              "$ref": "#/components/schemas/ProductFacet"
+            },
+            "title": "Classes",
+            "type": "array"
+          },
+          "departments": {
+            "items": {
+              "$ref": "#/components/schemas/ProductFacet"
+            },
+            "title": "Departments",
+            "type": "array"
+          },
+          "platforms": {
+            "items": {
+              "$ref": "#/components/schemas/ProductFacet"
+            },
+            "title": "Platforms",
+            "type": "array"
+          }
+        },
+        "required": [
+          "brands",
+          "classes",
+          "departments"
+        ],
+        "title": "ProductFacetsResponse",
+        "type": "object"
+      },
+      "ProductLegal": {
+        "properties": {
+          "is_antique": {
+            "title": "Is Antique",
+            "type": "boolean"
+          },
+          "is_firearm": {
+            "description": "Legally a firearm (FFL checkout, bound book, serial). Not the shipping lane — that stays `ffl_required`.",
+            "title": "Is Firearm",
+            "type": "boolean"
+          },
+          "nfa_type": {
+            "enum": [
+              "none",
+              "suppressor",
+              "SBR",
+              "SBS",
+              "AOW",
+              "MG",
+              "DD"
+            ],
+            "title": "Nfa Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "is_firearm",
+          "nfa_type",
+          "is_antique"
+        ],
+        "title": "ProductLegal",
+        "type": "object"
+      },
+      "ProductOffer": {
+        "properties": {
+          "brand_key": {
+            "description": "The brand folded for matching: case, punctuation and '&' vs 'and' ignored, spelling kept ('s and w' ≠ 'smith and wesson') except for the brand synonyms the service keeps ('holosun technologies' → 'holosun').",
+            "title": "Brand Key",
+            "type": "string"
+          },
+          "caliber": {
+            "title": "Caliber",
+            "type": "string"
+          },
+          "cost": {
+            "title": "Cost",
+            "type": "number"
+          },
+          "department": {
+            "title": "Department",
+            "type": "string"
+          },
+          "discontinued": {
+            "title": "Discontinued",
+            "type": "boolean"
+          },
+          "distributor": {
+            "title": "Distributor",
+            "type": "string"
+          },
+          "dropship_blocked": {
+            "title": "Dropship Blocked",
+            "type": "boolean"
+          },
+          "ffl_required": {
+            "title": "Ffl Required",
+            "type": "boolean"
+          },
+          "image_name": {
+            "title": "Image Name",
+            "type": "string"
+          },
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "image_url_hires": {
+            "title": "Image Url Hires",
+            "type": "string"
+          },
+          "long_description": {
+            "title": "Long Description",
+            "type": "string"
+          },
+          "manufacturer": {
+            "title": "Manufacturer",
+            "type": "string"
+          },
+          "map": {
+            "title": "Map",
+            "type": "number"
+          },
+          "map_policy": {
+            "default": "",
+            "description": "Manufacturer price-policy mark when the distributor ships one (ss: 'M' = enforceable MAP, 'U' = suggested MSRP, '' = no policy — render '' as 'no policy', never as MAP $0). Always '' for rsr.",
+            "title": "Map Policy",
+            "type": "string"
+          },
+          "mfg_number": {
+            "title": "Mfg Number",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "msrp": {
+            "title": "Msrp",
+            "type": "number"
+          },
+          "product_class": {
+            "description": "Handgun / Long Gun / Other Firearm / NFA / Gun Parts / Ammunition / Accessory — what the product is. Once the product is classified it is derived from the master category and legal fields and is the same on every offer of the product; until then it is this distributor's own department rule. A compatibility value: new clients read the product's `category` and `legal`. The one class table; a client keeps none of its own.",
+            "title": "Product Class",
+            "type": "string"
+          },
+          "product_key": {
+            "title": "Product Key",
+            "type": "string"
+          },
+          "prop65": {
+            "title": "Prop65",
+            "type": "boolean"
+          },
+          "qty": {
+            "title": "Qty",
+            "type": "integer"
+          },
+          "qty_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty Updated At"
+          },
+          "ships_ground_only": {
+            "title": "Ships Ground Only",
+            "type": "boolean"
+          },
+          "short_description": {
+            "title": "Short Description",
+            "type": "string"
+          },
+          "signature_required": {
+            "title": "Signature Required",
+            "type": "boolean"
+          },
+          "sku": {
+            "title": "Sku",
+            "type": "string"
+          },
+          "status_flag": {
+            "title": "Status Flag",
+            "type": "string"
+          },
+          "upc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upc"
+          },
+          "vendor_approval_required": {
+            "title": "Vendor Approval Required",
+            "type": "boolean"
+          },
+          "weight_lb": {
+            "title": "Weight Lb",
+            "type": "number"
+          }
+        },
+        "required": [
+          "distributor",
+          "sku",
+          "upc",
+          "manufacturer",
+          "model",
+          "department",
+          "cost",
+          "map",
+          "msrp",
+          "qty",
+          "ffl_required",
+          "dropship_blocked",
+          "vendor_approval_required",
+          "image_url",
+          "discontinued",
+          "status_flag",
+          "short_description",
+          "product_class",
+          "mfg_number",
+          "caliber",
+          "long_description",
+          "image_name",
+          "image_url_hires",
+          "weight_lb",
+          "prop65",
+          "ships_ground_only",
+          "signature_required",
+          "product_key",
+          "brand_key"
+        ],
+        "title": "ProductOffer",
+        "type": "object"
+      },
+      "ProductsBatchRequest": {
+        "properties": {
+          "keys": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Keys",
+            "type": "array"
+          }
+        },
+        "required": [
+          "keys"
+        ],
+        "title": "ProductsBatchRequest",
+        "type": "object"
+      },
+      "ProductsBatchResponse": {
+        "properties": {
+          "keys": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Requested key → the key it was normalised to, for the ones that changed (a 13-digit UPC with a leading zero is the 12-digit UPC-A).",
+            "title": "Keys",
+            "type": "object"
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogProduct"
+            },
+            "title": "Products",
+            "type": "array"
+          }
+        },
+        "required": [
+          "products",
+          "keys"
+        ],
+        "title": "ProductsBatchResponse",
+        "type": "object"
+      },
+      "ProductsResponse": {
+        "properties": {
+          "cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "`sort=key` only: pass back as `cursor` for the next page; null on the last page.",
+            "title": "Cursor"
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogProduct"
+            },
+            "title": "Products",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Matching products, when `count=true`.",
+            "title": "Total"
+          }
+        },
+        "required": [
+          "products"
+        ],
+        "title": "ProductsResponse",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "hmac": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-signature",
+        "description": "HMAC-SHA256 request signature — see README.md §Authentication (x-client-id, x-timestamp, x-signature)."
+      }
+    }
+  },
+  "security": [
+    {
+      "hmac": []
+    }
+  ]
+}

@@ -1,0 +1,455 @@
+name: Build & push production image
+
+# Builds the GunStore-POS production image (frappe + erpnext + our 3 apps), checks it,
+# pushes it to GHCR, tags releases, and hands the result to the deploy repo. This repo
+# deploys nothing itself: rollout to the stores (prod, demo) lives in the repository named
+# by the variable DEPLOY_REPO.
+#
+# Flow: build (+ smoke on the built image) -> push to GHCR -> release (git tag v<x.y.z> and
+# image tags) -> dispatch to the deploy repo (scripts/ci/dispatch.sh). With DEPLOY_REPO unset
+# (a fork, a self-hoster) the dispatch steps are skipped and the run ends at the image.
+#
+# Runner placement: every job that needs a runner of its own picks it from a repo variable,
+# unset = GitHub-hosted ubuntu-latest (the safe default for a public repo and for forks):
+#   CI_RUNS_ON_BUILD  JSON runs-on for `build`,           e.g. ["self-hosted","build"]
+#   CI_RUNS_ON_TEST   JSON runs-on for `tests`/`upgrade`, e.g. ["self-hosted","test"]
+# A pull request from a fork is sent to GitHub-hosted ubuntu-latest, whatever the variables
+# say. This is a convenience, not a security boundary: a fork can edit this file in its own
+# PR. Never register self-hosted runners on a public repository.
+# Service ports are dynamic, so concurrent test jobs never contend on one box. If the
+# self-hosted runners are down, jobs sit "Queued": clear the variables to run on hosted.
+#
+# Triggers:
+#   - PR to develop   -> light gate: api-docs + build only (image compiles, docs fresh; ~3 min).
+#                        Full tests on demand with the `ci:full` label. Draft PRs run nothing.
+#   - PR to main      -> full gate: api-docs + build + tests + upgrade smoke (the release PR)
+#   - push to develop -> build + push develop-<sha7> after the smoke (the demo pulls it); `latest`
+#                        is never moved by a develop push. No test gate, same reason develop PRs
+#                        have none. With DEPLOY_REPO set, send pos-develop {tag, sha} to the
+#                        deploy repo (demo-dispatch).
+#   - push to main    -> build + push main-<sha7> (only that tag; never `latest`), then
+#                        `release`: once tests and build pass, the version in
+#                        ffl_core/__init__.py becomes the git tag v<x.y.z> and the tags
+#                        v<x.y.z> and `latest` on the same image (scripts/ci/release_plan.py:
+#                        `latest` = the newest release). A version already tagged at another
+#                        commit releases nothing — the release PR's release-version job
+#                        refuses it. Version tags are made only here: pushing one by hand
+#                        starts no build. With DEPLOY_REPO set, send pos-release {tag} to the
+#                        deploy repo, which proposes the upgrade per store.
+#   - manual dispatch -> build + push the one tag you give (never v*, `latest`, main-*,
+#                        develop-*). Nothing deploys from here.
+# The dispatch credential, DEPLOY_DISPATCH_TOKEN, is an environment secret of the
+# `deploy-dispatch` environment (branches main + develop).
+# NOTE: develop is the integration base (CONTRIBUTING.md). Its PRs keep the
+# build gate (so the branch model can't silently die again) but not the 10-minute test suite: `make test` runs locally before a
+# PR, and the release PR develop→main re-runs the whole suite on the merged
+# tree before anything reaches prod.
+
+on:
+  pull_request:
+    branches: [main, develop]
+    # ready_for_review / labeled: leaving draft, or adding `ci:full`, re-runs.
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag to publish (not v*, latest, main-*, develop-*: version tags come only from the release job)"
+        required: true
+      # Empty = the pinned refs in deploy/prod/frappe-refs.env; a literal default here
+      # drifted (it still said v16.24.0 / v16.25.0 two bumps later).
+      frappe_ref:
+        description: "Frappe git ref (tag/branch/SHA) to bake in; empty = deploy/prod/frappe-refs.env"
+        default: ""
+      erpnext_ref:
+        description: "ERPNext git ref (tag/branch/SHA) to bake in; empty = deploy/prod/frappe-refs.env"
+        default: ""
+
+# One pipeline per ref at a time. Push-to-main runs share a group → releases stay
+# strictly ordered (a superseded pending run gets replaced — newest wins). PR refs are
+# distinct groups, so PRs run in parallel with each other and with main.
+# PRs: newest push wins, the superseded run is cancelled (nothing downstream
+# depends on a PR run). Main pushes and dispatches: never cancel — an in-flight release finishes.
+concurrency:
+  group: release-image-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  REGISTRY: ghcr.io
+  # Hard-coded lowercase: github.repository may contain uppercase (an organization name) and Docker rejects uppercase.
+  IMAGE: old-steel-arsenal/gunstore-pos
+
+jobs:
+  # App tests run in PARALLEL with the build — the image build doesn't need the
+  # test result. `release` gates on both (needs: [tests, build]), so untested code
+  # is never tagged.
+  # One job for all three apps: its 10 workers are balanced across the whole
+  # suite by measured time (scripts/ci/parallel_tests.py). Two jobs (ffl_core /
+  # the rest) paid the container + site setup twice and took two runners.
+  # use_cache=true reuses a cached frappe+erpnext bench on this CD path; the
+  # daily ci.yml run stays uncached so it keeps catching upstream drift.
+  # Tests: every non-PR run except develop pushes (push main / dispatch — the release gate), PRs
+  # to main (the release PR), and any PR labelled `ci:full`. Plain develop PRs
+  # skip them — see the header.
+  # No extension leg here: first-party extensions are tested by the maintainers' deployment
+  # pipeline, which calls this repo's _app-tests.yml with its own list and token
+  # (docs/extensions/README.md, "First-party extensions in CI").
+  tests:
+    if: >-
+      (github.event_name != 'pull_request' && github.ref_name != 'develop')
+      || (!github.event.pull_request.draft
+          && (github.event.pull_request.base.ref == 'main'
+              || contains(github.event.pull_request.labels.*.name, 'ci:full')))
+    uses: ./.github/workflows/_app-tests.yml
+    with:
+      use_cache: true
+      # ~8 min of tests serially; 10 sites on a self-hosted runner bring them near 2 min.
+      workers: 10
+      # Variable unset (public repo, fork) = a GitHub-hosted runner; _app-tests.yml caps the
+      # workers to its cores there. The cold hosted bench + site build need the longer limit.
+      runner: ${{ ((github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && vars.CI_RUNS_ON_TEST) || '"ubuntu-latest"' }}
+      timeout_minutes: ${{ ((github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && vars.CI_RUNS_ON_TEST) && 30 || 90 }}
+
+  # Upgrade regression on the release PR, and on a PR labelled `ci:upgrade`
+  # (e.g. one that adds a patch): the site is built on the PR's base — for a
+  # release PR that is main, exactly what prod runs — then migrated to this
+  # PR's head. The migrate is the check fresh-site tests cannot make; after it,
+  # a smoke set of end-to-end modules proves the upgraded site still works. The
+  # whole suite on an upgraded (and data-filled) site runs nightly (ci.yml).
+  upgrade:
+    name: upgrade from base
+    if: >-
+      github.event_name == 'pull_request' && !github.event.pull_request.draft
+      && (github.event.pull_request.base.ref == 'main'
+          || contains(github.event.pull_request.labels.*.name, 'ci:upgrade'))
+    uses: ./.github/workflows/_app-tests.yml
+    with:
+      use_cache: true
+      workers: 4
+      runner: ${{ ((github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && vars.CI_RUNS_ON_TEST) || '"ubuntu-latest"' }}
+      upgrade_from: ${{ github.event.pull_request.base.sha }}
+      # Orders (build/edit/cancel), receiving and the A&D cycle, 4473 gating,
+      # POS close, consignment, pay-on-sale GL, FastBound + Payroc, Woo sync.
+      modules: >-
+        ffl_core.tests.test_build_order ffl_core.tests.test_edit_order ffl_core.tests.test_cancel_order ffl_core.tests.test_receive_goods ffl_core.tests.test_acquisition_disposition_cycle ffl_core.tests.test_4473_nics_gating ffl_core.tests.test_pos_close ffl_core.tests.test_consignment_warehouse ffl_core.tests.test_pay_on_sale_settle ffl_integrations.tests.test_fastbound_pos_4473 ffl_integrations.tests.test_payroc ffl_woo_sync.tests.test_channel_exclusion
+      timeout_minutes: ${{ ((github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && vars.CI_RUNS_ON_TEST) && 30 || 90 }}
+
+  # Docs freshness: regenerate the API reference from source and fail on any
+  # diff, so an endpoint change can't merge without its docs. Pure-python AST
+  # scan (seconds) — no bench, so it stays GitHub-hosted and off the
+  # self-hosted test runners.
+  api-docs-freshness:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Validate OpenAPI output
+        run: |
+          pip install --quiet openapi-spec-validator==0.7.2
+          python3 scripts/test_generate_api_docs.py
+          python3 scripts/test_ext_new.py
+          # scripts/ci (all-checks-pass verdict, release plan, ext_test.sh against shims) ride along: no bench.
+          python3 -m unittest discover -s scripts/ci -p 'test_*.py'
+          # No store name, address or real-looking licence/account number in the tracked tree (plain Python, no bench).
+          python3 apps/ffl_core/ffl_core/tests/test_no_store_residue.py --standalone
+          # No retired or unlisted product identifier in the core (same: plain Python).
+          python3 apps/ffl_core/ffl_core/tests/test_no_retired_product_ids.py --standalone
+          make api-docs-check
+          openapi-spec-validator docs/api/openapi.json
+
+  # A release PR must carry a version above every release tag: merging one already
+  # tagged would ship nowhere, and a lower one would release backwards.
+  # Own job so a failure names itself; all-checks-pass fails it when skipped on a release PR.
+  release-version:
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Release PR carries an unreleased, highest version
+        run: python3 scripts/ci/release_plan.py --check
+
+  build:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    # CI_RUNS_ON_BUILD unset (public repo, fork) = GitHub-hosted ubuntu-latest.
+    runs-on: ${{ fromJSON(((github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && vars.CI_RUNS_ON_BUILD) || '"ubuntu-latest"') }}
+    # Warm builds take ~2 min on the self-hosted box; a cold frappe+erpnext layer rebuild
+    # (CACHE_BUST bump, builder prune, any hosted run without a layer cache) is the slow path.
+    # Anything past an hour is hung.
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Hosted runners start with ~14 GB free; a cold frappe+erpnext build (builder stage with
+      # node_modules and assets, plus the copy loaded into the daemon) does not fit next to the
+      # preinstalled toolchains nobody here uses. Self-hosted boxes keep theirs.
+      - name: Free disk space (hosted runner)
+        if: runner.environment == 'github-hosted'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+
+      - name: Resolve build parameters
+        id: meta
+        # Dispatch inputs reach the script as env vars, never as ${{ }} text spliced into it.
+        env:
+          DISPATCH_TAG: ${{ inputs.tag }}
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          DISPATCH_FRAPPE_REF: ${{ inputs.frappe_ref }}
+          DISPATCH_ERPNEXT_REF: ${{ inputs.erpnext_ref }}
+        run: |
+          set -euo pipefail
+          # shellcheck source=/dev/null
+          . deploy/prod/frappe-refs.env   # the production refs, shared with CI's benches
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            # an empty input keeps the pinned ref sourced above
+            FRAPPE_REF="${DISPATCH_FRAPPE_REF:-$FRAPPE_REF}"
+            ERPNEXT_REF="${DISPATCH_ERPNEXT_REF:-$ERPNEXT_REF}"
+            for v in "$FRAPPE_REF" "$ERPNEXT_REF"; do
+              [[ "$v" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "::error::not a git ref: '$v'"; exit 1; }
+            done
+          fi
+          # The image tag (develop-/main-<sha7>, or a dispatch's own; never v* or `latest`) is
+          # decided in release_plan.py. Only the release job writes `latest`: it is the newest
+          # release, which the deploy repo and every human `docker pull` read.
+          python3 scripts/ci/release_plan.py build-tag
+          {
+            echo "frappe_ref=${FRAPPE_REF}"
+            echo "erpnext_ref=${ERPNEXT_REF}"
+          } >> "$GITHUB_OUTPUT"
+
+      # Two build runners on one box run as the same user, and
+      # docker keeps registry logins in that user's one config file:
+      # login-action's post-step logout at the end of one build would sign the
+      # OTHER build out of GHCR mid-push. A job-local DOCKER_CONFIG keeps each
+      # job's login to itself; buildx is a system-wide CLI plugin, so nothing
+      # else lives in the per-user config that the build needs.
+      - name: Job-local docker config
+        run: |
+          mkdir -p "$RUNNER_TEMP/docker-config"
+          echo "DOCKER_CONFIG=$RUNNER_TEMP/docker-config" >> "$GITHUB_ENV"
+
+      # Self-hosted: `driver: docker` builds straight against the local daemon, whose layer
+      # store persists on the box's disk — the frappe+erpnext layers survive across runs with
+      # no gha-cache upload/download. (The default docker-container driver would NOT see the
+      # daemon's layer cache.) Hosted: a fresh VM has no layer store, so the docker-container
+      # driver with the GitHub Actions cache stands in, and `load` puts the result in the
+      # daemon for the smoke and the push below.
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          driver: ${{ runner.environment == 'self-hosted' && 'docker' || 'docker-container' }}
+
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: deploy/prod/Dockerfile
+          # Never pushed from here: the image lands in this daemon's store (docker
+          # driver) tagged as above, the extension-layer smoke below runs on it, and
+          # only then does the push step publish it — so a tag (or `latest`) never
+          # points at an image that failed the smoke. PR builds stay local.
+          push: false
+          load: ${{ runner.environment != 'self-hosted' }}
+          cache-from: ${{ runner.environment != 'self-hosted' && 'type=gha' || '' }}
+          # Hosted cache writes only on a push: a PR (a fork's included) only reads it.
+          cache-to: ${{ runner.environment != 'self-hosted' && github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}
+          build-args: |
+            FRAPPE_BRANCH=version-16
+            FRAPPE_REF=${{ steps.meta.outputs.frappe_ref }}
+            ERPNEXT_REF=${{ steps.meta.outputs.erpnext_ref }}
+            # Stable across commits so frequent main builds reuse the cached
+            # frappe+erpnext layer (fast). To force-refresh erpnext, run
+            # `docker builder prune` on the build box or bump erpnext_ref via
+            # workflow_dispatch.
+            CACHE_BUST=${{ steps.meta.outputs.erpnext_ref }}
+
+      # Extension layer smoke: replay the fixture extension (deploy/prod/tests/ext_hello)
+      # through the image just built — no DB, no site, a few minutes. The image is in
+      # this daemon's store whether or not it was pushed (docker driver), so PR builds
+      # get it too. Guards the entrypoint every container start runs.
+      - name: Extension layer smoke (ext-replay.sh on the built image)
+        run: |
+          set -euo pipefail
+          IMG="${{ env.REGISTRY }}/${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}"
+          docker run --rm --entrypoint test "$IMG" -x /usr/local/bin/ext-replay.sh
+          # The venv is built in frappe/build but runs in frappe/base: it must execute there,
+          # on an interpreter frappe's own requires-python accepts (>=3.14 for v16).
+          docker run --rm --entrypoint /home/frappe/frappe-bench/env/bin/python "$IMG" -c '
+          import sys
+          from importlib.metadata import metadata
+          from packaging.specifiers import SpecifierSet
+          import frappe, erpnext
+          need = metadata("frappe")["Requires-Python"]
+          have = sys.version.split()[0]
+          assert SpecifierSet(need).contains(have), f"image Python {have} does not satisfy frappe {need}"
+          print(f"image: Python {have} (frappe needs {need}), frappe {frappe.__version__}, erpnext {erpnext.__version__}")'
+          # baked: exercise the copies inside the image (this commit), not a bind-mount
+          EXT_TEST_BAKED=1 EXT_TEST_PLATFORM='' deploy/prod/tests/test_ext_replay.sh "$IMG"
+          deploy/prod/tests/test_ext_agent.sh
+          deploy/prod/tests/test_mcp_deploy.sh
+          deploy/prod/tests/test_prune_images.sh
+
+      - name: Push image to GHCR (only after the smoke passed)
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          docker push "${{ env.REGISTRY }}/${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}"
+
+  # The demo is deployed from the deploy repo: hand it every develop build.
+  demo-dispatch:
+    name: Hand the demo build to the deploy repo
+    needs: [build]
+    if: github.event_name == 'push' && github.ref_name == 'develop' && vars.DEPLOY_REPO != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # DEPLOY_DISPATCH_TOKEN is a secret of this environment (branches main + develop only),
+    # so no other branch or PR run can read it. deployment: false = no Deployment record.
+    environment:
+      name: deploy-dispatch
+      deployment: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: scripts/ci
+      - name: Dispatch pos-develop
+        env:
+          GH_TOKEN: ${{ secrets.DEPLOY_DISPATCH_TOKEN }}
+          DEPLOY_REPO: ${{ vars.DEPLOY_REPO }}
+          TAG: ${{ needs.build.outputs.tag }}
+        run: scripts/ci/dispatch.sh pos-develop "tag=${TAG}" "sha=${GITHUB_SHA}"
+
+  # A release = a version, not a merge. After main's tests and build pass, the
+  # version in ffl_core/__init__.py (make bump-version) becomes the git tag
+  # v<x.y.z> and, on the image main just pushed (main-<sha7>), the tags v<x.y.z>
+  # and `latest` (the newest release) — same digest, no rebuild — and, once deploys are
+  # handed off (DEPLOY_REPO), the deploy repo is told and proposes the upgrade per store.
+  # scripts/ci/release_plan.py decides: new / resume (re-run after a later step failed: redo
+  # the image tags and the dispatch, all idempotent) / taken (version released elsewhere:
+  # warn, stop). The image decision (`image`) comes first, so an image tag nobody released
+  # fails the job before the git tag exists; then the git tag, created atomically; then
+  # the image tags. An existing version image is never moved, never compared by digest
+  # (a re-run rebuilds main-<sha7> with a new one).
+  release:
+    name: Tag the release
+    needs: [tests, build]
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      packages: write
+    # DEPLOY_DISPATCH_TOKEN lives in this environment (see demo-dispatch).
+    environment:
+      name: deploy-dispatch
+      deployment: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Version to release
+        id: v
+        run: python3 scripts/ci/release_plan.py
+
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        if: steps.v.outputs.action != 'taken'
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Does the version's image exist?
+        id: img
+        if: steps.v.outputs.action != 'taken'
+        env:
+          IMG: ${{ env.REGISTRY }}/${{ env.IMAGE }}
+          ACTION: ${{ steps.v.outputs.action }}
+        run: python3 scripts/ci/release_plan.py image
+
+      - name: Tag the commit
+        if: steps.v.outputs.action == 'new'
+        env:
+          TAG: ${{ steps.v.outputs.tag }}
+        # A plain push of a new tag is rejected if the tag appeared meanwhile — never forced.
+        run: git tag "$TAG" "$GITHUB_SHA" && git push origin "refs/tags/${TAG}"
+
+      - name: Tag the image
+        if: steps.v.outputs.action != 'taken'
+        env:
+          IMG: ${{ env.REGISTRY }}/${{ env.IMAGE }}
+          TAG: ${{ steps.v.outputs.tag }}
+          BUILT: ${{ needs.build.outputs.tag }}
+          CREATE: ${{ steps.img.outputs.image }}
+          LATEST: ${{ steps.img.outputs.latest }}
+        run: |
+          set -euo pipefail
+          [ "$CREATE" != create ] || docker buildx imagetools create -t "${IMG}:${TAG}" "${IMG}:${BUILT}"
+          [ "$LATEST" != true ] || docker buildx imagetools create -t "${IMG}:latest" "${IMG}:${TAG}"
+          docker buildx imagetools inspect "${IMG}:${TAG}" --format '{{json .Manifest.Digest}}'
+
+
+      - name: Tell the deploy repo
+        if: steps.v.outputs.action != 'taken' && vars.DEPLOY_REPO != ''
+        env:
+          GH_TOKEN: ${{ secrets.DEPLOY_DISPATCH_TOKEN }}
+          DEPLOY_REPO: ${{ vars.DEPLOY_REPO }}
+          TAG: ${{ steps.v.outputs.tag }}
+        run: scripts/ci/dispatch.sh pos-release "tag=${TAG}"
+
+  # ---------------------------------------------------------------------------
+  # The ONE check branch protection requires (the all-checks-pass
+  # pattern). main's rule names this job instead of each gate, so splitting or
+  # renaming a test job can never leave a PR waiting on a check that no longer
+  # exists. `!cancelled()` makes it report when a gate fails, is skipped or
+  # times out. Not `always()`: inside a run that a newer push cancelled, an
+  # always() job sat queued and held this workflow's concurrency group, so the
+  # replacement run never started. A cancelled run reports nothing;
+  # its replacement reports for the new head.
+  #
+  # Two ways a SKIPPED or foreign check could satisfy the rule are closed here,
+  # because branch protection matches a check by name on the head commit, from
+  # whatever event made it, and counts "skipped" as passing:
+  # - The name is "all-checks-pass" on pull requests only. A develop push
+  #   (tests skipped by design) passes its own summary, and a release PR opened
+  #   on that same commit would otherwise be mergeable before its run tested
+  #   anything.
+  # - Draft PRs run it too, and it fails ("mark ready for review"), so the
+  #   draft-time result can never be a skipped pass sitting on the commit.
+  all-checks-pass:
+    name: ${{ github.event_name == 'pull_request' && 'all-checks-pass' || format('all-checks-pass ({0})', github.event_name) }}
+    needs: [api-docs-freshness, build, release-version, tests, upgrade]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: scripts/ci
+      - name: Every gate passed
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          # The release PR must actually RUN the suite: a skipped test job there
+          # means the gate condition broke, not that the tests passed. (GitHub
+          # counts a skipped required job as passing, so this is the only guard.)
+          TESTS_REQUIRED: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' }}
+          DRAFT: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft }}
+        run: python3 scripts/ci/all_checks_pass.py

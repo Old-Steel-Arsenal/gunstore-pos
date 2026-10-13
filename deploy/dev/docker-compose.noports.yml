@@ -1,0 +1,5 @@
+# Worktree stacks publish no host ports (tests need none), so several stacks coexist. The Makefile
+# adds this override for a worktree unless PORT_OFFSET is given (`make dev-up PORT_OFFSET=10`).
+services:
+  frappe:
+    ports: !reset []

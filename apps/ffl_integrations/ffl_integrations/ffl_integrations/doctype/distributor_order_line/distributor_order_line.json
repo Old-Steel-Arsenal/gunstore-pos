@@ -1,0 +1,168 @@
+{
+ "actions": [],
+ "creation": "2026-07-22 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "istable": 1,
+ "editable_grid": 1,
+ "field_order": [
+  "sku",
+  "item_code",
+  "description",
+  "wish_qty",
+  "ack_qty",
+  "unit_cost",
+  "invoiced_unit_cost",
+  "ship_method",
+  "column_break_line",
+  "item_status",
+  "invoiced_qty",
+  "received_qty",
+  "substituted_qty",
+  "line_status",
+  "fulfillment",
+  "section_echoes",
+  "invoices",
+  "tracking_numbers",
+  "serials"
+ ],
+ "fields": [
+  {
+   "fieldname": "sku",
+   "fieldtype": "Data",
+   "label": "SKU",
+   "in_list_view": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "options": "Item",
+   "label": "Item",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "label": "Description"
+  },
+  {
+   "fieldname": "wish_qty",
+   "fieldtype": "Int",
+   "label": "Wish Qty",
+   "in_list_view": 1,
+   "default": "0"
+  },
+  {
+   "fieldname": "ack_qty",
+   "fieldtype": "Int",
+   "label": "Ack Qty",
+   "in_list_view": 1,
+   "default": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unit_cost",
+   "fieldtype": "Currency",
+   "label": "Unit Cost",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "invoiced_unit_cost",
+   "fieldtype": "Currency",
+   "label": "Invoiced Unit Cost",
+   "read_only": 1,
+   "description": "What the distributor's invoice actually charged per unit (poll write-back); the receive books this when present."
+  },
+  {
+   "fieldname": "ship_method",
+   "fieldtype": "Select",
+   "label": "Ship Method",
+   "options": "Grnd\n2Day\n1Day\nNdas\nPrio",
+   "default": "Grnd"
+  },
+  {
+   "fieldname": "column_break_line",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_status",
+   "fieldtype": "Data",
+   "label": "Item Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoiced_qty",
+   "fieldtype": "Int",
+   "label": "Invoiced Qty",
+   "default": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_qty",
+   "fieldtype": "Int",
+   "label": "Received Qty",
+   "default": "0",
+   "read_only": 1,
+   "description": "Cumulative booked; batch arrivals add only the increment."
+  },
+  {
+   "fieldname": "substituted_qty",
+   "fieldtype": "Int",
+   "label": "Substituted Qty",
+   "default": "0",
+   "read_only": 1,
+   "description": "Units the counter fulfilled from shelf stock (or re-sourced) instead of waiting; when they arrive they are plain restock, no order to hang on."
+  },
+  {
+   "fieldname": "line_status",
+   "fieldtype": "Select",
+   "label": "Line Status",
+   "options": "Pending\nAcked\nShipped\nReceived\nKilled",
+   "default": "Pending",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fulfillment",
+   "fieldtype": "Select",
+   "label": "Fulfillment",
+   "options": "local\nto_store\nfds\ndirect",
+   "description": "Per-leg fulfillment (H1); Flow A restock = local."
+  },
+  {
+   "fieldname": "section_echoes",
+   "fieldtype": "Section Break",
+   "label": "Distributor Echoes"
+  },
+  {
+   "fieldname": "invoices",
+   "fieldtype": "Small Text",
+   "label": "Invoices (CSV)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tracking_numbers",
+   "fieldtype": "Small Text",
+   "label": "Tracking Numbers (CSV)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "serials",
+   "fieldtype": "Small Text",
+   "label": "Serials (CSV)",
+   "read_only": 1,
+   "description": "Serial numbers the distributor reported for this line; recorded here, stocked on receive."
+  }
+ ],
+ "links": [],
+ "modified": "2026-07-22 12:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "Distributor Order Line",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

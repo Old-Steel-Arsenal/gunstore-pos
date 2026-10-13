@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "creation": "2026-10-01 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-10-01 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Inventory Count Item Group",
+ "owner": "Administrator",
+ "states": [],
+ "istable": 1,
+ "editable_grid": 1,
+ "field_order": [
+  "item_group"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "options": "Item Group",
+   "label": "Item Group",
+   "in_list_view": 1,
+   "reqd": 1
+  }
+ ],
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}

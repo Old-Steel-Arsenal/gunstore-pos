@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the POS extension agent every 20 s (docs/self-hosting.md#extensions)
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec=20
+AccuracySec=5
+Unit=ext-agent.service
+
+[Install]
+WantedBy=timers.target

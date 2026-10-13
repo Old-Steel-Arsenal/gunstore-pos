@@ -1,0 +1,101 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Ext Hello API",
+    "version": "0.1.0",
+    "description": "RPC API of the Ext Hello extension (`ext_hello`) for the GunStore POS: Says hello to a customer from the POS. A starting point for an extension, not a feature.\n\nAll endpoints are Frappe *whitelisted methods* invoked as `/api/method/<dotted.path>` on a POS that has the extension installed. Unless an endpoint declares explicit HTTP verbs, it is documented here as POST. Arguments may be sent as JSON body, form data, or query string — JSON body is recommended.\n\nEvery operation carries an **Auth (derived from code)** line statically resolved from the gate the function actually executes. While the store has the extension switched off (Settings → Extensions), every gated endpoint refuses with a permission error.\n\nThe extension's DocTypes are served by Frappe's REST layer (`/api/resource/<DocType>`) — see the POS core's docs/api/frappe-rest.md; they are modelled under components.schemas and listed in reference/doctypes.md."
+  },
+  "servers": [
+    {
+      "url": "http://dev.localhost:8000",
+      "description": "local dev bench with the extension installed (safe default)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ext_hello",
+      "description": "Ext Hello"
+    },
+    {
+      "name": "webhooks",
+      "description": "Inbound webhooks (guest-accessible, signature-verified)"
+    }
+  ],
+  "security": [
+    {
+      "tokenAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "tokenAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "`Authorization: token <api_key>:<api_secret>` — per-user keys, see docs/api/README.md"
+      }
+    },
+    "responses": {
+      "FrappeError": {
+        "description": "Frappe error envelope. HTTP 4xx/5xx with JSON body: `exc_type`, `exception`, `_server_messages` (JSON-encoded list of user-facing messages)."
+      }
+    },
+    "schemas": {}
+  },
+  "paths": {
+    "/api/method/ext_hello.api.greet.greet": {
+      "post": {
+        "tags": [
+          "ext_hello"
+        ],
+        "summary": "Say hello to a customer.",
+        "description": "**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager — and only while the extension is switched on\n\nSource: `ext_hello/api/greet.py:11`",
+        "operationId": "ext_hello.api.greet.greet",
+        "responses": {
+          "200": {
+            "description": "dict: {\"message\": str}"
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer": {
+                    "type": "string",
+                    "description": "Customer name (the record id)."
+                  }
+                },
+                "required": [
+                  "customer"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ext_hello.api.greet.ping": {
+      "get": {
+        "tags": [
+          "ext_hello"
+        ],
+        "summary": "Prove the extension's Python is importable and switched on.",
+        "description": "**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager — and only while the extension is switched on\n\nSource: `ext_hello/api/greet.py:26`",
+        "operationId": "ext_hello.api.greet.ping",
+        "responses": {
+          "200": {
+            "description": "str: \"pong\""
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        }
+      }
+    }
+  }
+}

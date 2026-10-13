@@ -1,0 +1,25 @@
+{
+ "content": null,
+ "creation": "2026-09-02 00:00:00",
+ "docstatus": 0,
+ "doctype": "Page",
+ "icon": "octicon octicon-device-camera",
+ "idx": 0,
+ "modified": "2026-09-02 00:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "serial-photos",
+ "owner": "Administrator",
+ "page_name": "serial-photos",
+ "roles": [
+  {"role": "System Manager"},
+  {"role": "Stock User"},
+  {"role": "Stock Manager"},
+  {"role": "Item Manager"}
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Upload Photos by Serial"
+}

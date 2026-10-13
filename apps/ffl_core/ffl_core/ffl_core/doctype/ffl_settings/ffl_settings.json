@@ -1,0 +1,200 @@
+{
+ "actions": [],
+ "creation": "2026-05-04 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "issingle": 1,
+ "field_order": [
+  "tab_store",
+  "section_store",
+  "own_ffl_license",
+  "alert_recipients",
+  "column_store",
+  "receive_sources",
+  "pending_order_age_alert_days",
+  "receipt_footer_note",
+  "shipping_price_includes_tax",
+  "tab_compliance",
+  "section_compliance_mode",
+  "paper_4473_mode",
+  "section_transfer",
+  "transfer_fee_item",
+  "column_transfer",
+  "transfer_fee_amount",
+  "section_customer_records",
+  "store_customer_id_numbers",
+  "tab_verification",
+  "section_live_check",
+  "live_check_provider",
+  "live_check_rate_limit_per_hour",
+  "column_live",
+  "live_check_cache_ttl_minutes"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_store",
+   "fieldtype": "Tab Break",
+   "label": "Store"
+  },
+  {
+   "fieldname": "section_store",
+   "fieldtype": "Section Break",
+   "label": "This Store"
+  },
+  {
+   "fieldname": "own_ffl_license",
+   "fieldtype": "Data",
+   "label": "Our FFL Licence Number",
+   "description": "This store's FFL. A web order naming it as the receiving FFL is treated as in-store pickup."
+  },
+  {
+   "fieldname": "alert_recipients",
+   "fieldtype": "Small Text",
+   "label": "Alert Recipients",
+   "description": "Emails (comma or newline separated) that receive operational alerts. Empty = all System Managers."
+  },
+  {
+   "fieldname": "column_store",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "receive_sources",
+   "fieldtype": "Small Text",
+   "label": "Receive Sources",
+   "default": "RSR\nDistributor\nIndividual (trade-in)\nManufacturer\nConsignment\nOther",
+   "description": "One per line; fills the Source dropdown on Receive Goods, FFL Acquisition and Purchase Receipt."
+  },
+  {
+   "fieldname": "pending_order_age_alert_days",
+   "fieldtype": "Int",
+   "label": "Pending Order overdue after (days)",
+   "default": "7",
+   "description": "A queue row older than this is marked overdue on Pending Order and listed in the managers' daily digest."
+  },
+  {
+   "fieldname": "receipt_footer_note",
+   "fieldtype": "Small Text",
+   "label": "Receipt Footer Note",
+   "description": "Plain text printed under every receipt, one line per line. Empty prints nothing."
+  },
+  {
+   "fieldname": "shipping_price_includes_tax",
+   "fieldtype": "Check",
+   "label": "Shipping Price Includes Sales Tax",
+   "default": "1",
+   "description": "On: when an order is taxed, the shipping you enter is what the customer pays, with the sales tax already inside it, and the receipt says \"sales tax included\". Off: sales tax is added on top of the shipping. Only affects new orders; an existing order keeps the way it was created."
+  },
+  {
+   "fieldname": "tab_compliance",
+   "fieldtype": "Tab Break",
+   "label": "Compliance"
+  },
+  {
+   "fieldname": "section_compliance_mode",
+   "fieldtype": "Section Break",
+   "label": "4473"
+  },
+  {
+   "default": "0",
+   "fieldname": "paper_4473_mode",
+   "fieldtype": "Check",
+   "label": "Paper 4473 Mode",
+   "description": "4473 and NICS are handled on paper outside this system; the counter records a Paper 4473 instead of calling FastBound."
+  },
+  {
+   "fieldname": "section_transfer",
+   "fieldtype": "Section Break",
+   "label": "Customer Transfer-In"
+  },
+  {
+   "fieldname": "transfer_fee_item",
+   "fieldtype": "Link",
+   "options": "Item",
+   "label": "Transfer Fee Item",
+   "description": "Service item charged for a customer transfer-in 4473."
+  },
+  {
+   "fieldname": "column_transfer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transfer_fee_amount",
+   "fieldtype": "Currency",
+   "label": "Default Transfer Fee",
+   "default": "25",
+   "description": "Default per-firearm fee added to a Transfer ticket; editable per sale."
+  },
+  {
+   "fieldname": "section_customer_records",
+   "fieldtype": "Section Break",
+   "label": "Customer Records"
+  },
+  {
+   "default": "0",
+   "fieldname": "store_customer_id_numbers",
+   "fieldtype": "Check",
+   "label": "Store Customer ID Numbers",
+   "description": "Keep ID numbers and dates of birth on customer records; turning this off erases the stored numbers and dates of birth, while attached ID copies, change history and deleted records are kept."
+  },
+  {
+   "fieldname": "tab_verification",
+   "fieldtype": "Tab Break",
+   "label": "FFL Verification"
+  },
+  {
+   "fieldname": "section_live_check",
+   "fieldtype": "Section Break",
+   "label": "Live EZ Check"
+  },
+  {
+   "fieldname": "live_check_provider",
+   "fieldtype": "Select",
+   "label": "Provider",
+   "options": "ATF Form Scraper\nData Service\nManual Only",
+   "default": "ATF Form Scraper",
+   "description": "Where live FFL verification is looked up. Data Service uses the connection on Data Service Settings; Manual Only disables it."
+  },
+  {
+   "fieldname": "live_check_rate_limit_per_hour",
+   "fieldtype": "Int",
+   "label": "Rate Limit (req/hr)",
+   "default": "30",
+   "description": "Maximum ATF Form Scraper requests per hour."
+  },
+  {
+   "fieldname": "column_live",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "live_check_cache_ttl_minutes",
+   "fieldtype": "Int",
+   "label": "Cache TTL (minutes)",
+   "default": "1440",
+   "description": "How long a verification result is reused before it is looked up again."
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-09 00:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "FFL Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

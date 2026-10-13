@@ -1,0 +1,10 @@
+[
+ {
+  "doctype": "Email Template",
+  "name": "NICS Cleared Pickup",
+  "subject": "Your background check has cleared — pick up your firearm",
+  "use_html": 1,
+  "response_html": "{% set store = company_brand(company).name %}<p>Hi {{ customer_name }},</p><p>Good news — your background check has cleared. Please stop by {{ store }} to complete your purchase and pick up your firearm (order {{ invoice }}).</p><p>— {{ store }}</p>",
+  "response": "Hi {{ customer_name }}, your background check has cleared. Please come in to complete your purchase and pick up your firearm (order {{ invoice }})."
+ }
+]

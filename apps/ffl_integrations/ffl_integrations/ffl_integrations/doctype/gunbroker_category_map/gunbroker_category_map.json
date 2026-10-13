@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "creation": "2026-08-26 10:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "firearm_type",
+  "item_group",
+  "is_cr_eligible",
+  "is_antique",
+  "category_id",
+  "category_name"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "description": "For firearms. Leave blank on item-level (ammunition / optics / parts) rows.",
+   "fieldname": "firearm_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Firearm Type",
+   "options": "\nPistol\nRevolver\nRifle\nShotgun\nReceiver\nOther Firearm\nSilencer\nShort Barreled Rifle\nShort Barreled Shotgun\nMachine Gun\nDestructive Device\nAny Other Weapon"
+  },
+  {
+   "columns": 2,
+   "description": "For non-firearms (ammunition, optics, parts). Leave blank on firearm rows.",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "description": "Use this row only for guns old enough to qualify as Curios & Relics. It is checked ahead of the plain firearm-type row, so a C&R-eligible rifle can be listed under Curios & Relics rather than Other Rifles.",
+   "fieldname": "is_cr_eligible",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "C&R Eligible"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "description": "Use this row only for antiques (Item.is_antique \u2014 pre-1899). An antique takes ONLY a row flagged here, never the plain or C&R row for its type, and a modern gun never takes this row. Point it at one of GunBroker's Antique categories.",
+   "fieldname": "is_antique",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Antique"
+  },
+  {
+   "columns": 2,
+   "description": "GunBroker's numeric category ID. It must be a leaf category (canContainItems=true) or the listing is rejected. Sandbox and production IDs have not been proven identical \u2014 verify each one against production before go-live.",
+   "fieldname": "category_id",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "GunBroker Category ID",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "description": "For humans reading this table. Not sent to GunBroker.",
+   "fieldname": "category_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Category Name"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-27 12:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "GunBroker Category Map",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,52 @@
+# Extension layer (POS extension ecosystem, phase 0 — see docs/self-hosting.md#extensions).
+#
+# Extension apps are NOT baked into the image: they live on this volume and are
+# declared in sites/extensions.json. The image entrypoint runs ext-replay.sh on
+# every container start, which re-links each declared extension into the bench
+# (apps/<id> symlink, .pth, sites/apps.txt, built assets). The image stays
+# immutable; the extension layer survives `up -d`, image upgrades and restarts.
+#
+# Every service that runs the image entrypoint gets the volume — the frontend
+# included, because nginx serves an extension's bundles through the symlink chain
+# sites/assets/<id> -> apps/<id>/<id>/public -> apps-ext. The configurator is NOT
+# in the list on purpose: it overrides the entrypoint and only runs
+# `ls -1 apps > sites/apps.txt`, so it neither replays nor needs the volume.
+x-ext-volume: &ext_volume
+  volumes:
+    - apps-ext:/home/frappe/frappe-bench/apps-ext
+
+services:
+  backend: *ext_volume
+  frontend: *ext_volume
+  websocket: *ext_volume
+  queue-short: *ext_volume
+  queue-long: *ext_volume
+  scheduler: *ext_volume
+  # The local distributor catalog's worker (Data Service Settings › Catalog
+  # source = Local): one worker on its own `catalog` queue, so an hour-long
+  # snapshot never sits in front of short/default/long jobs. OPT-IN: a store on
+  # the Data Service never starts it; a Local store sets COMPOSE_PROFILES=catalog
+  # in deploy/prod/.env (see .env.example). Spelled out rather than `extends:
+  # queue-long`: older compose releases refuse to extend a service that has
+  # depends_on. Frappe only accepts a queue declared in common_site_config
+  # `workers`, so the command declares it first (idempotent merge) — the worker
+  # runs before the site's first migrate instead of crash-looping.
+  queue-catalog:
+    profiles: ["catalog"]
+    image: ${CUSTOM_IMAGE:-frappe/erpnext}:${CUSTOM_TAG:-$ERPNEXT_VERSION}
+    pull_policy: ${PULL_POLICY:-always}
+    restart: ${RESTART_POLICY:-unless-stopped}
+    platform: linux/amd64
+    depends_on:
+      configurator:
+        condition: service_completed_successfully
+    command:
+      - bash
+      - -c
+      - env/bin/python -m ffl_integrations.catalog_local.declare_queue sites/common_site_config.json && exec bench worker --queue catalog
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - apps-ext:/home/frappe/frappe-bench/apps-ext
+
+volumes:
+  apps-ext:

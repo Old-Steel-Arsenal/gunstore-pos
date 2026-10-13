@@ -1,0 +1,100 @@
+{
+ "actions": [],
+ "autoname": "format:CO-DRAFT-{####}",
+ "creation": "2026-07-02 22:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "customer",
+  "total",
+  "payload"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Items Total"
+  },
+  {
+   "description": "The Create Order page's form state, verbatim. Serials in a draft are NOT reserved — they are re-validated when the draft is resumed.",
+   "fieldname": "payload",
+   "fieldtype": "Long Text",
+   "label": "Payload (JSON)"
+  }
+ ],
+ "links": [],
+ "modified": "2026-07-02 22:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Create Order Draft",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title",
+ "track_changes": 0
+}

@@ -1,0 +1,136 @@
+{
+ "actions": [],
+ "autoname": "CAL-.#####",
+ "creation": "2026-09-30 20:00:00.000000",
+ "description": "One row per tool call made through a remote MCP connector (Claude, ChatGPT or another MCP client): who, which connector, which tool and arguments (secrets masked), and the outcome. Written before the call runs. Never deleted.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "istable": 0,
+ "links": [],
+ "modified": "2026-09-30 22:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Connector Audit Log",
+ "owner": "Administrator",
+ "sort_field": "started_at",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "tool",
+ "track_changes": 0,
+ "field_order": [
+  "started_at",
+  "user",
+  "full_name",
+  "tool",
+  "status",
+  "column_break_1",
+  "surface",
+  "client_name",
+  "client_id",
+  "finished_at",
+  "section_details",
+  "arguments",
+  "error"
+ ],
+ "fields": [
+  {
+   "fieldname": "started_at",
+   "fieldtype": "Datetime",
+   "label": "Started At",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Data",
+   "label": "User",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1,
+   "description": "The user as recorded at the time (a snapshot, not a link: these rows are never deleted, so a link would stop the User from ever being deleted)."
+  },
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "label": "Full Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tool",
+   "fieldtype": "Data",
+   "label": "Tool",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "options": "Started\nSuccess\nFailed",
+   "label": "Status",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "surface",
+   "fieldtype": "Select",
+   "options": "cpa\nfull",
+   "label": "Surface",
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "client_name",
+   "fieldtype": "Data",
+   "label": "Connector",
+   "read_only": 1
+  },
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Data",
+   "label": "OAuth Client",
+   "read_only": 1
+  },
+  {
+   "fieldname": "finished_at",
+   "fieldtype": "Datetime",
+   "label": "Finished At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_details",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "arguments",
+   "fieldtype": "Code",
+   "options": "JSON",
+   "label": "Arguments",
+   "read_only": 1
+  },
+  {
+   "fieldname": "error",
+   "fieldtype": "Small Text",
+   "label": "Error",
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  }
+ ]
+}

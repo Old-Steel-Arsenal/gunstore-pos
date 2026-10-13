@@ -1,0 +1,331 @@
+{
+ "actions": [],
+ "autoname": "field:code",
+ "creation": "2026-07-22 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "naming_rule": "By fieldname",
+ "field_order": [
+  "tab_general",
+  "section_identity",
+  "code",
+  "distributor_name",
+  "provider",
+  "supplier",
+  "column_identity",
+  "enabled",
+  "dropship_enabled",
+  "stocking_enabled",
+  "poll_enabled",
+  "priority",
+  "tab_pricing",
+  "section_pricing",
+  "override_dropship_defaults",
+  "default_markup_pct",
+  "column_pricing",
+  "default_rounding",
+  "section_markup",
+  "markup_rules",
+  "tab_stock",
+  "section_stock",
+  "safety_buffer",
+  "display_cap",
+  "column_stock",
+  "zero_stock_when_feed_stale",
+  "lead_days_min",
+  "lead_days_max",
+  "tab_catalog",
+  "section_catalog",
+  "catalog_endpoint",
+  "column_catalog",
+  "catalog_client_id",
+  "catalog_secret",
+  "tab_status",
+  "section_status",
+  "last_poll_run_at",
+  "section_notes",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_general",
+   "fieldtype": "Tab Break",
+   "label": "General"
+  },
+  {
+   "fieldname": "section_identity",
+   "fieldtype": "Section Break",
+   "label": "Distributor"
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "label": "Code",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1,
+   "description": "Short unique code; it is the record name (the house's short name)."
+  },
+  {
+   "fieldname": "distributor_name",
+   "fieldtype": "Data",
+   "label": "Name",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Data",
+   "label": "Provider",
+   "reqd": 1,
+   "in_list_view": 1,
+   "description": "Registered provider code (rsr, ss)."
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "options": "Supplier",
+   "label": "Supplier",
+   "description": "Supplier on receipts and cost invoices for this house."
+  },
+  {
+   "fieldname": "column_identity",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled",
+   "default": "0",
+   "in_list_view": 1,
+   "description": "Off: this house is not searched, quoted or ordered from."
+  },
+  {
+   "fieldname": "dropship_enabled",
+   "fieldtype": "Check",
+   "label": "Drop-ship",
+   "default": "0",
+   "description": "Allow direct-to-buyer and FDS orders."
+  },
+  {
+   "fieldname": "stocking_enabled",
+   "fieldtype": "Check",
+   "label": "Stocking",
+   "default": "0",
+   "description": "Allow stocking and procure-to-store orders."
+  },
+  {
+   "fieldname": "poll_enabled",
+   "fieldtype": "Check",
+   "label": "Poll orders",
+   "default": "0",
+   "description": "Every 30 minutes, pull status, tracking and serials for this house's live orders."
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Int",
+   "label": "Priority",
+   "default": "0",
+   "in_list_view": 1,
+   "description": "Lower first: planner column order and the default house; reorder in the Distributors hub."
+  },
+  {
+   "fieldname": "tab_pricing",
+   "fieldtype": "Tab Break",
+   "label": "Pricing"
+  },
+  {
+   "fieldname": "section_pricing",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "override_dropship_defaults",
+   "fieldtype": "Check",
+   "label": "Use its own markup and stock settings",
+   "default": "0",
+   "description": "Off: this distributor uses the defaults on the drop-ship extension's Pricing Settings (markup, rounding, safety buffer, display cap, zero when stale). On: it uses the values on its Pricing and Stock publishing tabs."
+  },
+  {
+   "fieldname": "default_markup_pct",
+   "fieldtype": "Percent",
+   "label": "Default markup %",
+   "description": "Used only when no markup rule matches (the drop-ship extension's Pricing Settings) and the product has no MAP or MSRP.",
+   "depends_on": "eval:doc.override_dropship_defaults"
+  },
+  {
+   "fieldname": "column_pricing",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_rounding",
+   "fieldtype": "Select",
+   "label": "Rounding",
+   "options": ".99\nnone\nwhole",
+   "default": "none",
+   "description": "Applied to the default-markup price; a matched rule uses its own.",
+   "depends_on": "eval:doc.override_dropship_defaults"
+  },
+  {
+   "fieldname": "section_markup",
+   "fieldtype": "Section Break",
+   "label": "Markup rules (retired)",
+   "hidden": 1
+  },
+  {
+   "fieldname": "markup_rules",
+   "fieldtype": "Table",
+   "options": "Distributor Markup Rule",
+   "label": "Markup rules (retired)",
+   "read_only": 1,
+   "hidden": 1,
+   "description": "Moved to the drop-ship extension's Pricing Settings (one table for every distributor, this house's rules scoped to it). Kept only as the pre-move record; nothing reads it."
+  },
+  {
+   "fieldname": "tab_stock",
+   "fieldtype": "Tab Break",
+   "label": "Stock publishing"
+  },
+  {
+   "fieldname": "section_stock",
+   "fieldtype": "Section Break",
+   "label": "Published quantity"
+  },
+  {
+   "fieldname": "safety_buffer",
+   "fieldtype": "Int",
+   "label": "Safety buffer",
+   "default": "3",
+   "description": "Units held back from the published quantity.",
+   "depends_on": "eval:doc.override_dropship_defaults"
+  },
+  {
+   "fieldname": "display_cap",
+   "fieldtype": "Int",
+   "label": "Display cap",
+   "default": "5",
+   "description": "Maximum quantity published, whatever the feed says.",
+   "depends_on": "eval:doc.override_dropship_defaults"
+  },
+  {
+   "fieldname": "column_stock",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "zero_stock_when_feed_stale",
+   "fieldtype": "Check",
+   "label": "Zero stock when the feed is stale",
+   "default": "1",
+   "description": "Publish 0 for this house's items while its quantity feed is older than the watchdog threshold.",
+   "depends_on": "eval:doc.override_dropship_defaults"
+  },
+  {
+   "fieldname": "lead_days_min",
+   "fieldtype": "Int",
+   "label": "Lead time (business days, from)",
+   "description": "Shortest usual delivery for this house's drop-ships. Published to the shop as the product's lead time; leave both blank to publish none."
+  },
+  {
+   "fieldname": "lead_days_max",
+   "fieldtype": "Int",
+   "label": "Lead time (business days, to)",
+   "description": "Longest usual delivery. Must not be below the 'from' value."
+  },
+  {
+   "fieldname": "tab_catalog",
+   "fieldtype": "Tab Break",
+   "label": "Catalog service"
+  },
+  {
+   "fieldname": "section_catalog",
+   "fieldtype": "Section Break",
+   "label": "Catalog API service for this house"
+  },
+  {
+   "fieldname": "catalog_endpoint",
+   "fieldtype": "Data",
+   "label": "Endpoint",
+   "description": "Blank: the site-wide service on Data Service Settings. Set to read this house from its own Catalog API service (docs/catalog-api)."
+  },
+  {
+   "fieldname": "column_catalog",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "catalog_client_id",
+   "fieldtype": "Data",
+   "label": "Client ID"
+  },
+  {
+   "fieldname": "catalog_secret",
+   "fieldtype": "Password",
+   "label": "Secret"
+  },
+  {
+   "fieldname": "tab_status",
+   "fieldtype": "Tab Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "section_status",
+   "fieldtype": "Section Break",
+   "label": "Polling"
+  },
+  {
+   "fieldname": "last_poll_run_at",
+   "fieldtype": "Datetime",
+   "label": "Last order poll",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-09 22:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "Distributor",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "write": 1,
+   "create": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

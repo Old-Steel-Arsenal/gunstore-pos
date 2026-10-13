@@ -1,0 +1,39 @@
+{
+ "actions": [],
+ "creation": "2026-07-22 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "istable": 1,
+ "editable_grid": 1,
+ "field_order": [
+  "rule_scope",
+  "dept_pattern",
+  "brand",
+  "column_break_rule",
+  "markup_pct",
+  "markup_flat",
+  "rounding",
+  "note"
+ ],
+ "fields": [
+  {"fieldname": "rule_scope", "fieldtype": "Select", "label": "Scope", "options": "Department\nBrand", "default": "Department", "in_list_view": 1, "reqd": 1},
+  {"fieldname": "dept_pattern", "fieldtype": "Data", "label": "Department Pattern", "in_list_view": 1, "depends_on": "eval:doc.rule_scope=='Department'", "description": "RSR department number / prefix this rule applies to."},
+  {"fieldname": "brand", "fieldtype": "Link", "options": "Brand", "label": "Brand", "in_list_view": 1, "depends_on": "eval:doc.rule_scope=='Brand'"},
+  {"fieldname": "column_break_rule", "fieldtype": "Column Break"},
+  {"fieldname": "markup_pct", "fieldtype": "Percent", "label": "Markup %", "in_list_view": 1, "description": "price = base × (1 + pct) + flat"},
+  {"fieldname": "markup_flat", "fieldtype": "Currency", "label": "Markup Flat", "in_list_view": 1},
+  {"fieldname": "rounding", "fieldtype": "Select", "label": "Rounding", "options": ".99\nnone\nwhole", "default": ".99"},
+  {"fieldname": "note", "fieldtype": "Data", "label": "Note"}
+ ],
+ "links": [],
+ "modified": "2026-07-22 12:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "Distributor Markup Rule",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

@@ -1,0 +1,654 @@
+{
+ "actions": [],
+ "creation": "2026-08-26 10:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_connection",
+  "section_connection",
+  "enabled",
+  "sandbox_mode",
+  "column_connection",
+  "username",
+  "password",
+  "seller_name",
+  "section_status",
+  "last_listing_push_at",
+  "last_listing_push_count",
+  "last_sweep_at",
+  "column_status",
+  "last_orders_synced_at",
+  "last_order_sync_count",
+  "last_sync_error",
+  "tab_listings",
+  "section_listing_defaults",
+  "postal_code",
+  "country_code",
+  "listing_duration",
+  "auto_relist",
+  "inspection_period",
+  "column_listing_defaults",
+  "is_ffl_required",
+  "will_ship_international",
+  "max_pictures",
+  "use_default_exclude_states",
+  "exclude_states",
+  "section_auction",
+  "default_listing_type",
+  "column_auction",
+  "auction_duration",
+  "auction_auto_relist",
+  "section_shipping",
+  "who_pays_shipping",
+  "long_gun_ship_cost",
+  "column_shipping",
+  "handgun_ship_cost",
+  "accessory_ship_cost",
+  "section_payment",
+  "pay_certified_check",
+  "pay_usps_money_order",
+  "pay_money_order",
+  "pay_personal_check",
+  "pay_cod",
+  "column_payment",
+  "card_checkout_enabled",
+  "pay_visa_mastercard",
+  "pay_amex",
+  "pay_discover",
+  "section_category",
+  "category_map",
+  "section_content",
+  "title_banned_phrases",
+  "description_footer",
+  "section_watermark",
+  "watermark_image",
+  "column_watermark",
+  "watermark_text",
+  "tab_accounting",
+  "section_accounting",
+  "check_deposit_account",
+  "card_clearing_account",
+  "column_accounting",
+  "ffl_doc_fee",
+  "fee_tiers",
+  "tab_advanced",
+  "section_sync",
+  "auto_sync_enabled",
+  "auto_acknowledge",
+  "stale_paid_days",
+  "column_sync",
+  "end_strategy",
+  "orders_since_override",
+  "section_api",
+  "request_timeout_seconds",
+  "probe_timeout_seconds",
+  "column_api",
+  "page_size",
+  "base_url_override",
+  "section_webhooks",
+  "webhook_username",
+  "webhook_password",
+  "column_webhooks",
+  "webhook_urls",
+  "last_webhook_at",
+  "last_webhook_event",
+  "order_sync_nudge"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_connection",
+   "fieldtype": "Tab Break",
+   "label": "Connection"
+  },
+  {
+   "fieldname": "section_connection",
+   "fieldtype": "Section Break",
+   "label": "Connection"
+  },
+  {
+   "default": "0",
+   "description": "Off: nothing is sent to or read from GunBroker.",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enable GunBroker"
+  },
+  {
+   "default": "1",
+   "description": "On: the GunBroker sandbox. Off: the live marketplace.",
+   "fieldname": "sandbox_mode",
+   "fieldtype": "Check",
+   "label": "Sandbox mode"
+  },
+  {
+   "fieldname": "column_connection",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "username",
+   "fieldtype": "Data",
+   "label": "Seller username",
+   "mandatory_depends_on": "eval:doc.enabled"
+  },
+  {
+   "fieldname": "password",
+   "fieldtype": "Password",
+   "label": "Seller password",
+   "mandatory_depends_on": "eval:doc.enabled"
+  },
+  {
+   "description": "GunBroker requires the User-Agent seller segment to match the name the DevKey was registered under. Required for the live marketplace; the sandbox does not check it.",
+   "fieldname": "seller_name",
+   "fieldtype": "Data",
+   "label": "Seller name (as registered for the DevKey)",
+   "mandatory_depends_on": "eval:doc.enabled && !doc.sandbox_mode"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_status",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "last_listing_push_at",
+   "fieldtype": "Datetime",
+   "label": "Last listing push",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_listing_push_count",
+   "fieldtype": "Int",
+   "label": "Listings pushed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_sweep_at",
+   "fieldtype": "Datetime",
+   "label": "Last sweep",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The poll reads changes from shortly before this instant.",
+   "fieldname": "last_orders_synced_at",
+   "fieldtype": "Datetime",
+   "label": "Orders synced up to (UTC)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_order_sync_count",
+   "fieldtype": "Int",
+   "label": "Orders synced",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_sync_error",
+   "fieldtype": "Long Text",
+   "label": "Last error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_listings",
+   "fieldtype": "Tab Break",
+   "label": "Listings"
+  },
+  {
+   "fieldname": "section_listing_defaults",
+   "fieldtype": "Section Break",
+   "label": "Listing defaults"
+  },
+  {
+   "fieldname": "postal_code",
+   "fieldtype": "Data",
+   "label": "Ship-from ZIP",
+   "mandatory_depends_on": "eval:doc.enabled"
+  },
+  {
+   "default": "US",
+   "fieldname": "country_code",
+   "fieldtype": "Data",
+   "label": "Country"
+  },
+  {
+   "default": "30",
+   "fieldname": "listing_duration",
+   "fieldtype": "Select",
+   "label": "Duration (days, fixed price)",
+   "options": "30\n60\n90"
+  },
+  {
+   "default": "4 Relist Fixed Price",
+   "description": "Relist Fixed Price: runs until sold, under a new item number each cycle.",
+   "fieldname": "auto_relist",
+   "fieldtype": "Select",
+   "label": "Auto-relist (fixed price)",
+   "options": "1 Do Not Relist\n4 Relist Fixed Price"
+  },
+  {
+   "default": "1 AS IS",
+   "fieldname": "inspection_period",
+   "fieldtype": "Select",
+   "label": "Inspection period",
+   "options": "1 AS IS\n4 3 days\n12 30-day"
+  },
+  {
+   "fieldname": "column_listing_defaults",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_ffl_required",
+   "fieldtype": "Check",
+   "label": "FFL required"
+  },
+  {
+   "default": "0",
+   "fieldname": "will_ship_international",
+   "fieldtype": "Check",
+   "label": "Ships internationally"
+  },
+  {
+   "default": "16",
+   "fieldname": "max_pictures",
+   "fieldtype": "Int",
+   "label": "Photos per listing"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_default_exclude_states",
+   "fieldtype": "Check",
+   "label": "Use account's excluded states"
+  },
+  {
+   "depends_on": "eval:!doc.use_default_exclude_states",
+   "description": "Two-letter state codes, comma-separated.",
+   "fieldname": "exclude_states",
+   "fieldtype": "Small Text",
+   "label": "Excluded states"
+  },
+  {
+   "fieldname": "section_auction",
+   "fieldtype": "Section Break",
+   "label": "Auction defaults"
+  },
+  {
+   "default": "Fixed Price",
+   "description": "Preselected in the Send dialog; the person listing can pick either.",
+   "fieldname": "default_listing_type",
+   "fieldtype": "Select",
+   "label": "Listing type offered",
+   "options": "Fixed Price\nAuction"
+  },
+  {
+   "fieldname": "column_auction",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "7",
+   "fieldname": "auction_duration",
+   "fieldtype": "Select",
+   "label": "Auction length (days)",
+   "options": "1\n3\n5\n7\n10\n14"
+  },
+  {
+   "default": "2 Relist Until Sold",
+   "description": "Relist Until Sold: an unsold auction runs again under a new item number.",
+   "fieldname": "auction_auto_relist",
+   "fieldtype": "Select",
+   "label": "Auto-relist (auction)",
+   "options": "2 Relist Until Sold\n1 Do Not Relist"
+  },
+  {
+   "fieldname": "section_shipping",
+   "fieldtype": "Section Break",
+   "label": "Shipping"
+  },
+  {
+   "default": "8 Buyer pays fixed",
+   "fieldname": "who_pays_shipping",
+   "fieldtype": "Select",
+   "label": "Shipping paid by",
+   "options": "2 Seller pays\n4 Buyer pays actual\n8 Buyer pays fixed"
+  },
+  {
+   "default": "45.00",
+   "description": "Used when a listing has no shipping cost of its own. 0 refuses the listing.",
+   "fieldname": "long_gun_ship_cost",
+   "fieldtype": "Currency",
+   "label": "Long gun rate (default)"
+  },
+  {
+   "fieldname": "column_shipping",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "34.99",
+   "fieldname": "handgun_ship_cost",
+   "fieldtype": "Currency",
+   "label": "Handgun rate (default)"
+  },
+  {
+   "default": "19.99",
+   "fieldname": "accessory_ship_cost",
+   "fieldtype": "Currency",
+   "label": "Accessory / ammo rate (default)"
+  },
+  {
+   "fieldname": "section_payment",
+   "fieldtype": "Section Break",
+   "label": "Payment methods"
+  },
+  {
+   "default": "1",
+   "fieldname": "pay_certified_check",
+   "fieldtype": "Check",
+   "label": "Certified check"
+  },
+  {
+   "default": "1",
+   "fieldname": "pay_usps_money_order",
+   "fieldtype": "Check",
+   "label": "USPS money order"
+  },
+  {
+   "default": "1",
+   "fieldname": "pay_money_order",
+   "fieldtype": "Check",
+   "label": "Money order"
+  },
+  {
+   "default": "0",
+   "description": "Off by default: it can bounce after the gun has shipped.",
+   "fieldname": "pay_personal_check",
+   "fieldtype": "Check",
+   "label": "Personal check"
+  },
+  {
+   "default": "0",
+   "fieldname": "pay_cod",
+   "fieldtype": "Check",
+   "label": "COD"
+  },
+  {
+   "fieldname": "column_payment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Needs a payment gateway on the GunBroker account.",
+   "fieldname": "card_checkout_enabled",
+   "fieldtype": "Check",
+   "label": "Accept cards"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.card_checkout_enabled",
+   "fieldname": "pay_visa_mastercard",
+   "fieldtype": "Check",
+   "label": "Visa / MasterCard"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.card_checkout_enabled",
+   "fieldname": "pay_amex",
+   "fieldtype": "Check",
+   "label": "American Express"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.card_checkout_enabled",
+   "fieldname": "pay_discover",
+   "fieldtype": "Check",
+   "label": "Discover"
+  },
+  {
+   "fieldname": "section_category",
+   "fieldtype": "Section Break",
+   "label": "Categories"
+  },
+  {
+   "description": "GunBroker category by firearm type, item group, or antique. An Item's own Category ID overrides.",
+   "fieldname": "category_map",
+   "fieldtype": "Table",
+   "label": "Category map",
+   "options": "GunBroker Category Map"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_content",
+   "fieldtype": "Section Break",
+   "label": "Listing content"
+  },
+  {
+   "default": "do not buy",
+   "description": "One per line. A title containing any of them is refused.",
+   "fieldname": "title_banned_phrases",
+   "fieldtype": "Small Text",
+   "label": "Blocked title phrases"
+  },
+  {
+   "description": "Appended to every listing. Links and images must be https.",
+   "fieldname": "description_footer",
+   "fieldtype": "Text Editor",
+   "label": "Description footer"
+  },
+  {
+   "fieldname": "section_watermark",
+   "fieldtype": "Section Break",
+   "label": "Photo watermark",
+   "description": "Drawn on every photo sent to GunBroker (a half-transparent panel in the lower right). The photos in POS and on the web store are not changed. Leave both empty for none."
+  },
+  {
+   "fieldname": "watermark_image",
+   "fieldtype": "Attach Image",
+   "label": "Logo",
+   "description": "A dark logo on a white or transparent ground."
+  },
+  {
+   "fieldname": "column_watermark",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "watermark_text",
+   "fieldtype": "Data",
+   "label": "Text under the logo",
+   "description": "For example the store's web address."
+  },
+  {
+   "fieldname": "tab_accounting",
+   "fieldtype": "Tab Break",
+   "label": "Accounting"
+  },
+  {
+   "fieldname": "section_accounting",
+   "fieldtype": "Section Break",
+   "label": "Accounting"
+  },
+  {
+   "description": "The operating bank account cheques and money orders go into \u2014 not a clearing account.",
+   "fieldname": "check_deposit_account",
+   "fieldtype": "Link",
+   "label": "Check deposit account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.card_checkout_enabled",
+   "fieldname": "card_clearing_account",
+   "fieldtype": "Link",
+   "label": "Card clearing account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_accounting",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "5.00",
+   "fieldname": "ffl_doc_fee",
+   "fieldtype": "Currency",
+   "label": "FFL doc fee (per item)"
+  },
+  {
+   "description": "Applied per item. Upper bound 0 = no limit and must be the last row.",
+   "fieldname": "fee_tiers",
+   "fieldtype": "Table",
+   "label": "Final value fee tiers",
+   "options": "GunBroker Fee Tier"
+  },
+  {
+   "fieldname": "tab_advanced",
+   "fieldtype": "Tab Break",
+   "label": "Advanced"
+  },
+  {
+   "fieldname": "section_sync",
+   "fieldtype": "Section Break",
+   "label": "Sync"
+  },
+  {
+   "default": "1",
+   "description": "Order polling and listing sweeps run on schedule.",
+   "fieldname": "auto_sync_enabled",
+   "fieldtype": "Check",
+   "label": "Scheduled sync"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_acknowledge",
+   "fieldtype": "Check",
+   "label": "Auto-acknowledge orders"
+  },
+  {
+   "default": "7",
+   "fieldname": "stale_paid_days",
+   "fieldtype": "Int",
+   "label": "Paid-not-shipped alert (days)"
+  },
+  {
+   "fieldname": "column_sync",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Delete Endpoint",
+   "description": "Delete Endpoint: ended through the API. Manual Only: staff end them on GunBroker.",
+   "fieldname": "end_strategy",
+   "fieldtype": "Select",
+   "label": "End listings via",
+   "options": "Delete Endpoint\nManual Only"
+  },
+  {
+   "description": "One-time back-fill from this store-time instant. Cleared after use.",
+   "fieldname": "orders_since_override",
+   "fieldtype": "Datetime",
+   "label": "Re-read orders since"
+  },
+  {
+   "fieldname": "section_api",
+   "fieldtype": "Section Break",
+   "label": "API"
+  },
+  {
+   "default": "30",
+   "fieldname": "request_timeout_seconds",
+   "fieldtype": "Int",
+   "label": "Request timeout (s)"
+  },
+  {
+   "default": "3",
+   "description": "Total for the whole sale, not per gun.",
+   "fieldname": "probe_timeout_seconds",
+   "fieldtype": "Int",
+   "label": "Counter check budget (s)"
+  },
+  {
+   "fieldname": "column_api",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "300",
+   "fieldname": "page_size",
+   "fieldtype": "Int",
+   "label": "API page size"
+  },
+  {
+   "description": "Testing only. Overrides Sandbox mode.",
+   "fieldname": "base_url_override",
+   "fieldtype": "Data",
+   "label": "Base URL override"
+  },
+  {
+   "fieldname": "section_webhooks",
+   "fieldtype": "Section Break",
+   "label": "Webhooks"
+  },
+  {
+   "description": "The user name GunBroker sends with every webhook.",
+   "fieldname": "webhook_username",
+   "fieldtype": "Data",
+   "label": "Webhook user name"
+  },
+  {
+   "description": "At least 12 characters. Enter the same one at gunbroker.com/account/webhooks.",
+   "fieldname": "webhook_password",
+   "fieldtype": "Password",
+   "label": "Webhook password"
+  },
+  {
+   "fieldname": "column_webhooks",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "webhook_urls",
+   "fieldtype": "HTML",
+   "label": "Webhook URLs"
+  },
+  {
+   "fieldname": "last_webhook_at",
+   "fieldtype": "Datetime",
+   "label": "Last webhook received",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_webhook_event",
+   "fieldtype": "Data",
+   "label": "Last webhook event",
+   "read_only": 1
+  },
+  {
+   "description": "Written by the webhook receiver so a running order sync knows to go round again.",
+   "fieldname": "order_sync_nudge",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Order sync nudge",
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-12 10:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "GunBroker Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

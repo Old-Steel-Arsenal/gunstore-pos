@@ -1,0 +1,310 @@
+{
+ "actions": [],
+ "autoname": "format:ACQ-{YYYY}-{#####}",
+ "creation": "2026-05-04 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_basic",
+  "acquisition_date",
+  "source_type",
+  "receive_source",
+  "transaction_type",
+  "column_break_1",
+  "company",
+  "amended_from",
+  "section_source",
+  "source_name",
+  "source_first_name",
+  "source_middle_name",
+  "source_last_name",
+  "source_suffix",
+  "source_address",
+  "column_break_2",
+  "source_ffl",
+  "source_id_type",
+  "source_id_number",
+  "source_customer",
+  "transfer_for_customer",
+  "source_id_document",
+  "section_item",
+  "item",
+  "serial",
+  "column_break_3",
+  "cost",
+  "section_external",
+  "fastbound_id",
+  "fastbound_synced_at",
+  "pending_intake_payload",
+  "section_notes",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_basic",
+   "fieldtype": "Section Break",
+   "label": "Acquisition"
+  },
+  {
+   "fieldname": "acquisition_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Acquisition Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "source_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Source Type",
+   "options": "Individual\nFFL Dealer\nManufacturer\nImporter\nEstate\nPawn\nTrade-in",
+   "reqd": 1
+  },
+  {
+   "description": "Procurement channel, carried from the Purchase Receipt's Source. Choices managed in FFL Settings → Receive Sources.",
+   "fieldname": "receive_source",
+   "fieldtype": "Select",
+   "label": "Receive Source"
+  },
+  {
+   "description": "FastBound acquisition type (presets + custom). Choices are synced from FastBound — refresh via FastBound Settings → 'Sync Acquire Types'. Leave blank to fall back to the source-type default.",
+   "fieldname": "transaction_type",
+   "fieldtype": "Select",
+   "label": "Acquisition Type"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "FFL Acquisition",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_source",
+   "fieldtype": "Section Break",
+   "label": "Source"
+  },
+  {
+   "fieldname": "source_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Source Name",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:['Individual','Trade-in','Estate','Pawn'].includes(doc.source_type)",
+   "fieldname": "source_first_name",
+   "fieldtype": "Data",
+   "label": "Source First Name"
+  },
+  {
+   "depends_on": "eval:['Individual','Trade-in','Estate','Pawn'].includes(doc.source_type)",
+   "fieldname": "source_middle_name",
+   "fieldtype": "Data",
+   "label": "Source Middle Name"
+  },
+  {
+   "depends_on": "eval:['Individual','Trade-in','Estate','Pawn'].includes(doc.source_type)",
+   "fieldname": "source_last_name",
+   "fieldtype": "Data",
+   "label": "Source Last Name"
+  },
+  {
+   "fieldname": "source_suffix",
+   "fieldtype": "Data",
+   "label": "Source Suffix"
+  },
+  {
+   "fieldname": "source_address",
+   "fieldtype": "Small Text",
+   "label": "Source Address"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.source_type==='FFL Dealer'",
+   "description": "1-XX-XXX-XX-XX-XXXXX",
+   "fieldname": "source_ffl",
+   "fieldtype": "Data",
+   "label": "Source FFL Number",
+   "mandatory_depends_on": "eval:doc.source_type==='FFL Dealer'"
+  },
+  {
+   "depends_on": "eval:['Individual','Trade-in','Estate','Pawn'].includes(doc.source_type)",
+   "fieldname": "source_id_type",
+   "fieldtype": "Select",
+   "label": "ID Type",
+   "options": "\nDriver License\nState ID\nPassport\nMilitary ID\nOther"
+  },
+  {
+   "depends_on": "eval:['Individual','Trade-in','Estate','Pawn'].includes(doc.source_type)",
+   "fieldname": "source_id_number",
+   "fieldtype": "Data",
+   "label": "ID Number"
+  },
+  {
+   "depends_on": "eval:['Individual','Trade-in','Estate','Pawn'].includes(doc.source_type)",
+   "fieldname": "source_customer",
+   "fieldtype": "Link",
+   "label": "Seller (Customer)",
+   "options": "Customer"
+  },
+  {
+   "description": "Set when this gun was received as an inbound customer transfer (a transfer-in on behalf of the customer): the customer who will pick it up. Drives the Pending Transfer Pickups report.",
+   "fieldname": "transfer_for_customer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Transfer For (Customer)",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:['Individual','Trade-in','Estate','Pawn'].includes(doc.source_type)",
+   "fieldname": "source_id_document",
+   "fieldtype": "Attach",
+   "label": "ID Document"
+  },
+  {
+   "fieldname": "section_item",
+   "fieldtype": "Section Break",
+   "label": "Item"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Auto-picked when the Item has exactly one in-stock Serial No.",
+   "fetch_if_empty": 1,
+   "fieldname": "serial",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Serial",
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Cost"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_external",
+   "fieldtype": "Section Break",
+   "label": "FastBound Sync"
+  },
+  {
+   "fieldname": "fastbound_id",
+   "fieldtype": "Data",
+   "label": "FastBound ID",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "fastbound_synced_at",
+   "fieldtype": "Datetime",
+   "label": "Last Synced",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "pending_intake_payload",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Pending Intake Payload",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-10-09 22:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "FFL Acquisition",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  }
+ ],
+ "sort_field": "acquisition_date",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,287 @@
+{
+ "actions": [],
+ "autoname": "format:DISP-{YYYY}-{#####}",
+ "creation": "2026-05-04 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_basic",
+  "disposition_date",
+  "disposition_type",
+  "column_break_1",
+  "company",
+  "amended_from",
+  "section_destination",
+  "customer",
+  "destination_ffl",
+  "section_destruction",
+  "destroyed_witness1",
+  "destroyed_witness2",
+  "section_item",
+  "item",
+  "serial",
+  "column_break_2",
+  "sales_invoice",
+  "sales_order",
+  "section_compliance",
+  "form_4473_status",
+  "nics_status",
+  "manual_override",
+  "override_reason",
+  "override_by",
+  "section_external",
+  "fastbound_id",
+  "fastbound_synced_at",
+  "section_notes",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_basic",
+   "fieldtype": "Section Break",
+   "label": "Disposition"
+  },
+  {
+   "fieldname": "disposition_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Disposition Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "disposition_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Disposition Type",
+   "options": "Retail Sale\nFFL Transfer\nReturn\nScrap\nGunsmithing\nDealer Transfer\nNFA",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "FFL Disposition",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_destination",
+   "fieldtype": "Section Break",
+   "label": "Destination"
+  },
+  {
+   "depends_on": "eval:['Retail Sale'].includes(doc.disposition_type)",
+   "description": "Only for Retail Sale (4473 / individual buyer). Dealer / FFL transfers use Destination FFL instead.",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "mandatory_depends_on": "eval:['Retail Sale'].includes(doc.disposition_type)",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:['FFL Transfer','Dealer Transfer','Return'].includes(doc.disposition_type)",
+   "description": "Pick from your ATF FFL Record library. Use the 'Lookup FFL via ATF' button to add a new dealer from ATF EZ Check.",
+   "fieldname": "destination_ffl",
+   "fieldtype": "Link",
+   "label": "Destination FFL",
+   "mandatory_depends_on": "eval:['FFL Transfer','Dealer Transfer','Return'].includes(doc.disposition_type)",
+   "options": "ATF FFL Record",
+   "show_title_field_in_link": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:['Scrap','Destroyed'].includes(doc.disposition_type)",
+   "fieldname": "section_destruction",
+   "fieldtype": "Section Break",
+   "label": "Destruction Witnesses"
+  },
+  {
+   "depends_on": "eval:['Scrap','Destroyed'].includes(doc.disposition_type)",
+   "description": "Required by FastBound/ATF for a destruction.",
+   "fieldname": "destroyed_witness1",
+   "fieldtype": "Data",
+   "label": "Witness 1",
+   "mandatory_depends_on": "eval:['Scrap','Destroyed'].includes(doc.disposition_type)"
+  },
+  {
+   "depends_on": "eval:['Scrap','Destroyed'].includes(doc.disposition_type)",
+   "fieldname": "destroyed_witness2",
+   "fieldtype": "Data",
+   "label": "Witness 2",
+   "mandatory_depends_on": "eval:['Scrap','Destroyed'].includes(doc.disposition_type)"
+  },
+  {
+   "fieldname": "section_item",
+   "fieldtype": "Section Break",
+   "label": "Item"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "description": "Pick an in-stock serial for the selected Item. Auto-picked when there's exactly one in stock.",
+   "fieldname": "serial",
+   "fieldtype": "Autocomplete",
+   "in_list_view": 1,
+   "label": "Serial"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order"
+  },
+  {
+   "fieldname": "section_compliance",
+   "fieldtype": "Section Break",
+   "label": "Compliance"
+  },
+  {
+   "default": "N/A",
+   "depends_on": "eval:['Retail Sale'].includes(doc.disposition_type)",
+   "fieldname": "form_4473_status",
+   "fieldtype": "Select",
+   "label": "4473 Status",
+   "options": "N/A\nPending\nCompleted"
+  },
+  {
+   "default": "N/A",
+   "depends_on": "eval:['Retail Sale'].includes(doc.disposition_type)",
+   "fieldname": "nics_status",
+   "fieldtype": "Select",
+   "label": "NICS Status",
+   "options": "N/A\nProceed\nDelayed\nDenied\nCancelled"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:['Retail Sale'].includes(doc.disposition_type)",
+   "description": "Set when a manager force-completed the sale because FastBound was unavailable/diverged (the 4473 was completed in FastBound but didn't sync back). Requires Sales Manager / System Manager + a reason.",
+   "fieldname": "manual_override",
+   "fieldtype": "Check",
+   "label": "Manual Override (4473 bypass)",
+   "no_copy": 1
+  },
+  {
+   "depends_on": "manual_override",
+   "fieldname": "override_reason",
+   "fieldtype": "Small Text",
+   "label": "Override Reason",
+   "mandatory_depends_on": "manual_override",
+   "no_copy": 1
+  },
+  {
+   "depends_on": "manual_override",
+   "fieldname": "override_by",
+   "fieldtype": "Link",
+   "label": "Override By",
+   "no_copy": 1,
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_external",
+   "fieldtype": "Section Break",
+   "label": "FastBound Sync"
+  },
+  {
+   "fieldname": "fastbound_id",
+   "fieldtype": "Data",
+   "label": "FastBound ID",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "fastbound_synced_at",
+   "fieldtype": "Datetime",
+   "label": "Last Synced",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-04 12:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "FFL Disposition",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  }
+ ],
+ "sort_field": "disposition_date",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

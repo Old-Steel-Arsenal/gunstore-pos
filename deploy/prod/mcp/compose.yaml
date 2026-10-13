@@ -1,0 +1,34 @@
+# Remote MCP servers (gunstore-pos-mcp) on a POS host — deployed by THIS repo's
+# release: auto_deploy.sh writes .env next to this file (site URL, local POS
+# frontend, the pinned MCP_TAG from version.env) and runs `up -d` here, so every
+# POS release ships the MCP build it was tested with.
+#
+# Host networking: each server binds 127.0.0.1 only (its config refuses anything
+# else) and reaches the POS frontend on loopback; the host's Caddy fronts them
+# (deploy/prod/caddy-connector.caddy). No secrets: every call carries the
+# signed-in user's own OAuth token.
+name: gunstore-mcp
+x-common: &common
+  image: ${MCP_IMAGE:-ghcr.io/old-steel-arsenal/gunstore-pos-mcp}:${MCP_TAG:?MCP_TAG comes from version.env}
+  network_mode: host
+  restart: unless-stopped
+  env_file: .env
+  logging:
+    driver: json-file
+    options: {max-size: "10m", max-file: "5"}
+services:
+  mcp-cpa:
+    <<: *common
+    environment:
+      GUNSTORE_MCP_MODE: cpa
+      GUNSTORE_MCP_PORT: "8781"
+      GUNSTORE_MCP_PUBLIC_URL: ${FRAPPE_BASE_URL:?}/connector/cpa/mcp
+  mcp-full:
+    <<: *common
+    environment:
+      GUNSTORE_MCP_MODE: full
+      GUNSTORE_MCP_PORT: "8782"
+      GUNSTORE_MCP_PUBLIC_URL: ${FRAPPE_BASE_URL:?}/connector/full/mcp
+      # The GunBroker write tools: auto_deploy.sh sets this from the store's own
+      # GunBroker Settings.enabled (a store that lists must be able to end).
+      GUNSTORE_MCP_GUNBROKER_ACTIONS: ${MCP_GUNBROKER_ACTIONS:-0}

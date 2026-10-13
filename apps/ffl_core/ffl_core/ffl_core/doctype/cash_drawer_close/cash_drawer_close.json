@@ -1,0 +1,226 @@
+{
+ "actions": [],
+ "creation": "2026-10-02 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "business_date",
+  "status",
+  "is_counted",
+  "is_cutoff",
+  "column_break_1",
+  "opening_amount",
+  "expected",
+  "counted",
+  "variance",
+  "carry_forward",
+  "detail_section",
+  "reason",
+  "counted_by",
+  "counted_at",
+  "closed_at",
+  "column_break_2",
+  "days_covered",
+  "covers_from",
+  "variance_je",
+  "cutoff_je",
+  "trueup_je",
+  "pos_closing_entries",
+  "active_key"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "options": "Company",
+   "label": "Company",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "business_date",
+   "fieldtype": "Date",
+   "label": "Day",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "options": "Closed\nClosing\nUndone",
+   "default": "Closed",
+   "label": "Status",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "is_counted",
+   "fieldtype": "Check",
+   "label": "Counted",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "is_cutoff",
+   "fieldtype": "Check",
+   "label": "First count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "opening_amount",
+   "fieldtype": "Currency",
+   "label": "Opening",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expected",
+   "fieldtype": "Currency",
+   "label": "Expected",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "counted",
+   "fieldtype": "Currency",
+   "label": "Counted",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "variance",
+   "fieldtype": "Currency",
+   "label": "Difference",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "carry_forward",
+   "fieldtype": "Currency",
+   "label": "Carried to the next day",
+   "read_only": 1
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "counted_by",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Counted by",
+   "read_only": 1
+  },
+  {
+   "fieldname": "counted_at",
+   "fieldtype": "Datetime",
+   "label": "Counted at",
+   "read_only": 1
+  },
+  {
+   "fieldname": "closed_at",
+   "fieldtype": "Datetime",
+   "label": "Closed at",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "days_covered",
+   "fieldtype": "Int",
+   "label": "Days covered",
+   "read_only": 1
+  },
+  {
+   "fieldname": "covers_from",
+   "fieldtype": "Date",
+   "label": "Covers days not counted since",
+   "read_only": 1
+  },
+  {
+   "fieldname": "variance_je",
+   "fieldtype": "Link",
+   "options": "Journal Entry",
+   "label": "Difference entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cutoff_je",
+   "fieldtype": "Link",
+   "options": "Journal Entry",
+   "label": "First count entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "trueup_je",
+   "fieldtype": "Link",
+   "options": "Journal Entry",
+   "label": "Earlier days corrected entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pos_closing_entries",
+   "fieldtype": "Small Text",
+   "label": "POS closings",
+   "read_only": 1
+  },
+  {
+   "fieldname": "active_key",
+   "fieldtype": "Data",
+   "label": "Active key",
+   "hidden": 1,
+   "read_only": 1,
+   "unique": 1,
+   "no_copy": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-03 17:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Cash Drawer Close",
+ "owner": "Administrator",
+ "states": [],
+ "autoname": "format:CDC-{YYYY}-{#####}",
+ "description": "One close of the cash drawer per company per day: expected, counted and the difference.",
+ "sort_field": "business_date",
+ "sort_order": "DESC",
+ "title_field": "business_date",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Accounts User",
+   "read": 1,
+   "report": 1,
+   "export": 1
+  }
+ ]
+}

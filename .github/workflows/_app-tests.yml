@@ -1,0 +1,749 @@
+name: App tests (reusable)
+
+# Reusable test workflow — the custom-app test suite on a real bench
+# (MariaDB + Redis services), plus the first-party extensions when asked. Called by:
+#   - release-image.yml  → gates build + deploy (CD waits for green tests)
+#   - ci.yml             → daily upgrade-regression
+#   - the maintainers' deployment repository (another repository, by `uses: …@main`) → the
+#     first-party extensions only, against a release or a develop commit of this one: it passes
+#     `repository`, `only_extensions`, `extension_list` and the two secrets below.
+on:
+  workflow_call:
+    inputs:
+      use_cache:
+        description: "Reuse a cached frappe+erpnext bench (CD path). Leave false for the daily drift-check so it always pulls fresh upstream."
+        type: boolean
+        default: false
+      workers:
+        # >1 splits the modules across that many cloned sites of this bench and
+        # runs them at once (scripts/ci/parallel_tests.py): balanced by the last
+        # run's per-module time, a failed module re-run once alone (pass = FLAKY,
+        # reported, not fatal). 1 = the plain serial `bench run-tests` loop,
+        # which the 2-core GitHub-hosted daily run keeps.
+        description: "Parallel test workers (1 = serial)"
+        type: number
+        default: 1
+      runner:
+        # JSON string so callers can pass either a plain label or a label array:
+        #   '"ubuntu-latest"' (default — daily drift-check stays GitHub-hosted)
+        #   '["self-hosted","test"]' (CD path — the self-hosted test runners).
+        # Callers read it from the repo variable CI_RUNS_ON_TEST, falling back to
+        # '"ubuntu-latest"' when it is unset (public repo, fork).
+        # Service ports are DYNAMIC (see the services block), so any number of
+        # test-labeled runners can run these jobs concurrently on one box.
+        description: "runs-on target, JSON-encoded"
+        type: string
+        default: '"ubuntu-latest"'
+      apps:
+        # Lets callers split the suite across parallel jobs (ffl_core alone is
+        # ~87% of total test time). The site always installs ALL THREE apps —
+        # cross-app hooks stay active exactly as on prod — only the run-tests
+        # loop narrows.
+        description: "Space-separated subset of our apps to test"
+        type: string
+        default: "ffl_core ffl_integrations ffl_woo_sync"
+      modules:
+        # A named subset of test modules instead of every module of `apps` — the
+        # release PR's upgrade job runs a smoke set this way. Runs through the
+        # parallel runner even with workers: 1. A name that does not exist fails.
+        description: "Only these test modules (space-separated dotted names)"
+        type: string
+        default: ""
+      timeout_minutes:
+        # Callers tighten this to what their runner needs. The default covers the
+        # daily GitHub-hosted run, which builds the bench from scratch (~15 min).
+        # Without a value GitHub would allow 6 hours — a hung job would hold a
+        # self-hosted test runner that long.
+        description: "Job timeout in minutes"
+        type: number
+        default: 60
+      repository:
+        # The repository to check out, as owner/name. Empty = the caller's own (the in-repo
+        # callers never set it). A caller in ANOTHER repository must set it: github.repository
+        # is then the caller, not the code under test. While that repository is private, the
+        # secret CHECKOUT_TOKEN has to be able to read it.
+        description: "Repository to test, owner/name (default: the caller's repository)"
+        type: string
+        default: ""
+      ref:
+        description: "Commit to test (default: the commit that triggered the run). Always a full sha when `repository` is set"
+        type: string
+        default: ""
+      upgrade_from:
+        # Upgrade regression. The site is first built on THIS ref's apps (setup
+        # and bootstrap run as that release would), then the apps are switched
+        # to the commit under test, `bench migrate` + bootstrap run, and the
+        # suite runs on the upgraded site. A patch, schema sync, fixture or
+        # after_migrate hook that breaks on a real older site fails here, before
+        # prod runs the same migrate.
+        description: "Git ref of the release to upgrade from (empty = fresh site)"
+        type: string
+        default: ""
+      seed_with_old_tests:
+        # Before upgrading, run the OLD release's own suite on the site, so the
+        # migrate meets the documents those tests leave behind (invoices,
+        # returns, dispositions, serials...) instead of bare masters. Slow: the
+        # old suite runs serially. Its failures are warnings, not errors.
+        description: "Fill the old site by running the old release's tests first"
+        type: boolean
+        default: false
+      extensions:
+        # Adds a second leg to the job matrix (suite: extensions) that runs AT THE SAME
+        # TIME as our suites, on another test runner and a site of its own built exactly
+        # the same way: every extension in `extension_list` is
+        # installed there and put through its own tests, the extension lint and its
+        # API-docs check — endpoints documented, docs/api fresh (scripts/ci/ext_test.sh,
+        # the same script `make ext-test` runs). It used to run after our suites on
+        # their site, adding ~3 min (the largest extension alone ~2.5) to the job's wall time.
+        # Both legs belong to this workflow, so a caller's `needs:` on it (release,
+        # all-checks-pass) waits for and fails on either.
+        description: "Also test the first-party extensions (needs `extension_list` and secret EXT_REPOS_TOKEN; without the token the leg is not started)"
+        type: boolean
+        default: false
+      only_extensions:
+        # The extensions leg ALONE: the core suites do not run. For a caller that exists only to
+        # test extensions against a core ref (the deployment repository). Unlike `extensions`, a
+        # missing token or an empty list FAILS the run: a caller that asked for nothing but the
+        # extensions must not go green having tested none.
+        description: "Run only the first-party extensions leg (no core suites); a missing EXT_REPOS_TOKEN or an empty extension_list fails"
+        type: boolean
+        default: false
+      extension_list:
+        # JSON array of {id, repo, ref}: id = the extension's app name, repo = owner/name,
+        # ref = a branch or tag. The caller owns the list (it names extension repositories this
+        # repository does not know); each entry is validated by the "Fetch first-party
+        # extensions" step before anything is cloned.
+        description: 'First-party extensions to test: JSON array of {"id", "repo", "ref"}'
+        type: string
+        default: ""
+    secrets:
+      EXT_REPOS_TOKEN:
+        # Fine-grained PAT, contents:read on the extension repos only (they are private).
+        # Absent: with `extensions`, the leg is skipped with a warning and the job stays
+        # green (Dependabot, forks, not set yet); with `only_extensions`, the run fails.
+        required: false
+      CHECKOUT_TOKEN:
+        # Needed only while the repository under test is private and is not the caller's own:
+        # it checks out `repository` (and `upgrade_from`). Default: the caller's github.token.
+        required: false
+
+jobs:
+  # The extensions leg needs EXT_REPOS_TOKEN (the extension repos are private). Secrets cannot
+  # be read in a matrix or a job `if`, so this small job reads it and decides the legs:
+  # without the token (public repo, fork, Dependabot) the extensions leg is never started,
+  # instead of building a whole bench and site only to skip. Not run at all when the caller
+  # does not ask for extensions. With only_extensions the core leg is dropped, and a missing
+  # token fails here (red) rather than warning: nothing else would have been tested.
+  ext-gate:
+    name: Extensions leg gate
+    if: ${{ inputs.extensions || inputs.only_extensions }}
+    # The same runner as the tests, so the gate adds no billed hosted minutes on the
+    # self-hosted path. It checks nothing out, so it cannot touch a persistent workspace.
+    runs-on: ${{ fromJSON(inputs.runner) }}
+    timeout-minutes: 5
+    outputs:
+      suites: ${{ steps.gate.outputs.suites }}
+    steps:
+      - name: Is EXT_REPOS_TOKEN available?
+        id: gate
+        env:
+          EXT_REPOS_TOKEN: ${{ secrets.EXT_REPOS_TOKEN }}
+          ONLY: ${{ inputs.only_extensions }}
+        run: |
+          if [ -n "$EXT_REPOS_TOKEN" ]; then
+            if [ "$ONLY" = "true" ]; then
+              echo 'suites=["extensions"]' >> "$GITHUB_OUTPUT"
+            else
+              echo 'suites=["core","extensions"]' >> "$GITHUB_OUTPUT"
+            fi
+            exit 0
+          fi
+          if [ "$ONLY" = "true" ]; then
+            echo '::error title=First-party extensions not tested::only_extensions was asked for, but EXT_REPOS_TOKEN is not available to this run — nothing would be tested'
+            exit 1
+          fi
+          echo '::warning title=First-party extensions not tested::EXT_REPOS_TOKEN is not available to this run (Dependabot, a fork, or not set) — the extensions leg was skipped'
+          {
+            echo '> [!WARNING]'
+            echo "> **First-party extensions were not tested:** \`EXT_REPOS_TOKEN\` is not available to this run (Dependabot, a fork, or the secret is not set). This does not fail the run."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo 'suites=["core"]' >> "$GITHUB_OUTPUT"
+
+  custom-app-tests:
+    name: Custom app tests (ERPNext ${{ matrix.erpnext_branch }})${{ matrix.suite == 'extensions' && ' — first-party extensions' || '' }}
+    needs: ext-gate
+    # ext-gate is skipped when the caller wants no extensions; a skipped need would skip this
+    # job too, unless a status function appears here.
+    if: ${{ !cancelled() && contains(fromJSON('["success","skipped"]'), needs.ext-gate.result) }}
+    runs-on: ${{ fromJSON(inputs.runner) }}
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    # No job-level concurrency group anymore: MariaDB/Redis host ports are
+    # allocated per-job by Docker (dynamic mapping below), so concurrent test
+    # jobs on the same box never contend. Cross-run CD ordering now lives where
+    # it belongs — release-image.yml's workflow-level per-ref group and the
+    # deploy job's prod-deploy mutex.
+    strategy:
+      fail-fast: false
+      matrix:
+        erpnext_branch: [version-16]
+        # core: our three apps' suites. extensions (only with inputs.extensions): the
+        # first-party extensions, in parallel on their own runner + site — same bench,
+        # same site setup; the steps below say which leg they belong to. Two legs need
+        # two free test-labeled runners; with only one free they
+        # queue and run back to back — no slower than the old single job.
+        suite: ${{ fromJSON(needs.ext-gate.outputs.suites || '["core"]') }}
+    services:
+      # Container ports map to RANDOM host ports (no fixed 3306/6379) — the
+      # resolved values are read from job.services.*.ports below and written
+      # into the bench config every run. This is what makes multiple test
+      # runners on one box safe.
+      # tmpfs: the datadir lives in RAM, so every InnoDB fsync in this
+      # write-heavy suite (each submit → GL + stock ledger + bound book) is a
+      # memory op. The CI DB stays well under the 4g cap; the service container
+      # is fresh each job, so nothing needed persistence anyway.
+      mariadb:
+        image: mariadb:11.8
+        ports: ["3306"]
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MARIADB_AUTO_UPGRADE: 1
+        # A 2s health interval: the job starts only once MariaDB reports healthy,
+        # and at 10s every job sat idle ~8s after the server was already up.
+        # (Comments must stay out of the folded block below — a `#` there would
+        # become part of the docker options.)
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=2s
+          --health-timeout=5s
+          --health-retries=30
+          --tmpfs /var/lib/mysql:rw,size=4g
+      redis:
+        image: redis:7-alpine
+        ports: ["6379"]
+    steps:
+      # Set early (not inside Run tests): the failure-artifact name needs it
+      # even when a pre-test step is what failed.
+      # An upgrade run gets its own slug: the nightly calls this workflow twice
+      # with the same apps (fresh + upgrade), and upload-artifact refuses a
+      # second artifact of the same name in one run — the later job's logs
+      # would be lost on exactly the night both fail. It also keeps the
+      # upgraded site's timings apart from the fresh site's.
+      - name: Compute apps slug
+        env:
+          APPS: ${{ inputs.apps }}
+          SUFFIX: ${{ inputs.upgrade_from != '' && '-upgrade' || '' }}${{ matrix.suite == 'extensions' && '-extensions' || '' }}
+        run: echo "APPS_SLUG=${APPS// /-}${SUFFIX}" >> "$GITHUB_ENV"
+
+      - name: Checkout monorepo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: gunstore
+          repository: ${{ inputs.repository || github.repository }}
+          ref: ${{ inputs.ref }}
+          token: ${{ secrets.CHECKOUT_TOKEN || github.token }}
+
+      - name: Checkout the release to upgrade from
+        if: ${{ inputs.upgrade_from != '' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: gunstore-old
+          repository: ${{ inputs.repository || github.repository }}
+          ref: ${{ inputs.upgrade_from }}
+          token: ${{ secrets.CHECKOUT_TOKEN || github.token }}
+
+      # Before any bench work, so a token that cannot read a repo fails in seconds.
+      # git clones rather than actions/checkout: the list is data. The token travels
+      # in one process's environment (--config-env), never on a command line or in
+      # the clones' .git/config.
+      - name: Fetch first-party extensions
+        id: extensions
+        if: ${{ (inputs.extensions || inputs.only_extensions) && matrix.suite == 'extensions' }}
+        env:
+          EXT_REPOS_TOKEN: ${{ secrets.EXT_REPOS_TOKEN }}
+          EXT_LIST: ${{ inputs.extension_list }}
+          ONLY: ${{ inputs.only_extensions }}
+        run: |
+          set -euo pipefail
+          # The list is the caller's input (JSON, data), read from the environment, never spliced
+          # into the script. An empty string is an empty list; anything else must be a JSON array.
+          entries=$(python3 - <<'PY'
+          import json, os, re
+          raw = os.environ["EXT_LIST"].strip()
+          items = json.loads(raw) if raw else []
+          assert isinstance(items, list), "extension_list must be a JSON array"
+          for e in items:
+              assert re.fullmatch(r"[a-z][a-z0-9]{1,11}_[a-z][a-z0-9_]*", e["id"]), e
+              assert re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", e["repo"]), e
+              assert re.fullmatch(r"[A-Za-z0-9._/-]{1,100}", e["ref"]) and not e["ref"].startswith("-"), e
+              print(e["id"], e["repo"], e["ref"])
+          PY
+          )
+          rm -rf ext
+          if [ -z "$entries" ]; then
+            if [ "$ONLY" = "true" ]; then
+              echo '::error title=No first-party extensions to test::only_extensions was asked for, but extension_list is empty'
+              exit 1
+            fi
+            echo "ids=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -z "$EXT_REPOS_TOKEN" ]; then
+            echo "::warning title=First-party extensions not tested::EXT_REPOS_TOKEN is not available to this run (Dependabot, a fork, or not set) — skipped: $(cut -d' ' -f1 <<<"$entries" | xargs)"
+            {
+              echo '> [!WARNING]'
+              echo "> **First-party extensions were not tested:** \`EXT_REPOS_TOKEN\` is not available to this run (Dependabot, a fork, or the secret is not set). Skipped: $(cut -d' ' -f1 <<<"$entries" | xargs). This does not fail the run."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "ids=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          basic=$(printf 'x-access-token:%s' "$EXT_REPOS_TOKEN" | base64 | tr -d '\n')
+          echo "::add-mask::$basic"
+          export GIT_AUTH_HEADER="AUTHORIZATION: basic $basic" GIT_TERMINAL_PROMPT=0
+          mkdir ext
+          while read -r id repo ref; do
+            if ! git --config-env=http.https://github.com/.extraheader=GIT_AUTH_HEADER \
+                clone --quiet --depth 1 --single-branch --branch "$ref" "https://github.com/$repo.git" "ext/$id"; then
+              echo "::error title=First-party extension not fetched::cannot clone $repo@$ref with EXT_REPOS_TOKEN — the token may have expired or lost contents:read on $repo, or the ref is gone. Rotate the secret, or delete it to skip first-party extensions (docs/extensions/README.md)."
+              exit 1
+            fi
+            echo "$id: $repo@$ref $(git -C "ext/$id" rev-parse --short HEAD)"
+          done <<<"$entries"
+          echo "ids=$(cut -d' ' -f1 <<<"$entries" | xargs)" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Python
+        id: setup-python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          # frappe==16.17.3's pyproject.toml pins requires-python to >=3.14,<3.15
+          # — match exactly so uv resolves the install. Local docker bench
+          # ships Python 3.14.2 from the same constraint.
+          python-version: "3.14"
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # frappe-framework@version-16 package.json engines.node = ">=24"
+          node-version: "24"
+
+      # Pure-JS unit tests (POS tender guard etc.) — no bench needed, so they
+      # run early and fail fast. They once existed but ran nowhere:
+      # the JS-side invariants had documentation strength only.
+      - name: JS unit tests
+        # Glob, not the bare directory — node's --test dir resolution is
+        # version-finicky; the glob form runs the same files everywhere. Only
+        # the shard that carries ffl_core runs them (they are ffl_core files).
+        if: matrix.suite == 'core' && contains(inputs.apps, 'ffl_core')
+        run: node --test 'gunstore/apps/ffl_core/ffl_core/tests/js/*.test.js'
+
+      - name: Install bench
+        run: |
+          pip install --upgrade pip
+          pip install frappe-bench
+          npm install -g yarn
+
+      # GitHub-hosted only. On the self-hosted runners (Ubuntu 26.04): libcups2/libxrender1
+      # ship with the OS (as t64 renames), and wkhtmltopdf is not in 26.04's
+      # repos at all — deliberately not installed, since the only PDF touchpoint
+      # in our suites (test_sale_receipt) mocks frappe.attach_print and never
+      # invokes the binary. If a future test needs real PDFs, install the
+      # official wkhtmltox .deb on the runner machine.
+      - name: Install system deps
+        if: runner.environment == 'github-hosted'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wkhtmltopdf libcups2 libxrender1
+          # The hosted image carries the MySQL 8 client, not MariaDB's. scripts/ci/parallel_tests.py
+          # falls back to its `mysql`/`mysqldump`, and mysqldump 8 asks the server for
+          # information_schema.COLUMN_STATISTICS, which MariaDB lacks (the dump of the base site
+          # dies). Switching that off is an option-file entry; MariaDB's own client (self-hosted)
+          # would reject it, so it is written on this hosted-only path.
+          printf '[mysqldump]\ncolumn-statistics=0\n' >> ~/.my.cnf
+
+      # --- #2 speed-up: reuse the frappe+erpnext bench across CD runs ---
+      # Restored before — and saved after — the init+get-app below, so the cache
+      # holds frappe + erpnext + the venv ONLY. It deliberately excludes our 3
+      # apps (they change every commit and are re-linked fresh below) and the
+      # test site (created fresh each run).
+      #
+      # The key MUST include the resolved Python version. (The ImageOS token
+      # in the key is inert — env.ImageOS always evaluates empty, see the note
+      # on the restore step below; kept only to avoid churning the live key.)
+      # frappe-bench/env is a virtualenv whose scripts hardcode the absolute
+      # interpreter path (e.g. /opt/hostedtoolcache/Python/3.14.X/x64/bin/python).
+      # python-version: "3.14" floats to the latest patch, so when the runner
+      # bumps 3.14.X (or the image rotates) a venv restored under a version-blind
+      # key points at an interpreter that no longer exists →
+      # "./env/bin/pip: cannot execute: required file not found" (exit 127).
+      # Keying on the resolved version rebuilds the venv fresh when it drifts.
+      # NO restore-keys: a key change must force a full rebuild, never a partial
+      # (stale-venv) restore. Bump the epoch (v2→v3…) to force a clean rebuild.
+      # Gated on use_cache so the daily drift-check (ci.yml) still builds fresh.
+      # GitHub-hosted only (kept intact for the one-line rollback to
+      # ubuntu-latest). NOTE the key's env.ImageOS has always evaluated empty —
+      # image-set process env vars never enter the `env` expression context —
+      # which is exactly how a self-hosted run once got an exact hit on a
+      # GitHub-built bench whose venv pointed at /opt/hostedtoolcache (exit
+      # 126). Self-hosted therefore never touches this cache in either
+      # direction; it reuses the bench persisted in the runner workspace below.
+      # Which frappe / ERPNext a reused bench carries: production's pinned tags
+      # (deploy/prod/frappe-refs.env) whenever a bench is reused, so every runner
+      # tests what ships; the daily drift-check (use_cache false) builds the moving
+      # branch on purpose.
+      # An upgrade run starts where production does before the deploy: the old release's
+      # apps on the frappe / ERPNext the old release pinned (frappe=/erpnext=, what the bench
+      # is built with). "Move the bench to the refs under test" then switches to the refs
+      # being tested (*_target), the way a deploy brings code and framework together.
+      # Building the old site straight on the new refs pairs old code with a framework it
+      # never shipped on (an old bootstrap wrote a Workspace Sidebar, which
+      # a later Frappe refuses), a state production never passes through.
+      - name: Resolve frappe / ERPNext refs
+        id: refs
+        env:
+          USE_CACHE: ${{ inputs.use_cache }}
+          BRANCH: ${{ matrix.erpnext_branch }}
+          UPGRADE_FROM: ${{ inputs.upgrade_from }}
+        run: |
+          set -euo pipefail
+          if [ "$USE_CACHE" = "true" ]; then
+            # shellcheck source=/dev/null
+            . gunstore/deploy/prod/frappe-refs.env
+          else
+            FRAPPE_REF="$BRANCH"
+            ERPNEXT_REF="$BRANCH"
+          fi
+          echo "frappe_target=${FRAPPE_REF}" >> "$GITHUB_OUTPUT"
+          echo "erpnext_target=${ERPNEXT_REF}" >> "$GITHUB_OUTPUT"
+          if [ -n "$UPGRADE_FROM" ] && [ "$USE_CACHE" = "true" ] && [ -f gunstore-old/deploy/prod/frappe-refs.env ]; then
+            # shellcheck source=/dev/null
+            . gunstore-old/deploy/prod/frappe-refs.env
+          fi
+          echo "frappe=${FRAPPE_REF}" >> "$GITHUB_OUTPUT"
+          echo "erpnext=${ERPNEXT_REF}" >> "$GITHUB_OUTPUT"
+          echo "bench refs: frappe ${FRAPPE_REF}, erpnext ${ERPNEXT_REF}"
+
+      - name: Restore bench cache
+        id: bench-cache
+        if: ${{ inputs.use_cache && runner.environment == 'github-hosted' }}
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: frappe-bench
+          key: bench-v3-${{ runner.os }}-${{ env.ImageOS }}-py${{ steps.setup-python.outputs.python-version }}-frappe-${{ steps.refs.outputs.frappe }}-erpnext-${{ steps.refs.outputs.erpnext }}
+
+      # Self-hosted: the runner workspace survives runs, so last run's bench is
+      # already on local disk — no network cache transfer at all. Reuse it only
+      # if it is COMPLETE: venv executes (a tool-cache Python bump orphans the
+      # venv's hardcoded interpreter path), frappe imports (a failed bench init
+      # leaves a venv without frappe behind), and erpnext is present. Anything
+      # less → wipe and rebuild fresh. So is one on other frappe / ERPNext versions
+      # than production's pinned tags: a bench kept "as long as it works" left the
+      # several test runners on different frappe releases.
+      # An upgrade run builds its bench on the OLD release's refs and then moves it to the new
+      # ones, which leaves new Python next to old node_modules and assets. It must not become the
+      # bench the next run on this runner reuses, nor make that run rebuild: park the runner's
+      # bench aside here, work in a throwaway one, and put the parked one back at the end
+      # ("Put the parked bench back"). A run that died before that leaves frappe-bench.parked
+      # behind; every self-hosted run restores it first.
+      - name: Park the reused bench (self-hosted upgrade runs)
+        if: ${{ inputs.use_cache && runner.environment == 'self-hosted' }}
+        env:
+          UPGRADE: ${{ inputs.upgrade_from != '' }}
+        run: |
+          if [ -d frappe-bench.parked ]; then rm -rf frappe-bench && mv frappe-bench.parked frappe-bench; fi
+          if [ "$UPGRADE" = "true" ] && [ -d frappe-bench ]; then mv frappe-bench frappe-bench.parked; fi
+
+      - name: Check local bench (self-hosted)
+        id: local-bench
+        if: ${{ inputs.use_cache && runner.environment == 'self-hosted' }}
+        env:
+          WANT_FRAPPE: ${{ steps.refs.outputs.frappe }}
+          WANT_ERPNEXT: ${{ steps.refs.outputs.erpnext }}
+        run: |
+          have=$(./frappe-bench/env/bin/python -c \
+            'import frappe, erpnext; print(f"v{frappe.__version__} v{erpnext.__version__}")' \
+            2>/dev/null || true)
+          if [ "$have" = "${WANT_FRAPPE} ${WANT_ERPNEXT}" ]; then
+            echo "reuse=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "rebuilding the bench: has '${have:-none}', want '${WANT_FRAPPE} ${WANT_ERPNEXT}'"
+            rm -rf frappe-bench
+            echo "reuse=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Init bench
+        if: ${{ !inputs.use_cache || (steps.bench-cache.outputs.cache-hit != 'true' && steps.local-bench.outputs.reuse != 'true') }}
+        env:
+          FRAPPE_REF: ${{ steps.refs.outputs.frappe }}
+          # The interpreter setup-python just put on PATH, by absolute path. bench's
+          # default `--python python3` reaches `uv venv`, and uv prefers its OWN managed
+          # Pythons over PATH: on a self-hosted box a uv-managed CPython 3.12 (shared by every
+          # runner of that user) won, and frappe (requires-python >=3.14) would not
+          # install (exit 167).
+          PYTHON_BIN: ${{ steps.setup-python.outputs.python-path }}
+          # bench init and get-app each run `bench build`, which connects to redis.
+          # A fresh bench has no redis keys yet ("Point bench at this run's service
+          # ports" comes later), so frappe fell back to 127.0.0.1:13311 and some other
+          # listener answered: "Protocol error, got Z" (upgrade job).
+          # frappe reads these env vars before any config.
+          FRAPPE_REDIS_CACHE: redis://127.0.0.1:${{ job.services.redis.ports['6379'] }}
+          FRAPPE_REDIS_QUEUE: redis://127.0.0.1:${{ job.services.redis.ports['6379'] }}
+        run: |
+          # --no-backups: bench init otherwise installs a crontab entry that runs
+          # `bench --site all backup` every 6 h. On a self-hosted runner that cron
+          # outlives the job, backs up a throwaway CI site and competes with
+          # running tests (found on two runners and removed).
+          bench init --skip-redis-config-generation --no-backups \
+            --python "$PYTHON_BIN" \
+            --frappe-branch "$FRAPPE_REF" \
+            frappe-bench
+          ./frappe-bench/env/bin/python -c 'import sys; print("bench venv:", sys.version)'
+
+      - name: Get ERPNext
+        if: ${{ !inputs.use_cache || (steps.bench-cache.outputs.cache-hit != 'true' && steps.local-bench.outputs.reuse != 'true') }}
+        working-directory: frappe-bench
+        env:
+          FRAPPE_REDIS_CACHE: redis://127.0.0.1:${{ job.services.redis.ports['6379'] }}
+          FRAPPE_REDIS_QUEUE: redis://127.0.0.1:${{ job.services.redis.ports['6379'] }}
+        run: bench get-app --branch ${{ steps.refs.outputs.erpnext }} erpnext https://github.com/frappe/erpnext.git
+
+      # Persist the freshly-built bench (frappe+erpnext+venv) for next time —
+      # only on a cache miss, captured here BEFORE our apps + site are added.
+      # GitHub-hosted only: on self-hosted the bench persists on disk by itself.
+      - name: Save bench cache
+        if: ${{ inputs.use_cache && runner.environment == 'github-hosted' && steps.bench-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: frappe-bench
+          key: ${{ steps.bench-cache.outputs.cache-primary-key }}
+
+      # Runs UNCONDITIONALLY, after every bench-acquisition path (fresh init,
+      # gha cache restore, self-hosted workspace reuse): the service host ports
+      # are new every job, so a persisted common_site_config.json always holds
+      # last run's dead ports. db_port goes through --parse — pymysql wants an
+      # int, and a quoted "32768" would land as a string.
+      - name: Point bench at this run's service ports
+        working-directory: frappe-bench
+        run: |
+          bench set-config -g db_host 127.0.0.1
+          bench set-config -g -p db_port ${{ job.services.mariadb.ports['3306'] }}
+          bench set-config -g redis_cache redis://127.0.0.1:${{ job.services.redis.ports['6379'] }}
+          bench set-config -g redis_queue redis://127.0.0.1:${{ job.services.redis.ports['6379'] }}
+          bench set-config -g redis_socketio redis://127.0.0.1:${{ job.services.redis.ports['6379'] }}
+          # Site config OVERRIDES common config in frappe's merge order. A
+          # persisted site (self-hosted workspace) that ever picked up a
+          # db_host/db_port key would silently pin last run's dead port, so
+          # stamp the site-level keys too whenever the site already exists.
+          if [ -f sites/ci.localhost/site_config.json ]; then
+            bench --site ci.localhost set-config db_host 127.0.0.1
+            bench --site ci.localhost set-config -p db_port ${{ job.services.mariadb.ports['3306'] }}
+          fi
+
+      - name: Link our apps
+        working-directory: frappe-bench
+        env:
+          # An upgrade run builds the site on the old release first.
+          SOURCE: ${{ inputs.upgrade_from != '' && 'gunstore-old' || 'gunstore' }}
+        run: |
+          for app in ffl_core ffl_integrations ffl_woo_sync; do
+            ln -sfn "$GITHUB_WORKSPACE/$SOURCE/apps/$app" "apps/$app"
+            ./env/bin/pip install -e "apps/$app"
+          done
+          # Rewrite sites/apps.txt with a known-good list (one app per line,
+          # newline-terminated). The default file ships *without* a trailing
+          # newline; merging via `cat | printf` ate the boundary and produced
+          # "erpnextffl_core" → ModuleNotFoundError. Just declare the truth.
+          printf '%s\n' frappe erpnext ffl_core ffl_integrations ffl_woo_sync > sites/apps.txt
+          echo "--- apps.txt ---"
+          cat sites/apps.txt
+
+      # GitHub-hosted (and the daily drift-check): full from-scratch site —
+      # unchanged, and the rollback path stays exercised daily.
+      - name: Create CI site
+        if: ${{ !inputs.use_cache || runner.environment == 'github-hosted' }}
+        working-directory: frappe-bench
+        run: |
+          bench new-site ci.localhost \
+            --mariadb-root-password root \
+            --admin-password admin \
+            --install-app erpnext \
+            --install-app ffl_core \
+            --install-app ffl_integrations \
+            --install-app ffl_woo_sync \
+            --no-mariadb-socket \
+            --force
+          bench --site ci.localhost set-config allow_tests true
+          # Run ERPNext's setup wizard programmatically. Without this, none of
+          # the standard masters (Fiscal Year, Stock Entry Type, Warehouse
+          # Type, default chart of accounts, etc.) exist and every test that
+          # touches Stock Entry or Sales Invoice fails on a missing master.
+          bench --site ci.localhost execute "ffl_core.setup.test_bootstrap.run"
+
+      # Self-hosted CD path: the expensive, invariant part of site creation
+      # (frappe+erpnext schema + setup wizard) is dumped ONCE per resolved
+      # frappe/erpnext version into the persistent workspace, and every run
+      # restores that dump instead of re-running thousands of DDLs. Our three
+      # apps are DELIBERATELY NOT in the template — they change every commit
+      # and are installed fresh below, so the template can never serve stale
+      # app schema. Safety net: the daily GitHub-hosted run above still builds
+      # everything from scratch.
+      - name: Create CI site (from template)
+        if: ${{ inputs.use_cache && runner.environment == 'self-hosted' }}
+        working-directory: frappe-bench
+        run: |
+          set -euo pipefail
+          VER=$(./env/bin/python -c "import frappe, erpnext; print(f'frappe{frappe.__version__}-erpnext{erpnext.__version__}')")
+          TPL="$GITHUB_WORKSPACE/site-template-${VER}.sql.gz"
+          if [ ! -f "$TPL" ] || [ ! -d sites/ci.localhost ]; then
+            echo "::notice::site template for ${VER} missing — building it (one-time slow path)"
+            bench new-site ci.localhost \
+              --mariadb-root-password root \
+              --admin-password admin \
+              --install-app erpnext \
+              --no-mariadb-socket \
+              --force
+            bench --site ci.localhost set-config allow_tests true
+            # NOT `bench execute`: it refuses modules of apps not installed on
+            # the site (AppNotInstalledError) — and ffl_core is deliberately
+            # not installed on the template site. The module itself is
+            # importable (pip install -e into the bench venv), so call it
+            # through a bare frappe connection instead. Frappe's log handlers
+            # use paths relative to CWD ('../logs', '<site>/logs') assuming
+            # CWD is <bench>/sites — exactly how bench itself runs commands —
+            # so run from there with sites_path='.'.
+            ( cd sites && ../env/bin/python -c "import frappe; frappe.init(site='ci.localhost', sites_path='.'); frappe.connect(); from ffl_core.setup.test_bootstrap import run_template_stage; print(run_template_stage()); frappe.destroy()" )
+            bench --site ci.localhost backup
+            # shellcheck disable=SC2012  # newest backup by mtime; bench generates the names
+            latest=$(ls -t sites/ci.localhost/private/backups/*-database.sql.gz | head -1)
+            cp "$latest" "$TPL"
+          else
+            bench --site ci.localhost restore "$TPL" --mariadb-root-password root
+            bench --site ci.localhost set-config allow_tests true
+          fi
+          for app in ffl_core ffl_integrations ffl_woo_sync; do
+            bench --site ci.localhost install-app "$app"
+          done
+          bench --site ci.localhost execute "ffl_core.setup.test_bootstrap.run"
+
+      - name: Seed the old site with the old release's tests
+        if: ${{ inputs.upgrade_from != '' && inputs.seed_with_old_tests && matrix.suite == 'core' }}
+        working-directory: frappe-bench
+        run: |
+          for app in ffl_core ffl_integrations ffl_woo_sync; do
+            bench --site ci.localhost run-tests --app "$app" \
+              || echo "::warning::the old release's $app tests failed; they only seed data here"
+          done
+
+      - name: Move the bench to the refs under test
+        if: ${{ inputs.upgrade_from != '' && (steps.refs.outputs.frappe != steps.refs.outputs.frappe_target || steps.refs.outputs.erpnext != steps.refs.outputs.erpnext_target) }}
+        working-directory: frappe-bench
+        env:
+          FRAPPE_REF: ${{ steps.refs.outputs.frappe_target }}
+          ERPNEXT_REF: ${{ steps.refs.outputs.erpnext_target }}
+        run: |
+          set -euo pipefail
+          for app in frappe erpnext; do
+            if [ "$app" = frappe ]; then ref="$FRAPPE_REF"; else ref="$ERPNEXT_REF"; fi
+            # by URL, not remote name: a reused bench's clones need not share one
+            git -C "apps/$app" fetch --quiet --depth 1 "https://github.com/frappe/$app.git" "$ref"
+            # --force: the build's yarn install rewrites tracked lockfiles (erpnext banking/yarn.lock)
+            git -C "apps/$app" checkout --quiet --force FETCH_HEAD
+          done
+          ./env/bin/pip install --quiet -e apps/frappe -e apps/erpnext
+          # and the front end, so nothing of the old release is left in this bench
+          bench setup requirements --node
+          bench build
+          ./env/bin/python -c 'import frappe, erpnext; print(f"bench moved to frappe {frappe.__version__}, erpnext {erpnext.__version__}")'
+
+      - name: Upgrade the site to the commit under test
+        if: ${{ inputs.upgrade_from != '' }}
+        working-directory: frappe-bench
+        run: |
+          set -euo pipefail
+          for app in ffl_core ffl_integrations ffl_woo_sync; do
+            ln -sfn "$GITHUB_WORKSPACE/gunstore/apps/$app" "apps/$app"
+            ./env/bin/pip install -e "apps/$app"
+          done
+          printf '%s\n' frappe erpnext ffl_core ffl_integrations ffl_woo_sync > sites/apps.txt
+          echo "::group::bench migrate ($(git -C "$GITHUB_WORKSPACE/gunstore-old" rev-parse --short HEAD) → $(git -C "$GITHUB_WORKSPACE/gunstore" rev-parse --short HEAD))"
+          bench --site ci.localhost migrate
+          echo "::endgroup::"
+          bench --site ci.localhost execute "ffl_core.setup.test_bootstrap.run"
+
+      - name: Run tests
+        if: matrix.suite == 'core'
+        working-directory: frappe-bench
+        env:
+          APPS: ${{ inputs.apps }}
+          WORKERS: ${{ inputs.workers }}
+          MODULES: ${{ inputs.modules }}
+          RUNNER_ENV: ${{ runner.environment }}
+        run: |
+          # lazy: a hosted standard runner has 4 vCPU (the callers' worker counts are sized for
+          # a self-hosted runner); more workers than cores only slow every site down.
+          # Upgrade: a larger-runner label, billed.
+          if [ "$RUNNER_ENV" = github-hosted ] && [ "$WORKERS" -gt "$(nproc)" ]; then
+            WORKERS=$(nproc)
+            echo "::notice::hosted runner: workers capped to $WORKERS (cores)"
+          fi
+          if [ "$WORKERS" -gt 1 ] || [ -n "$MODULES" ]; then
+            # Timings sit under $HOME, which every self-hosted runner on a box shares (same
+            # user), so whichever runner takes the next job splits by this run.
+            python3 "$GITHUB_WORKSPACE/gunstore/scripts/ci/parallel_tests.py" \
+              --bench . --apps "$APPS" --workers "$WORKERS" \
+              --base-site ci.localhost --db-root-password root \
+              --timings "$HOME/.cache/gunstore-ci/test-timings-${APPS_SLUG}.json" \
+              --modules "$MODULES"
+          else
+            for app in $APPS; do
+              bench --site ci.localhost run-tests --app "$app"
+            done
+          fi
+
+      - name: First-party extensions — install, tests, lint, docs
+        if: ${{ matrix.suite == 'extensions' && steps.extensions.outputs.ids != '' }}
+        env:
+          IDS: ${{ steps.extensions.outputs.ids }}
+        # ext_test.sh exit 3 = tests, lint and docstrings passed; the docs' only problem is what THIS core's
+        # generator and role names make of them — a stale docs/api, or Permissions prose naming other roles
+        # than a gate resolved through the core (PERMISSIONS DRIFT). A core change alone trips either: a
+        # warning, not red. Any other failure is red: wiring, install or migrate, tests, lint, an undocumented
+        # endpoint, a parity failure or Permissions prose contradicting the extension's own roles (1), a
+        # refused id or folder (2).
+        run: |
+          status=0
+          for id in $IDS; do
+            rc=0
+            gunstore/scripts/ci/ext_test.sh frappe-bench ci.localhost "$id" "ext/$id" || rc=$?
+            case $rc in
+              0) ;;
+              3) echo "::warning title=First-party extension docs/api stale::$id — its tests and lint passed; its committed docs/api is not what this core's generator writes, or its Permissions prose names other roles than this core derives (PERMISSIONS DRIFT above). Drop hand-written role lists, regenerate docs/api with this core and merge that to $id (docs/extensions/README.md)." ;;
+              *) status=1; echo "::error::first-party extension $id failed (see the ext-test lines above)" ;;
+            esac
+          done
+          exit $status
+
+      # Name carries the apps subset and the leg — parallel jobs in one run must
+      # not collide on the artifact name when both fail.
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bench-logs-${{ matrix.erpnext_branch }}-${{ env.APPS_SLUG }}
+          path: frappe-bench/logs/
+
+      # A self-hosted workspace (bench, venv, checkouts) outlives the job: take the
+      # extensions back out, so the next run on this runner starts from our apps.
+      - name: Unwire first-party extensions
+        if: ${{ always() && matrix.suite == 'extensions' }}
+        env:
+          IDS: ${{ steps.extensions.outputs.ids }}
+        run: |
+          for id in $IDS; do
+            rm -f "frappe-bench/apps/$id" frappe-bench/env/lib/python*/site-packages/"$id".pth
+            if [ -f frappe-bench/sites/apps.txt ]; then sed -i "/^${id}\$/d" frappe-bench/sites/apps.txt; fi
+          done
+          rm -rf ext
+
+      - name: Put the parked bench back
+        if: ${{ always() && inputs.use_cache && inputs.upgrade_from != '' && runner.environment == 'self-hosted' }}
+        run: |
+          if [ -d frappe-bench.parked ]; then rm -rf frappe-bench && mv frappe-bench.parked frappe-bench; fi

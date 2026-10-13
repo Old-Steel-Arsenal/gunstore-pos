@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:caliber_name",
+ "creation": "2026-05-04 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "caliber_name",
+  "abbreviation",
+  "metric_equivalent",
+  "category"
+ ],
+ "fields": [
+  {
+   "fieldname": "caliber_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Caliber Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "abbreviation",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Abbreviation"
+  },
+  {
+   "description": "Optional metric/imperial cross-reference, e.g. '9mm Luger' ↔ '.355'",
+   "fieldname": "metric_equivalent",
+   "fieldtype": "Data",
+   "label": "Metric / Equivalent"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Category",
+   "options": "Pistol\nRifle\nShotgun\nRimfire\nMagnum\nOther"
+  }
+ ],
+ "links": [],
+ "modified": "2026-05-04 12:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Caliber",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Stock User"
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
+  }
+ ],
+ "sort_field": "caliber_name",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

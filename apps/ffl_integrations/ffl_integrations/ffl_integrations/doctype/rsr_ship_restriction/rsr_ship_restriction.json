@@ -1,0 +1,54 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-07-28 09:00:00",
+ "description": "Where RSR will not ship one product, as published in their ship-restrictions file. Shown on the fulfilment screen for staff to read; it never blocks a checkout by itself.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_target",
+  "rsr_stock_number",
+  "column_target",
+  "entry_count",
+  "load_batch",
+  "section_restriction",
+  "entries"
+ ],
+ "fields": [
+  {"fieldname": "section_target", "fieldtype": "Section Break", "label": "SKU"},
+  {"fieldname": "rsr_stock_number", "fieldtype": "Data", "label": "RSR Stock #", "reqd": 1, "in_list_view": 1, "in_standard_filter": 1, "description": "RSR's stock number for the restricted product."},
+  {"fieldname": "column_target", "fieldtype": "Column Break"},
+  {"fieldname": "entry_count", "fieldtype": "Int", "label": "Entry Count", "read_only": 1, "in_list_view": 1, "description": "How many restriction lines the feed carries for this SKU (duplicates included — the count is RSR's, not ours to tidy)."},
+  {"fieldname": "load_batch", "fieldtype": "Data", "label": "Load Batch", "length": 64, "in_standard_filter": 1, "description": "Which load of the restrictions file produced this row. Only rows from the load recorded in RSR Settings are used, so a load that stopped half-way is never acted on."},
+  {"fieldname": "section_restriction", "fieldtype": "Section Break", "label": "Restrictions"},
+  {"fieldname": "entries", "fieldtype": "Long Text", "label": "Entries (JSON)", "read_only": 1, "description": "The restriction lines RSR published for this product, in the order they sent them: municipality, state, territory type, restriction detail. Territory type: C = City, T = County, S = State. Restriction detail: Y, F, A and L block a drop-ship outright; H, O, S and R mean the recipient needs a permit; anything else is treated as blocked. Read-only — the next load of the file replaces it."}
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-07-28 09:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "RSR Ship Restriction",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  }
+ ],
+ "sort_field": "rsr_stock_number",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 0
+}

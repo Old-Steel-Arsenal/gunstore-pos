@@ -1,0 +1,19 @@
+{
+ "creation": "2026-10-08 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Distributor Order",
+ "filters_json": "{\"card\": \"to_receive\"}",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "To Receive",
+ "method": "ffl_core.api.gun_shop_cards.get_count",
+ "modified": "2026-10-08 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "To Receive",
+ "owner": "Administrator",
+ "show_percentage_stats": 0,
+ "type": "Custom"
+}

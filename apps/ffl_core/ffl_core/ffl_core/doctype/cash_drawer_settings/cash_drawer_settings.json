@@ -1,0 +1,77 @@
+{
+ "actions": [],
+ "creation": "2026-10-02 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "limits_tab",
+  "variance_threshold",
+  "expense_cap",
+  "expenses_tab",
+  "expense_accounts",
+  "tracking_started"
+ ],
+ "fields": [
+  {
+   "fieldname": "limits_tab",
+   "fieldtype": "Tab Break",
+   "label": "Limits"
+  },
+  {
+   "fieldname": "variance_threshold",
+   "fieldtype": "Currency",
+   "label": "Count difference that needs a reason",
+   "default": "20",
+   "description": "A close this far over or short needs a written reason and is flagged on the weekly report."
+  },
+  {
+   "fieldname": "expense_cap",
+   "fieldtype": "Currency",
+   "label": "Biggest cash expense",
+   "default": "200",
+   "description": "A single expense above this cannot be paid from the drawer."
+  },
+  {
+   "fieldname": "expenses_tab",
+   "fieldtype": "Tab Break",
+   "label": "Cash expenses"
+  },
+  {
+   "fieldname": "expense_accounts",
+   "fieldtype": "Table",
+   "options": "Cash Drawer Expense Account",
+   "label": "Accounts a cash expense can go to",
+   "description": "Leave empty for Print and Stationery, Office Maintenance, Freight, Postal, Entertainment and Miscellaneous Expenses."
+  },
+  {
+   "fieldname": "tracking_started",
+   "fieldtype": "Datetime",
+   "label": "Cash tracking started",
+   "read_only": 1,
+   "hidden": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-02 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Cash Drawer Settings",
+ "owner": "Administrator",
+ "states": [],
+ "issingle": 1,
+ "track_changes": 1,
+ "description": "Limits and lists for the daily cash count, bank deposits and cash expenses.",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  }
+ ]
+}

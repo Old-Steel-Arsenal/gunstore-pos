@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "creation": "2026-09-30 23:30:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "description": "Switch the MCP servers that AI assistants (Claude, ChatGPT and other MCP clients) connect to on or off. Every call made through them is recorded in Connector Audit Log.",
+ "field_order": [
+  "connector_tab",
+  "enable_cpa",
+  "cpa_url",
+  "cpa_claude_code",
+  "column_break_1",
+  "enable_full",
+  "full_url",
+  "full_claude_code"
+ ],
+ "fields": [
+  {
+   "fieldname": "connector_tab",
+   "fieldtype": "Tab Break",
+   "label": "MCP Server"
+  },
+  {
+   "fieldname": "enable_cpa",
+   "fieldtype": "Check",
+   "default": "0",
+   "label": "Enable Read-only MCP Server",
+   "description": "Lets signed-in users read POS data from an AI assistant (reports, stock, orders) with their own permissions. Nothing can be changed through it."
+  },
+  {
+   "fieldname": "cpa_url",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "label": "Read-only MCP Server URL",
+   "depends_on": "enable_cpa",
+   "description": "Add this URL as a connector in Claude or ChatGPT, then sign in with your POS account."
+  },
+  {
+   "fieldname": "cpa_claude_code",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "depends_on": "enable_cpa",
+   "label": "Claude Code Command (Read-only)",
+   "description": "Run this in a terminal, then open /mcp in Claude Code and choose Authenticate to sign in."
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "enable_full",
+   "fieldtype": "Check",
+   "default": "0",
+   "label": "Enable Full MCP Server",
+   "description": "Lets signed-in users also change data from an AI assistant (payments, orders, listings), limited to what their own POS role allows."
+  },
+  {
+   "fieldname": "full_url",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "label": "Full MCP Server URL",
+   "depends_on": "enable_full",
+   "description": "Add this URL as a connector in Claude or ChatGPT, then sign in with your POS account."
+  },
+  {
+   "fieldname": "full_claude_code",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "depends_on": "enable_full",
+   "label": "Claude Code Command (Full)",
+   "description": "Run this in a terminal, then open /mcp in Claude Code and choose Authenticate to sign in."
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-09-30 23:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "MCP Settings",
+ "owner": "Administrator",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  }
+ ]
+}

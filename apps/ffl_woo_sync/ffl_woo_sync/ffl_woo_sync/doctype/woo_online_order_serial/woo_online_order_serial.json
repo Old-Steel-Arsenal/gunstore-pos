@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "creation": "2026-06-24 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "istable": 1,
+ "field_order": [
+  "item_code",
+  "woo_line_id",
+  "unit_index",
+  "col_break_1",
+  "confirmed_serial",
+  "stock_hold_serial",
+  "reservation_error",
+  "fulfillment"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "woo_line_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Woo Line ID"
+  },
+  {
+   "default": "0",
+   "fieldname": "unit_index",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Unit #"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Dealer-confirmed serial that ships. Blank until entered in WooCommerce. Loose coupling — Data, not Link, so orders survive serial renames.",
+   "fieldname": "confirmed_serial",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Confirmed Serial"
+  },
+  {
+   "description": "Placeholder Serial No reserved only to hold WooCommerce stock while the confirmed serial is awaited. Released on confirm/cancel.",
+   "fieldname": "stock_hold_serial",
+   "fieldtype": "Data",
+   "label": "Stock Hold Serial",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reservation_error",
+   "fieldtype": "Small Text",
+   "label": "Reservation Error",
+   "read_only": 1
+  },
+  {
+   "default": "local",
+   "description": "Which lane fills this unit. Only local/to_store are disposed locally (H1); an fds serial is a record of RSR's shipment.",
+   "fieldname": "fulfillment",
+   "fieldtype": "Select",
+   "label": "Fulfillment",
+   "options": "local\nto_store\nfds\ndirect",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-06-24 00:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Woo Sync",
+ "name": "Woo Online Order Serial",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

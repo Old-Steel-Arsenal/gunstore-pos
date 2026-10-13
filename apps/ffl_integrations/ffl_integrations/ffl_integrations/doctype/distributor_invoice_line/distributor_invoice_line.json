@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "creation": "2026-09-29 12:00:00",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "istable": 1,
+ "field_order": [
+  "sku",
+  "description",
+  "qty",
+  "unit_cost",
+  "amount",
+  "tracking_number",
+  "serials",
+  "upc",
+  "item_code",
+  "received_qty"
+ ],
+ "fields": [
+  {
+   "fieldname": "sku",
+   "fieldtype": "Data",
+   "label": "SKU",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "label": "Description",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Int",
+   "label": "Qty",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "unit_cost",
+   "fieldtype": "Currency",
+   "label": "Unit Cost",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "tracking_number",
+   "fieldtype": "Data",
+   "label": "Tracking Number"
+  },
+  {
+   "fieldname": "serials",
+   "fieldtype": "Small Text",
+   "label": "Serials"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_qty",
+   "fieldtype": "Int",
+   "label": "Received Qty",
+   "read_only": 1,
+   "default": "0"
+  },
+  {
+   "fieldname": "upc",
+   "fieldtype": "Data",
+   "label": "UPC",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-09-30 13:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "Distributor Invoice Line",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

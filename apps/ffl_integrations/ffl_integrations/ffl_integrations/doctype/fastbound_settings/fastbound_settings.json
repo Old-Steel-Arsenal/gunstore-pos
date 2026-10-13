@@ -1,0 +1,217 @@
+{
+ "actions": [],
+ "creation": "2026-05-04 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_connection",
+  "section_creds",
+  "enabled",
+  "account_num",
+  "api_key",
+  "column_creds",
+  "base_url",
+  "default_audit_user",
+  "section_webhook",
+  "webhook_secret",
+  "column_webhook",
+  "webhook_url_help",
+  "tab_status",
+  "section_status",
+  "last_import_at",
+  "last_import_count",
+  "column_status",
+  "last_import_errors",
+  "section_smartlists",
+  "acquire_types",
+  "column_smartlists",
+  "dispose_types",
+  "smart_lists_synced_at",
+  "tab_advanced",
+  "section_advanced",
+  "lookup_ffl_on_push",
+  "column_advanced",
+  "request_timeout_seconds"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_connection",
+   "fieldtype": "Tab Break",
+   "label": "Connection"
+  },
+  {
+   "fieldname": "section_creds",
+   "fieldtype": "Section Break",
+   "label": "Connection"
+  },
+  {
+   "default": "1",
+   "description": "Off: A&D records are kept locally only, and firearm sales need FFL Settings \u2192 Paper 4473 Mode (reload open tills).",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enable FastBound"
+  },
+  {
+   "fieldname": "account_num",
+   "fieldtype": "Data",
+   "label": "Account number",
+   "mandatory_depends_on": "eval:doc.enabled"
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Password",
+   "label": "API key",
+   "mandatory_depends_on": "eval:doc.enabled"
+  },
+  {
+   "fieldname": "column_creds",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Production: https://cloud.fastbound.com. Test sites use the test account's URL. Blank stops the integration.",
+   "fieldname": "base_url",
+   "fieldtype": "Data",
+   "label": "Base URL"
+  },
+  {
+   "default": "import@gunshop.local",
+   "description": "Sent as X-AuditUser on every call.",
+   "fieldname": "default_audit_user",
+   "fieldtype": "Data",
+   "label": "Audit user"
+  },
+  {
+   "fieldname": "section_webhook",
+   "fieldtype": "Section Break",
+   "label": "Webhook"
+  },
+  {
+   "description": "From FastBound \u2192 Settings \u2192 Webhooks.",
+   "fieldname": "webhook_secret",
+   "fieldtype": "Password",
+   "label": "Webhook secret"
+  },
+  {
+   "fieldname": "column_webhook",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "webhook_url_help",
+   "fieldtype": "HTML",
+   "label": "Webhook URL",
+   "options": "Register <code>https://&lt;your-site&gt;/api/method/ffl_integrations.fastbound.webhook.fastbound_event</code> in FastBound \u2192 Settings \u2192 Webhooks for <code>form4473.completed</code> and <code>disposition.committed</code>."
+  },
+  {
+   "fieldname": "tab_status",
+   "fieldtype": "Tab Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "section_status",
+   "fieldtype": "Section Break",
+   "label": "Last import"
+  },
+  {
+   "fieldname": "last_import_at",
+   "fieldtype": "Datetime",
+   "label": "Last import",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_import_count",
+   "fieldtype": "Int",
+   "label": "Items imported",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_import_errors",
+   "fieldtype": "Long Text",
+   "label": "Import errors",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_smartlists",
+   "fieldtype": "Section Break",
+   "label": "Cached lists"
+  },
+  {
+   "description": "Refreshed by Sync FastBound Lists.",
+   "fieldname": "acquire_types",
+   "fieldtype": "Small Text",
+   "label": "Acquisition types",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_smartlists",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dispose_types",
+   "fieldtype": "Small Text",
+   "label": "Disposition types",
+   "read_only": 1
+  },
+  {
+   "fieldname": "smart_lists_synced_at",
+   "fieldtype": "Datetime",
+   "label": "Lists synced at",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_advanced",
+   "fieldtype": "Tab Break",
+   "label": "Advanced"
+  },
+  {
+   "fieldname": "section_advanced",
+   "fieldtype": "Section Break",
+   "label": "Advanced"
+  },
+  {
+   "default": "1",
+   "description": "Off only when a test account's FFL numbers are unknown to FastBound's lookup.",
+   "fieldname": "lookup_ffl_on_push",
+   "fieldtype": "Check",
+   "label": "Look up FFL on push"
+  },
+  {
+   "fieldname": "column_advanced",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "fieldname": "request_timeout_seconds",
+   "fieldtype": "Int",
+   "label": "Request Timeout (s)"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-29 13:30:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "FastBound Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

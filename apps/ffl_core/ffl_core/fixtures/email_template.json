@@ -1,0 +1,10 @@
+[
+ {
+  "doctype": "Email Template",
+  "name": "Sale Receipt",
+  "subject": "Your receipt from {{ company_brand(doc.company).name }} — {{ doc.name }}",
+  "use_html": 1,
+  "response_html": "{% set store = company_brand(doc.company).name %}<p>Hi {{ customer_name }},</p>{% set due = doc.rounded_total or doc.grand_total %}{% if due < 0 and not doc.is_return %}<p>Thank you for your trade. Your receipt for <strong>{{ doc.name }}</strong> is attached: we paid you {{ frappe.utils.fmt_money(0 - due, currency=doc.currency) }}{% if doc.get(\"ffl_trade_in_payout_method\") %} by {{ doc.ffl_trade_in_payout_method | e }}{% endif %}.</p>{% else %}<p>Thank you for your purchase. Your receipt for <strong>{{ doc.name }}</strong> (total {{ doc.grand_total }}) is attached.</p>{% endif %}<p>— {{ store }}</p>",
+  "response": "Hi {{ customer_name }}, {% set due = doc.rounded_total or doc.grand_total %}{% if due < 0 and not doc.is_return %}thank you for your trade. Your receipt for {{ doc.name }} is attached: we paid you {{ frappe.utils.fmt_money(0 - due, currency=doc.currency) }}{% if doc.get(\"ffl_trade_in_payout_method\") %} by {{ doc.ffl_trade_in_payout_method | e }}{% endif %}.{% else %}thank you for your purchase. Your receipt for {{ doc.name }} (total {{ doc.grand_total }}) is attached.{% endif %}"
+ }
+]

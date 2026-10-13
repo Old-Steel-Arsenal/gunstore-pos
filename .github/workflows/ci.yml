@@ -1,0 +1,45 @@
+name: CI
+
+# Nightly: (1) our suite on a from-scratch GitHub-hosted bench at the ERPNext
+# version-16 head, so upstream drift is caught early — a compatibility patch
+# then goes into ffl_core/ffl_integrations/ffl_woo_sync, never into upstream
+# apps; (2) the upgrade regression below.
+#
+# Per-push / per-PR testing now runs inside the build pipeline
+# (release-image.yml calls the same reusable _app-tests workflow and gates
+# build + deploy on it), so this workflow no longer triggers on push/PR.
+on:
+  schedule:
+    - cron: "23 4 * * *"
+  workflow_dispatch:
+    inputs:
+      hosted:
+        description: "Run the upgrade regression on a GitHub-hosted ubuntu-latest runner instead of the self-hosted ones (a trial run to measure hosted minutes)"
+        type: boolean
+        default: false
+
+jobs:
+  custom-app-tests:
+    uses: ./.github/workflows/_app-tests.yml
+
+  # What prod runs (main) upgraded to what ships next (develop): the site is
+  # built and filled on main, migrated to develop, then develop's suite runs on
+  # it. Runner: the repo variable CI_RUNS_ON_TEST (the self-hosted test runners: free, and
+  # the parallel runner keeps the suite near a minute); unset (public repo, fork) or the
+  # `hosted` dispatch input = GitHub-hosted ubuntu-latest, which is slower and has the
+  # longer limit below.
+  # Note the split: this file and _app-tests.yml come from main (schedules run
+  # the default branch), the checked-out code and scripts/ci from develop. A
+  # change to parallel_tests.py's arguments must stay compatible until released.
+  upgrade-regression:
+    name: Upgrade regression (main → develop)
+    uses: ./.github/workflows/_app-tests.yml
+    with:
+      use_cache: true
+      runner: ${{ (!inputs.hosted && vars.CI_RUNS_ON_TEST) || '"ubuntu-latest"' }}
+      workers: 8
+      ref: develop
+      upgrade_from: main
+      seed_with_old_tests: true
+      # Seeded with main's whole suite (~8 min serially) before the migrate and the suite.
+      timeout_minutes: ${{ (!inputs.hosted && vars.CI_RUNS_ON_TEST) && 60 || 150 }}

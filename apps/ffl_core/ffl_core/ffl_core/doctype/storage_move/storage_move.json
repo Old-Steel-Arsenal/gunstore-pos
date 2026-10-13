@@ -1,0 +1,170 @@
+{
+ "actions": [],
+ "creation": "2026-10-02 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-10-02 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "owner": "Administrator",
+ "states": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1
+  },
+  {
+   "role": "Sales User",
+   "read": 1
+  }
+ ],
+ "name": "Storage Move",
+ "description": "The log of every location change: receive, move, sale, ship, return, count, adjust. Rows are only ever added.",
+ "autoname": "format:SMOV-{######}",
+ "title_field": "item_code",
+ "field_order": [
+  "kind",
+  "reason",
+  "company",
+  "column_break_1",
+  "serial_no",
+  "item_code",
+  "qty",
+  "section_break_1",
+  "from_location",
+  "to_location",
+  "column_break_2",
+  "voucher_type",
+  "voucher_no",
+  "voucher_detail",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "kind",
+   "fieldtype": "Select",
+   "options": "serial\nqty",
+   "label": "Kind",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Select",
+   "options": "receive\nmove\nsale\nship\nout\nreturn\ncount\nadjust\nconfirm",
+   "label": "Reason",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "options": "Company",
+   "label": "Company",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Data",
+   "label": "Serial No",
+   "read_only": 1,
+   "in_list_view": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "options": "Item",
+   "label": "Item",
+   "read_only": 1,
+   "in_list_view": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Quantity",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "from_location",
+   "fieldtype": "Link",
+   "options": "Storage Location",
+   "label": "From",
+   "read_only": 1,
+   "in_list_view": 1,
+   "description": "Blank = it was in no location (unassigned)."
+  },
+  {
+   "fieldname": "to_location",
+   "fieldtype": "Link",
+   "options": "Storage Location",
+   "label": "To",
+   "read_only": 1,
+   "in_list_view": 1,
+   "description": "Blank = it left the store's locations (sold, shipped, gone)."
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Data",
+   "label": "Document Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Data",
+   "label": "Document",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "voucher_detail",
+   "fieldtype": "Data",
+   "label": "Document Row",
+   "read_only": 1
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note",
+   "read_only": 1
+  }
+ ]
+}

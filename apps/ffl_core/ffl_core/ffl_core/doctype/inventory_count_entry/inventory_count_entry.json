@@ -1,0 +1,132 @@
+{
+ "actions": [],
+ "creation": "2026-10-01 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-10-01 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Inventory Count Entry",
+ "owner": "Administrator",
+ "states": [],
+ "autoname": "hash",
+ "description": "One scan or manual entry inside an Inventory Count. Rows are only ever added or removed, never edited, so several people can scan into the same count at once.",
+ "istable": 0,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "title_field": "item_code",
+ "field_order": [
+  "inventory_count",
+  "kind",
+  "method",
+  "column_break_1",
+  "item_code",
+  "serial_no",
+  "code",
+  "warehouse",
+  "qty_delta",
+  "serial_key"
+ ],
+ "fields": [
+  {
+   "fieldname": "inventory_count",
+   "fieldtype": "Link",
+   "options": "Inventory Count",
+   "label": "Inventory Count",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "search_index": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "kind",
+   "fieldtype": "Select",
+   "options": "serial\nqty\nunknown",
+   "label": "Kind",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1,
+   "description": "serial = a firearm found by serial number; qty = units of a non-serialized item; unknown = a barcode the system does not recognise."
+  },
+  {
+   "fieldname": "method",
+   "fieldtype": "Select",
+   "options": "scan\nmanual",
+   "default": "scan",
+   "label": "Entered By",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "options": "Item",
+   "label": "Item",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Data",
+   "label": "Serial No",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "label": "Scanned Code",
+   "read_only": 1,
+   "description": "The barcode as scanned. Only filled in for codes the system did not recognise."
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "options": "Warehouse",
+   "label": "Warehouse",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty_delta",
+   "fieldtype": "Float",
+   "label": "Quantity Change",
+   "default": "0",
+   "read_only": 1,
+   "description": "A scan adds 1. A typed-in quantity adds the difference from what was already counted."
+  },
+  {
+   "fieldname": "serial_key",
+   "fieldtype": "Data",
+   "label": "Serial Key",
+   "unique": 1,
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "Stops the same gun being counted twice in one count."
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1
+  }
+ ]
+}

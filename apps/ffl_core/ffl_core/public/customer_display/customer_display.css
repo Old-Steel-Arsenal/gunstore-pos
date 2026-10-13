@@ -1,0 +1,131 @@
+/* Customer-facing display — reuses ERPNext POS ItemCart class names and visual
+   rules, rendered with Frappe desk design tokens (desk.bundle.css is injected at
+   runtime by customer_display.js, so fonts/colours/theme match the desk). The
+   POS cart CSS itself lives inside point-of-sale.bundle.js (not linkable), so the
+   cart rules are reproduced here against the same tokens and scaled up for
+   across-the-counter readability.
+
+   Probed against ERPNext v16 (erpnext/.../point_of_sale/pos_item_cart.js +
+   scss/point-of-sale.scss), same version as the POS button selectors in
+   ffl_core.bundle.js. The class CONTRACT (.cart-item-wrapper, .item-name,
+   .item-qty-rate, .cart-totals-section, .grand-total-container, …) is the drift
+   risk: if a future ERPNext renames these, this CSS won't error — it'll just
+   render stale. Re-check against pos_item_cart.js on ERPNext major upgrades.
+
+   Fallback tokens (Frappe light theme) keep the page readable if desk.bundle.css
+   is slow/unavailable; the injected desk CSS is appended AFTER this file, so its
+   :root (incl. the dark-theme overrides) wins when present. */
+:root {
+	--fg-color: #fff;
+	--control-bg: #f4f5f6;
+	--gray-50: #f9fafa;
+	--gray-300: #ebeef0;
+	--gray-500: #c0c6cc;
+	--gray-600: #98a1a9;
+	--text-light: #fff;
+	--text-color: #1f272e;
+	--text-muted: #8d99a6;
+	--dark-green-500: #28a745;
+	--border-radius-md: 8px;
+	--shadow-base: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+	background: var(--gray-50);
+	color: var(--text-color);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	overflow: hidden;
+}
+
+.ffl-cd { height: 100vh; width: 100vw; padding: 2.5vh 2.5vw; }
+.ffl-cd-screen { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; }
+
+/* shared "pos-card" surface (mirrors .point-of-sale-app .pos-card) */
+.ffl-cd .pos-card {
+	background-color: var(--fg-color);
+	box-shadow: var(--shadow-base);
+	border-radius: var(--border-radius-md);
+}
+
+/* ---- Welcome ---- */
+.ffl-cd-welcome {
+	display: flex; flex-direction: column; align-items: center; justify-content: center;
+	gap: 28px; padding: 6vh 8vw; text-align: center;
+}
+.ffl-cd-logo { max-width: 34vw; max-height: 34vh; object-fit: contain; }
+.ffl-cd-brand-name { font-size: 3.4rem; font-weight: 700; letter-spacing: 0.01em; }
+.ffl-cd-welcome-text { font-size: 2.2rem; color: var(--text-muted); font-weight: 500; }
+
+/* ---- Thank you ---- */
+.ffl-cd-thankyou {
+	display: flex; align-items: center; justify-content: center;
+	padding: 8vh 10vw;
+}
+.ffl-cd-thankyou-text { font-size: 4.5rem; font-weight: 800; color: var(--dark-green-500); }
+
+/* ---- Cart (mirrors POS ItemCart) ---- */
+.ffl-cd .customer-cart-container {
+	width: min(92vw, 820px); height: 92vh; display: flex; flex-direction: column;
+}
+.ffl-cd .cart-container { flex: 1 1 0%; display: flex; flex-direction: column; padding: 2.4rem; min-height: 0; }
+.ffl-cd .abs-cart-container { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; }
+
+.ffl-cd .cart-label { font-weight: 700; font-size: 1.5rem; padding-bottom: 1rem; }
+
+.ffl-cd .cart-header {
+	display: flex; width: 100%; font-size: 1.1rem; color: var(--text-muted);
+	padding-bottom: 0.8rem; border-bottom: 1px solid var(--gray-300);
+}
+.ffl-cd .cart-header .name-header { flex: 1 1 0%; }
+.ffl-cd .cart-header .qty-header { margin-right: 1.5rem; text-align: center; }
+.ffl-cd .cart-header .rate-amount-header { text-align: right; }
+
+.ffl-cd .cart-items-section {
+	display: flex; flex-direction: column; flex: 1 1 0%;
+	overflow-y: auto; min-height: 50px; padding-top: 0.4rem;
+}
+
+.ffl-cd .cart-item-wrapper {
+	display: flex; align-items: center; padding: 0.9rem 0.4rem; border-radius: var(--border-radius-md);
+}
+.ffl-cd .seperator { border-bottom: 1px solid var(--gray-300); margin: 0 0.4rem; }
+
+.ffl-cd .item-image {
+	display: flex; align-items: center; justify-content: center;
+	width: 3rem; height: 3rem; border-radius: var(--border-radius-md);
+	color: var(--text-light); margin-right: 1rem; overflow: hidden; flex-shrink: 0;
+}
+.ffl-cd .item-image > img { width: 100%; height: 100%; object-fit: cover; }
+.ffl-cd .item-abbr { background-color: var(--control-bg); color: var(--text-muted); font-size: 1.2rem; font-weight: 600; }
+
+.ffl-cd .item-name-desc {
+	display: flex; flex-direction: column; flex: 1 1 0%; min-width: 0;
+	overflow: hidden; white-space: nowrap;
+}
+.ffl-cd .item-name { font-weight: 700; font-size: 1.5rem; overflow: hidden; text-overflow: ellipsis; }
+
+.ffl-cd .item-qty-rate { display: flex; flex-shrink: 0; text-align: right; margin-left: 1rem; align-items: center; }
+.ffl-cd .item-qty { display: flex; align-items: center; margin-right: 1.6rem; font-weight: 700; font-size: 1.4rem; }
+.ffl-cd .item-rate-amount { display: flex; flex-direction: column; flex-shrink: 0; text-align: right; }
+.ffl-cd .item-rate { font-weight: 700; font-size: 1.5rem; }
+.ffl-cd .item-amount { font-size: 1.05rem; font-weight: 500; color: var(--text-muted); }
+
+/* ---- Totals ---- */
+.ffl-cd .cart-totals-section {
+	display: flex; flex-direction: column; flex-shrink: 0; width: 100%;
+	margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-300);
+}
+.ffl-cd .net-total-container {
+	display: flex; align-items: center; justify-content: space-between;
+	padding: 0.5rem 0; font-weight: 500; font-size: 1.4rem; color: var(--text-muted);
+}
+.ffl-cd .taxes-container { display: flex; flex-direction: column; font-weight: 500; font-size: 1.4rem; color: var(--text-muted); }
+.ffl-cd .taxes-container .tax-row { display: flex; justify-content: space-between; padding: 0.4rem 0; }
+.ffl-cd .grand-total-container {
+	display: flex; align-items: center; justify-content: space-between;
+	padding: 0.8rem 0 0; font-weight: 800; font-size: 2.4rem;
+}
+.ffl-cd .pay-block { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px dashed var(--gray-500); }
+.ffl-cd .pay-block .change-row { color: var(--dark-green-500); }

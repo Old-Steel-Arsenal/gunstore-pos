@@ -1,0 +1,197 @@
+{
+ "actions": [],
+ "creation": "2026-06-16 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_connection",
+  "section_creds",
+  "store_url",
+  "column_creds",
+  "consumer_key",
+  "consumer_secret",
+  "section_webhook",
+  "webhook_secret",
+  "outbound_webhook_secret",
+  "tab_sync",
+  "section_sync",
+  "auto_sync_enabled",
+  "reconcile_frequency",
+  "column_sync",
+  "request_timeout_seconds",
+  "follow_category_tree",
+  "tab_status",
+  "section_status",
+  "last_push_at",
+  "last_push_count",
+  "last_reconcile_at",
+  "column_status",
+  "last_order_audit_at",
+  "last_sync_error"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_connection",
+   "fieldtype": "Tab Break",
+   "label": "Connection"
+  },
+  {
+   "fieldname": "section_creds",
+   "fieldtype": "Section Break",
+   "label": "Connection"
+  },
+  {
+   "description": "HTTPS, no trailing slash.",
+   "fieldname": "store_url",
+   "fieldtype": "Data",
+   "label": "Store URL",
+   "options": "URL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_creds",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "WooCommerce \u2192 Settings \u2192 Advanced \u2192 REST API.",
+   "fieldname": "consumer_key",
+   "fieldtype": "Password",
+   "label": "Consumer key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "consumer_secret",
+   "fieldtype": "Password",
+   "label": "Consumer secret",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_webhook",
+   "fieldtype": "Section Break",
+   "label": "Webhook"
+  },
+  {
+   "description": "WooCommerce \u2192 Settings \u2192 Advanced \u2192 Webhooks.",
+   "fieldname": "webhook_secret",
+   "fieldtype": "Password",
+   "label": "Webhook secret"
+  },
+  {
+   "description": "Shared with the shop's WooCommerce FFL plugin (Dropship \u2192 Settings). Signs the drop-ship status events the POS posts to /wp-json/ffl-core/v1/dropship-status. Blank = events off.",
+   "fieldname": "outbound_webhook_secret",
+   "fieldtype": "Password",
+   "label": "Outbound status webhook secret"
+  },
+  {
+   "fieldname": "tab_sync",
+   "fieldtype": "Tab Break",
+   "label": "Sync"
+  },
+  {
+   "fieldname": "section_sync",
+   "fieldtype": "Section Break",
+   "label": "Sync"
+  },
+  {
+   "default": "0",
+   "description": "Off: nothing is pushed, reconciled or audited.",
+   "fieldname": "auto_sync_enabled",
+   "fieldtype": "Check",
+   "label": "Enable sync"
+  },
+  {
+   "default": "Daily",
+   "fieldname": "reconcile_frequency",
+   "fieldtype": "Select",
+   "label": "Reconcile frequency",
+   "options": "Every 2 Hours\nDaily\nWeekly\nDisabled"
+  },
+  {
+   "fieldname": "column_sync",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "The catalog master's category mirror links, renames and creates this store's product categories, and product pushes set their category from the tree. Off: the mirror skips this store and pushes leave product categories as they are.",
+   "fieldname": "follow_category_tree",
+   "fieldtype": "Check",
+   "label": "Follow the catalog category tree"
+  },
+  {
+   "default": "30",
+   "fieldname": "request_timeout_seconds",
+   "fieldtype": "Int",
+   "label": "Request Timeout (s)"
+  },
+  {
+   "fieldname": "tab_status",
+   "fieldtype": "Tab Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "section_status",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "last_push_at",
+   "fieldtype": "Datetime",
+   "label": "Last push",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_push_count",
+   "fieldtype": "Int",
+   "label": "Items pushed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_reconcile_at",
+   "fieldtype": "Datetime",
+   "label": "Last reconcile",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Daily check for WooCommerce orders missing from the POS.",
+   "fieldname": "last_order_audit_at",
+   "fieldtype": "Datetime",
+   "label": "Last order audit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_sync_error",
+   "fieldtype": "Long Text",
+   "label": "Last error",
+   "read_only": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-09-26 20:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Woo Sync",
+ "name": "WooCommerce Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

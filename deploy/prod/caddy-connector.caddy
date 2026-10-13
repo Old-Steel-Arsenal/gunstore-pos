@@ -1,0 +1,18 @@
+# Paste INSIDE the store's existing `pos.<domain> { … }` site block, above its
+# reverse_proxy to 127.0.0.1:8080 (handle blocks run first and are terminal).
+# The shared Caddyfile is edited by a human on the box (docs/self-hosting.md#remote-mcp-connector-optional):
+#   sudo cp -a /etc/caddy/Caddyfile /etc/caddy/Caddyfile.bak.$(date +%s)
+#   sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+#   sudo systemctl reload caddy
+	handle_path /connector/cpa/* {
+		reverse_proxy 127.0.0.1:8781
+	}
+	handle_path /connector/full/* {
+		reverse_proxy 127.0.0.1:8782
+	}
+	handle /.well-known/oauth-protected-resource/connector/cpa/* {
+		reverse_proxy 127.0.0.1:8781
+	}
+	handle /.well-known/oauth-protected-resource/connector/full/* {
+		reverse_proxy 127.0.0.1:8782
+	}

@@ -1,0 +1,20 @@
+# Config for `gitleaks dir .` / `gitleaks git`: the default rules plus two exact exceptions.
+# Both lines are test fixtures with an invented password (a test asserts it never reaches a log
+# or an exception message), not credentials. Each exception needs the file AND the line to match,
+# so a real secret in either file, or the same text anywhere else, is still reported.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "fake RSR password in the credential-redaction test"
+condition = "AND"
+regexTarget = "line"
+paths = ['''^apps/ffl_integrations/ffl_integrations/tests/test_credential_redaction\.py$''']
+regexes = ['''api_base_url="https://api\.example\.invalid", pos_indicator="I",''']
+
+[[allowlists]]
+description = "fake GunBroker password in the client test (asserted absent from the exception)"
+condition = "AND"
+regexTarget = "line"
+paths = ['''^apps/ffl_integrations/ffl_integrations/tests/test_gunbroker_client\.py$''']
+regexes = ['''password="hunter2-in-the-body"''']

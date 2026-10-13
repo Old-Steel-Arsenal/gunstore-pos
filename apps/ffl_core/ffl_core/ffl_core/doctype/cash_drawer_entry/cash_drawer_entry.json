@@ -1,0 +1,257 @@
+{
+ "actions": [],
+ "creation": "2026-10-02 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "entry_type",
+  "status",
+  "column_break_1",
+  "posting_date",
+  "amount",
+  "payment_method",
+  "detail_section",
+  "reference",
+  "withdrawer",
+  "expense_account",
+  "memo",
+  "column_break_2",
+  "receipt",
+  "acquisition",
+  "serial",
+  "invoice",
+  "customer",
+  "purchase_receipt",
+  "books_section",
+  "debit_account",
+  "credit_account",
+  "column_break_3",
+  "journal_entry",
+  "payout_key",
+  "voided_by",
+  "voided_on",
+  "net_before_undo"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "options": "Company",
+   "label": "Company",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "entry_type",
+   "fieldtype": "Select",
+   "options": "Deposit\nFrom Bank\nExpense\nPayout\nPayout Adjustment\nTrade-in Payout\nGoods Payout\nOwner Draw",
+   "label": "What for",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "options": "Posted\nVoided",
+   "default": "Posted",
+   "label": "Status",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "payment_method",
+   "fieldtype": "Select",
+   "options": "\nCash\nZelle\nCheck\nACH",
+   "label": "Paid by"
+  },
+  {
+   "fieldname": "detail_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Data",
+   "label": "Bank reference"
+  },
+  {
+   "fieldname": "withdrawer",
+   "fieldtype": "Data",
+   "label": "Taken by",
+   "read_only": 1,
+   "depends_on": "eval:doc.entry_type=='Owner Draw'"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Expense account"
+  },
+  {
+   "fieldname": "memo",
+   "fieldtype": "Small Text",
+   "label": "Memo"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "receipt",
+   "fieldtype": "Attach",
+   "label": "Receipt"
+  },
+  {
+   "fieldname": "acquisition",
+   "fieldtype": "Link",
+   "options": "FFL Acquisition",
+   "label": "Acquisition"
+  },
+  {
+   "fieldname": "serial",
+   "fieldtype": "Data",
+   "label": "Serial number"
+  },
+  {
+   "fieldname": "invoice",
+   "fieldtype": "Link",
+   "options": "POS Invoice",
+   "label": "Invoice",
+   "read_only": 1,
+   "depends_on": "eval:doc.entry_type=='Trade-in Payout'",
+   "description": "The ticket whose trade-ins exceeded the sale."
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "label": "Customer",
+   "read_only": 1,
+   "depends_on": "eval:['Trade-in Payout', 'Goods Payout'].includes(doc.entry_type)"
+  },
+  {
+   "fieldname": "purchase_receipt",
+   "fieldtype": "Link",
+   "options": "Purchase Receipt",
+   "label": "Purchase Receipt",
+   "read_only": 1,
+   "depends_on": "eval:doc.entry_type=='Goods Payout'",
+   "description": "The Receive Goods purchase the private seller was paid for.",
+   "search_index": 1
+  },
+  {
+   "fieldname": "books_section",
+   "fieldtype": "Section Break",
+   "label": "Books"
+  },
+  {
+   "fieldname": "debit_account",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Debit account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "credit_account",
+   "fieldtype": "Link",
+   "options": "Account",
+   "label": "Credit account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "options": "Journal Entry",
+   "label": "Journal Entry",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "payout_key",
+   "fieldtype": "Data",
+   "label": "Payout key",
+   "hidden": 1,
+   "read_only": 1,
+   "unique": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "voided_by",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Undone by",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voided_on",
+   "fieldtype": "Datetime",
+   "label": "Undone on",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_before_undo",
+   "fieldtype": "Currency",
+   "label": "Net before undo",
+   "read_only": 1,
+   "no_copy": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-07 01:12:57.841162",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Cash Drawer Entry",
+ "owner": "Administrator",
+ "states": [],
+ "autoname": "format:CDE-{YYYY}-{#####}",
+ "description": "Cash that left the drawer other than through a sale. Each entry posts its own Journal Entry.",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "title_field": "entry_type",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Accounts User",
+   "read": 1,
+   "report": 1,
+   "export": 1
+  }
+ ]
+}

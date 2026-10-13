@@ -1,0 +1,280 @@
+{
+ "actions": [],
+ "autoname": "field:extension_id",
+ "creation": "2026-09-12 12:00:00",
+ "description": "One row per extension app on this bench: what it is, whether it is installed on this site, and the store's on/off switch. Maintained by ffl_core.extensions.registry.sync; toggled from the Extensions page.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "extension_id",
+  "title",
+  "version",
+  "enabled",
+  "column_break_state",
+  "installed_on_site",
+  "compatible",
+  "incompatible_reason",
+  "section_publisher",
+  "publisher",
+  "publisher_id",
+  "license_required",
+  "column_break_source",
+  "source",
+  "installed_at",
+  "installed_by",
+  "section_manifest",
+  "description",
+  "requires_core",
+  "homepage",
+  "support",
+  "permissions",
+  "manifest",
+  "section_job",
+  "job_state",
+  "job_started_at",
+  "job_message",
+  "last_synced",
+  "section_update",
+  "latest_version",
+  "latest_requires_core",
+  "column_break_update",
+  "latest_sha256",
+  "latest_checked_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "extension_id",
+   "fieldtype": "Data",
+   "label": "Extension ID",
+   "reqd": 1,
+   "unique": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "version",
+   "fieldtype": "Data",
+   "label": "Version",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled",
+   "default": "1",
+   "in_list_view": 1,
+   "description": "Off = hooks do nothing, endpoints refuse, POS actions hidden. Data is kept."
+  },
+  {
+   "fieldname": "column_break_state",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "installed_on_site",
+   "fieldtype": "Check",
+   "label": "Installed on this site",
+   "read_only": 1
+  },
+  {
+   "fieldname": "compatible",
+   "fieldtype": "Check",
+   "label": "Compatible with this core",
+   "read_only": 1
+  },
+  {
+   "fieldname": "incompatible_reason",
+   "fieldtype": "Small Text",
+   "label": "Why not compatible",
+   "read_only": 1,
+   "depends_on": "eval:!doc.compatible"
+  },
+  {
+   "fieldname": "section_publisher",
+   "fieldtype": "Section Break",
+   "label": "Publisher"
+  },
+  {
+   "fieldname": "publisher",
+   "fieldtype": "Data",
+   "label": "Publisher",
+   "read_only": 1
+  },
+  {
+   "fieldname": "publisher_id",
+   "fieldtype": "Data",
+   "label": "Publisher ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "license_required",
+   "fieldtype": "Check",
+   "label": "Needs a licence (marketplace)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_source",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Data",
+   "label": "Source",
+   "read_only": 1,
+   "description": "From sites/extensions.json: upload, git, marketplace; baked = shipped in the image."
+  },
+  {
+   "fieldname": "installed_at",
+   "fieldtype": "Datetime",
+   "label": "Installed at",
+   "read_only": 1
+  },
+  {
+   "fieldname": "installed_by",
+   "fieldtype": "Data",
+   "label": "Installed by",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_manifest",
+   "fieldtype": "Section Break",
+   "label": "Manifest"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "read_only": 1
+  },
+  {
+   "fieldname": "requires_core",
+   "fieldtype": "Data",
+   "label": "Requires core",
+   "read_only": 1
+  },
+  {
+   "fieldname": "homepage",
+   "fieldtype": "Data",
+   "label": "Homepage",
+   "read_only": 1,
+   "options": "URL"
+  },
+  {
+   "fieldname": "support",
+   "fieldtype": "Data",
+   "label": "Support",
+   "read_only": 1
+  },
+  {
+   "fieldname": "permissions",
+   "fieldtype": "Code",
+   "label": "Permissions (declared)",
+   "read_only": 1,
+   "options": "JSON"
+  },
+  {
+   "fieldname": "manifest",
+   "fieldtype": "Code",
+   "label": "Manifest snapshot",
+   "read_only": 1,
+   "options": "JSON"
+  },
+  {
+   "fieldname": "section_job",
+   "fieldtype": "Section Break",
+   "label": "Background job"
+  },
+  {
+   "fieldname": "job_state",
+   "fieldtype": "Select",
+   "label": "Job",
+   "options": "Idle\nInstalling\nStaged\nUpgrading\nUninstalling\nFailed",
+   "default": "Idle",
+   "read_only": 1
+  },
+  {
+   "fieldname": "job_started_at",
+   "fieldtype": "Datetime",
+   "label": "Job started at",
+   "read_only": 1
+  },
+  {
+   "fieldname": "job_message",
+   "fieldtype": "Small Text",
+   "label": "Job message",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_synced",
+   "fieldtype": "Datetime",
+   "label": "Last synced",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_update",
+   "fieldtype": "Section Break",
+   "label": "Update"
+  },
+  {
+   "fieldname": "latest_version",
+   "fieldtype": "Data",
+   "label": "Newer Version Offered",
+   "read_only": 1,
+   "description": "What the store's update service offers, when newer than the installed version (extensions/updates.py)."
+  },
+  {
+   "fieldname": "latest_requires_core",
+   "fieldtype": "Data",
+   "label": "It Requires Core",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_update",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "latest_sha256",
+   "fieldtype": "Data",
+   "label": "Its SHA-256",
+   "read_only": 1
+  },
+  {
+   "fieldname": "latest_checked_at",
+   "fieldtype": "Datetime",
+   "label": "Last Checked For Updates",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "links": [],
+ "modified": "2026-09-23 18:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "POS Extension",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

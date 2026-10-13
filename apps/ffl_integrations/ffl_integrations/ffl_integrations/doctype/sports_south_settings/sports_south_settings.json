@@ -1,0 +1,527 @@
+{
+ "actions": [],
+ "creation": "2026-09-08 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_account",
+  "section_connection",
+  "ordering_enabled",
+  "sandbox_mode",
+  "customer_number",
+  "column_connection",
+  "username",
+  "password",
+  "section_advanced",
+  "base_url",
+  "tab_ordering",
+  "section_ffl_email",
+  "auto_email_ffl",
+  "fulfillment_email",
+  "column_ffl_email",
+  "order_email_cc",
+  "sales_message",
+  "section_ship_codes",
+  "ship_via_ground",
+  "column_ship_codes",
+  "ship_via_2day",
+  "accessory_ground_economy",
+  "section_firearm_flags",
+  "firearm_signature",
+  "firearm_adult_signature",
+  "column_firearm_flags",
+  "firearm_insurance",
+  "section_other_flags",
+  "other_signature",
+  "other_adult_signature",
+  "column_other_flags",
+  "other_insurance",
+  "section_price",
+  "price_drift_alert_pct",
+  "hold_escalate_days",
+  "section_store",
+  "store_ship_name",
+  "store_ship_attn",
+  "store_ship_line1",
+  "store_ship_line2",
+  "column_store",
+  "store_ship_city",
+  "store_ship_state",
+  "store_ship_zip",
+  "store_ship_phone",
+  "tab_freight",
+  "section_rates",
+  "rate_handgun_2day",
+  "rate_long_gun_ground",
+  "column_rates",
+  "rate_accessory_ground",
+  "rate_accessory_economy",
+  "rate_2day_air",
+  "rate_next_day",
+  "section_fees",
+  "fee_signature",
+  "fee_adult_signature",
+  "column_fees",
+  "fee_insurance_pct",
+  "fee_insurance_min",
+  "section_store_freight",
+  "store_free_handgun_qty",
+  "store_free_handgun_amount",
+  "column_store_freight",
+  "store_free_other_amount",
+  "store_other_rate",
+  "freight_variance_alert",
+  "tab_status",
+  "section_status",
+  "credits_polled_through",
+  "column_status",
+  "last_credits_poll_at",
+  "section_error",
+  "last_error"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_account",
+   "fieldtype": "Tab Break",
+   "label": "Account"
+  },
+  {
+   "fieldname": "section_connection",
+   "fieldtype": "Section Break",
+   "label": "Ordering API"
+  },
+  {
+   "fieldname": "ordering_enabled",
+   "fieldtype": "Check",
+   "label": "Allow live orders",
+   "default": "0",
+   "description": "Off: nothing is sent to Sports South's ordering API; the catalog still syncs through Data Service."
+  },
+  {
+   "fieldname": "sandbox_mode",
+   "fieldtype": "Check",
+   "label": "Sandbox mode",
+   "default": "0",
+   "description": "On: orders are sent with Source 99994 (Sports South's test environment)."
+  },
+  {
+   "fieldname": "customer_number",
+   "fieldtype": "Data",
+   "label": "Account number",
+   "mandatory_depends_on": "eval:doc.ordering_enabled",
+   "description": "Your Sports South account number (also the API user name and Source)."
+  },
+  {
+   "fieldname": "column_connection",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "username",
+   "fieldtype": "Data",
+   "label": "API user name",
+   "description": "Leave blank to use the account number."
+  },
+  {
+   "fieldname": "password",
+   "fieldtype": "Password",
+   "label": "API password",
+   "mandatory_depends_on": "eval:doc.ordering_enabled"
+  },
+  {
+   "fieldname": "section_advanced",
+   "fieldtype": "Section Break",
+   "label": "Advanced",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "base_url",
+   "fieldtype": "Data",
+   "label": "API base URL",
+   "default": "https://webservices.theshootingwarehouse.com/smart"
+  },
+  {
+   "fieldname": "tab_ordering",
+   "fieldtype": "Tab Break",
+   "label": "Ordering"
+  },
+  {
+   "fieldname": "section_ffl_email",
+   "fieldtype": "Section Break",
+   "label": "FFL email and sales message"
+  },
+  {
+   "fieldname": "auto_email_ffl",
+   "fieldtype": "Check",
+   "label": "Email the transfer FFL automatically",
+   "default": "1",
+   "description": "After a firearm order is submitted, email the transfer dealer's FFL copy to Sports South (required within 3 business days)."
+  },
+  {
+   "fieldname": "fulfillment_email",
+   "fieldtype": "Data",
+   "label": "Sports South fulfillment email",
+   "default": "fulfillment@sportssouth.biz",
+   "options": "Email"
+  },
+  {
+   "fieldname": "column_ffl_email",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "order_email_cc",
+   "fieldtype": "Data",
+   "label": "CC on FFL emails",
+   "options": "Email",
+   "description": "Optional: the shop mailbox that keeps a copy."
+  },
+  {
+   "fieldname": "sales_message",
+   "fieldtype": "Data",
+   "label": "Sales message on every order",
+   "description": "Optional note to your Sports South sales representative."
+  },
+  {
+   "fieldname": "section_ship_codes",
+   "fieldtype": "Section Break",
+   "label": "Ship codes"
+  },
+  {
+   "fieldname": "ship_via_ground",
+   "fieldtype": "Data",
+   "label": "Ground ship code",
+   "description": "ShipVIA for long guns, ammunition and accessories: G = Ground Premium (trackable, claims and intercepts allowed).",
+   "default": "G"
+  },
+  {
+   "fieldname": "column_ship_codes",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ship_via_2day",
+   "fieldtype": "Data",
+   "label": "2-Day Air ship code",
+   "description": "ShipVIA for any order with a handgun (handguns ship air only); N = Next-Day Air.",
+   "default": "2"
+  },
+  {
+   "fieldname": "accessory_ground_economy",
+   "fieldtype": "Check",
+   "label": "Accessory / ammunition orders ship Ground Economy",
+   "default": "0",
+   "description": "On: non-firearm orders ship Ground Economy ($7.95, empty ShipVIA) by discount carriers with no claims, traces, address changes or intercepts."
+  },
+  {
+   "fieldname": "section_firearm_flags",
+   "fieldtype": "Section Break",
+   "label": "Firearm orders \u2014 delivery options"
+  },
+  {
+   "fieldname": "firearm_signature",
+   "fieldtype": "Check",
+   "label": "Signature",
+   "default": "0",
+   "description": "$2.00 per order."
+  },
+  {
+   "fieldname": "firearm_adult_signature",
+   "fieldtype": "Check",
+   "label": "Adult signature",
+   "default": "0",
+   "description": "$2.75 per order."
+  },
+  {
+   "fieldname": "column_firearm_flags",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "firearm_insurance",
+   "fieldtype": "Check",
+   "label": "Insurance",
+   "default": "0",
+   "description": "0.95% of the order, $2.90 minimum; without it carrier claims cap at $100."
+  },
+  {
+   "fieldname": "section_other_flags",
+   "fieldtype": "Section Break",
+   "label": "Accessory / ammunition orders \u2014 delivery options"
+  },
+  {
+   "fieldname": "other_signature",
+   "fieldtype": "Check",
+   "label": "Signature",
+   "default": "0"
+  },
+  {
+   "fieldname": "other_adult_signature",
+   "fieldtype": "Check",
+   "label": "Adult signature",
+   "default": "0"
+  },
+  {
+   "fieldname": "column_other_flags",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_insurance",
+   "fieldtype": "Check",
+   "label": "Insurance",
+   "default": "0"
+  },
+  {
+   "fieldname": "section_price",
+   "fieldtype": "Section Break",
+   "label": "Price check"
+  },
+  {
+   "fieldname": "price_drift_alert_pct",
+   "fieldtype": "Percent",
+   "label": "Alert when the filled price exceeds the quote by",
+   "default": "2",
+   "description": "Sports South charges its current price, not the price on the order; an alert is sent when the difference is above this."
+  },
+  {
+   "fieldname": "hold_escalate_days",
+   "fieldtype": "Int",
+   "label": "Flag a hold after (days)",
+   "default": "3",
+   "description": "A Distributor Order held this long shows as trouble on the Pending Order queue."
+  },
+  {
+   "fieldname": "section_store",
+   "fieldtype": "Section Break",
+   "label": "Ship-to address override",
+   "description": "Stocking and procure-to-store orders ship here; leave blank to use the company address."
+  },
+  {
+   "fieldname": "store_ship_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "store_ship_attn",
+   "fieldtype": "Data",
+   "label": "Attention"
+  },
+  {
+   "fieldname": "store_ship_line1",
+   "fieldtype": "Data",
+   "label": "Address line 1"
+  },
+  {
+   "fieldname": "store_ship_line2",
+   "fieldtype": "Data",
+   "label": "Address line 2"
+  },
+  {
+   "fieldname": "column_store",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "store_ship_city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "store_ship_state",
+   "fieldtype": "Data",
+   "label": "State",
+   "length": 2
+  },
+  {
+   "fieldname": "store_ship_zip",
+   "fieldtype": "Data",
+   "label": "ZIP"
+  },
+  {
+   "fieldname": "store_ship_phone",
+   "fieldtype": "Data",
+   "label": "Phone"
+  },
+  {
+   "fieldname": "tab_freight",
+   "fieldtype": "Tab Break",
+   "label": "Freight"
+  },
+  {
+   "fieldname": "section_rates",
+   "fieldtype": "Section Break",
+   "label": "Flat-rate shipping (estimate; the invoice amount replaces it)"
+  },
+  {
+   "fieldname": "rate_handgun_2day",
+   "fieldtype": "Currency",
+   "label": "Handgun, 2-Day Air",
+   "default": "10.95"
+  },
+  {
+   "fieldname": "rate_long_gun_ground",
+   "fieldtype": "Currency",
+   "label": "Long gun, Ground Premium",
+   "default": "10.95"
+  },
+  {
+   "fieldname": "column_rates",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rate_accessory_ground",
+   "fieldtype": "Currency",
+   "label": "Accessory / ammunition, Ground Premium",
+   "default": "10.95"
+  },
+  {
+   "fieldname": "rate_accessory_economy",
+   "fieldtype": "Currency",
+   "label": "Accessory / ammunition, Ground Economy",
+   "default": "7.95"
+  },
+  {
+   "fieldname": "rate_2day_air",
+   "fieldtype": "Currency",
+   "label": "2-Day Air (long gun / accessory)",
+   "default": "27.95"
+  },
+  {
+   "fieldname": "rate_next_day",
+   "fieldtype": "Currency",
+   "label": "Next-Day Air",
+   "default": "42.95"
+  },
+  {
+   "fieldname": "section_fees",
+   "fieldtype": "Section Break",
+   "label": "Per-order fees"
+  },
+  {
+   "fieldname": "fee_signature",
+   "fieldtype": "Currency",
+   "label": "Signature",
+   "default": "2.00"
+  },
+  {
+   "fieldname": "fee_adult_signature",
+   "fieldtype": "Currency",
+   "label": "Adult signature",
+   "default": "2.75"
+  },
+  {
+   "fieldname": "column_fees",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fee_insurance_pct",
+   "fieldtype": "Percent",
+   "label": "Insurance, % of order",
+   "default": "0.95"
+  },
+  {
+   "fieldname": "fee_insurance_min",
+   "fieldtype": "Currency",
+   "label": "Insurance minimum",
+   "default": "2.90"
+  },
+  {
+   "fieldname": "section_store_freight",
+   "fieldtype": "Section Break",
+   "label": "Shipped to the store",
+   "description": "Sports South's open-account / ACH shipping rules for orders to the shop."
+  },
+  {
+   "fieldname": "store_free_handgun_qty",
+   "fieldtype": "Int",
+   "label": "Handguns ship free from (count)",
+   "default": "3"
+  },
+  {
+   "fieldname": "store_free_handgun_amount",
+   "fieldtype": "Currency",
+   "label": "Handguns ship free from (value)",
+   "default": "750"
+  },
+  {
+   "fieldname": "column_store_freight",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "store_free_other_amount",
+   "fieldtype": "Currency",
+   "label": "Long guns / ammo / accessories ship free from",
+   "default": "500"
+  },
+  {
+   "fieldname": "store_other_rate",
+   "fieldtype": "Currency",
+   "label": "Long guns / ammo / accessories below that",
+   "default": "5"
+  },
+  {
+   "fieldname": "freight_variance_alert",
+   "fieldtype": "Currency",
+   "label": "Alert when invoiced freight differs by more than",
+   "default": "5",
+   "description": "The poll compares the freight the house invoiced with the figure booked at placement; a larger gap sends an alert."
+  },
+  {
+   "fieldname": "tab_status",
+   "fieldtype": "Tab Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "section_status",
+   "fieldtype": "Section Break",
+   "label": "Credit memo poll"
+  },
+  {
+   "fieldname": "credits_polled_through",
+   "fieldtype": "Date",
+   "label": "Credits polled through",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_credits_poll_at",
+   "fieldtype": "Datetime",
+   "label": "Last credit poll",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_error",
+   "fieldtype": "Section Break",
+   "label": "Last error"
+  },
+  {
+   "fieldname": "last_error",
+   "fieldtype": "Long Text",
+   "label": "Last error",
+   "read_only": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-09-08 12:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "Sports South Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

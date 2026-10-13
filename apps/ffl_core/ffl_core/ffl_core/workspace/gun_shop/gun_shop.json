@@ -1,0 +1,212 @@
+{
+ "app": "ffl_core",
+ "charts": [],
+ "content": "[{\"id\": \"hdr_attention\", \"type\": \"header\", \"data\": {\"text\": \"<span class='h4'><b>Needs attention</b></span>\", \"col\": 12}}, {\"id\": \"nc_pending_orders\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Orders\", \"col\": 4}}, {\"id\": \"nc_pending_4473\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending 4473\", \"col\": 4}}, {\"id\": \"nc_transfer_pickups\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transfer Pickups\", \"col\": 4}}, {\"id\": \"nc_to_receive\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"To Receive\", \"col\": 4}}, {\"id\": \"nc_web_orders\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Web Orders\", \"col\": 4}}, {\"id\": \"sp_attention\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"sc_open_pos\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Open POS\", \"col\": 3}}, {\"id\": \"sc_create_order\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Create Order\", \"col\": 3}}, {\"id\": \"sc_receive_goods\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Receive Goods\", \"col\": 3}}, {\"id\": \"sc_add_customer\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Add Customer\", \"col\": 3}}, {\"id\": \"sp_shortcuts\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"card_buying\", \"type\": \"card\", \"data\": {\"card_name\": \"Buying\", \"col\": 3}}, {\"id\": \"card_inventory\", \"type\": \"card\", \"data\": {\"card_name\": \"Inventory\", \"col\": 3}}, {\"id\": \"card_ffl\", \"type\": \"card\", \"data\": {\"card_name\": \"FFL\", \"col\": 3}}, {\"id\": \"card_money\", \"type\": \"card\", \"data\": {\"card_name\": \"Money\", \"col\": 3}}]",
+ "creation": "2026-05-04 16:52:10.285648",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "retail",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Gun Shop",
+ "link_type": "DocType",
+ "links": [
+  {
+   "hidden": 0,
+   "icon": "buying",
+   "is_query_report": 0,
+   "label": "Buying",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Distributor Orders",
+   "link_count": 0,
+   "link_to": "distributor-restock",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Items",
+   "link_count": 0,
+   "link_to": "Item",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "stock",
+   "is_query_report": 0,
+   "label": "Inventory",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock On Hand",
+   "link_count": 0,
+   "link_to": "Stock Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Inventory Count",
+   "link_count": 0,
+   "link_to": "stocktake",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Storage Locations",
+   "link_count": 0,
+   "link_to": "storage-map",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "non_profit",
+   "is_query_report": 0,
+   "label": "FFL",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "4473 Records",
+   "link_count": 0,
+   "link_to": "Form 4473 Records",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Firearms In Stock",
+   "link_count": 0,
+   "link_to": "Firearms In Stock",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "selling",
+   "is_query_report": 0,
+   "label": "Money",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Cash Drawer",
+   "link_count": 0,
+   "link_to": "cash-drawer",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Report",
+   "link_count": 0,
+   "link_to": "Sales Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-07-02 21:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Gun Shop",
+ "number_cards": [
+  {
+   "label": "Pending Orders",
+   "number_card_name": "Pending Orders"
+  },
+  {
+   "label": "Pending 4473",
+   "number_card_name": "Pending 4473"
+  },
+  {
+   "label": "Transfer Pickups",
+   "number_card_name": "Transfer Pickups"
+  },
+  {
+   "label": "To Receive",
+   "number_card_name": "To Receive"
+  },
+  {
+   "label": "Web Orders",
+   "number_card_name": "Web Orders"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "Gun Shop",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 0.0,
+ "shortcuts": [
+  {
+   "color": "Green",
+   "doc_view": "",
+   "label": "Open POS",
+   "type": "URL",
+   "url": "/app/point-of-sale"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Create Order",
+   "type": "URL",
+   "url": "/app/create-order"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "",
+   "label": "Receive Goods",
+   "type": "URL",
+   "url": "/app/receive-goods"
+  },
+  {
+   "color": "Yellow",
+   "doc_view": "New",
+   "label": "Add Customer",
+   "link_to": "Customer",
+   "type": "DocType"
+  }
+ ],
+ "title": "Gun Shop",
+ "type": "Workspace"
+}

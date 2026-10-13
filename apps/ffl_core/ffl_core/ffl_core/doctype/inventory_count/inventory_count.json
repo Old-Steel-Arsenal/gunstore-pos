@@ -1,0 +1,154 @@
+{
+ "actions": [],
+ "creation": "2026-10-01 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-10-01 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Inventory Count",
+ "owner": "Administrator",
+ "states": [],
+ "autoname": "IC-.YYYY.-.#####",
+ "description": "One stocktake: staff scan what is on the shelf and the count is compared with what the system says. Nothing is adjusted until a Stock Manager finalizes it. Counts are started and changed from the Inventory Count page only.",
+ "istable": 0,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "title_field": "name",
+ "track_changes": 1,
+ "field_order": [
+  "company",
+  "status",
+  "column_break_1",
+  "include_custody",
+  "section_scope",
+  "warehouses",
+  "item_groups",
+  "section_result",
+  "stock_reconciliation",
+  "finalized_by",
+  "finalized_at",
+  "notes",
+  "serial_report"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "options": "Company",
+   "label": "Company",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "options": "Open\nFinalized\nCancelled",
+   "default": "Open",
+   "label": "Status",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "include_custody",
+   "fieldtype": "Check",
+   "default": "1",
+   "label": "Include Customer-Custody Warehouses",
+   "description": "Guns held for customers (transfers waiting for pickup) are counted too. Turn off to leave them out.",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "section_scope",
+   "fieldtype": "Section Break",
+   "label": "Scope"
+  },
+  {
+   "fieldname": "warehouses",
+   "fieldtype": "Table MultiSelect",
+   "options": "Inventory Count Warehouse",
+   "label": "Warehouses",
+   "description": "Leave empty to count every warehouse that holds the store's own stock.",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "item_groups",
+   "fieldtype": "Table MultiSelect",
+   "options": "Inventory Count Item Group",
+   "label": "Item Groups",
+   "description": "Leave empty to count every item group.",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "section_result",
+   "fieldtype": "Section Break",
+   "label": "Result"
+  },
+  {
+   "fieldname": "stock_reconciliation",
+   "fieldtype": "Link",
+   "options": "Stock Reconciliation",
+   "label": "Stock Reconciliation",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "finalized_by",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Finalized By",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "finalized_at",
+   "fieldtype": "Datetime",
+   "label": "Finalized At",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "serial_report",
+   "fieldtype": "Code",
+   "options": "JSON",
+   "label": "Firearm Difference Report",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "Saved when the count is finalized: guns missing from the shelf, guns scanned that were not expected, and unknown barcodes."
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1,
+   "report": 1
+  }
+ ]
+}

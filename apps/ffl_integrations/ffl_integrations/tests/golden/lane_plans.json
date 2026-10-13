@@ -1,0 +1,713 @@
+{
+	"rsr": {
+		"capabilities": [
+			"catalog",
+			"check_availability",
+			"dropship",
+			"fds",
+			"place_order",
+			"search",
+			"to_store",
+			"update_ffl",
+			"verify_dealer"
+		],
+		"classification_error": "SKU 'RSR-GUN': RSR catalog says firearm=False but Item.is_firearm=True \u2014 order held for manual classification review (#12).",
+		"freight": {
+			"direct": 15.0,
+			"fds": 15.0,
+			"stocking": 15.0,
+			"to_store": 15.0
+		},
+		"place_payload": {
+			"Dropship Accessory": {
+				"ContactNum": "5551234567",
+				"Email": "orders@example.com",
+				"FillOrKill": "Y",
+				"Items": [
+					{
+						"PartNum": "RSR-ACC",
+						"ShipMethod": "Grnd",
+						"WishQty": 2
+					}
+				],
+				"PONum": "DO-2609-00001",
+				"ShipAddress": "5 Elm St",
+				"ShipAddress2": "Apt 2",
+				"ShipCity": "Springfield",
+				"ShipState": "TX",
+				"ShipZip": "75024",
+				"Storename": "Ann Buyer"
+			},
+			"Dropship Firearm": {
+				"ContactNum": "5551234567",
+				"Email": "orders@example.com",
+				"FillOrKill": "Y",
+				"Items": [
+					{
+						"PartNum": "RSR-ACC",
+						"ShipMethod": "Grnd",
+						"WishQty": 2
+					}
+				],
+				"PONum": "DO-2609-00001",
+				"ShipFFL": "1-99-888-01-2D-09999",
+				"Storename": "Ann Buyer"
+			},
+			"Procure To Store": {
+				"Email": "orders@example.com",
+				"FillOrKill": "Y",
+				"Items": [
+					{
+						"PartNum": "RSR-ACC",
+						"ShipMethod": "Grnd",
+						"WishQty": 2
+					}
+				],
+				"PONum": "DO-2609-00001"
+			},
+			"Stocking": {
+				"Email": "orders@example.com",
+				"FillOrKill": "Y",
+				"Items": [
+					{
+						"PartNum": "RSR-ACC",
+						"ShipMethod": "Grnd",
+						"WishQty": 2
+					}
+				],
+				"PONum": "DO-2609-00001"
+			}
+		},
+		"plans": {
+			"direct/accessory": [
+				{
+					"account": "fulfillment",
+					"consumer_name": "Ann Buyer",
+					"contact_num": "5551234567",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "RSR-ACC",
+							"qty": 2,
+							"ship_method": "Grnd",
+							"sku": "RSR-ACC"
+						}
+					],
+					"order_type": "Dropship Accessory",
+					"ship_ffl": null,
+					"ship_to": {
+						"city": "Springfield",
+						"line1": "5 Elm St",
+						"line2": "Apt 2",
+						"state": "TX",
+						"zip": "75024"
+					},
+					"transfer_dealer": null
+				}
+			],
+			"direct/firearm": {
+				"refused": "A firearm cannot be drop-shipped to the buyer's address \u2014 it ships to the transfer dealer (order it on the firearm drop-ship lane)."
+			},
+			"direct/mixed": {
+				"refused": "A firearm cannot be drop-shipped to the buyer's address \u2014 it ships to the transfer dealer (order it on the firearm drop-ship lane)."
+			},
+			"direct/over_cap": [
+				{
+					"account": "fulfillment",
+					"first_sku": "RSR-ACC-0",
+					"last_sku": "RSR-ACC-399",
+					"line_count": 400,
+					"order_type": "Dropship Accessory"
+				},
+				{
+					"account": "fulfillment",
+					"first_sku": "RSR-ACC-400",
+					"last_sku": "RSR-ACC-401",
+					"line_count": 2,
+					"order_type": "Dropship Accessory"
+				}
+			],
+			"fds/accessory": {
+				"refused": "Only firearms belong on a firearm drop-ship order \u2014 the distributor refuses an accessory sent to a transfer dealer."
+			},
+			"fds/firearm": [
+				{
+					"account": "fulfillment",
+					"consumer_name": "Ann Buyer",
+					"contact_num": "5551234567",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "RSR-GUN",
+							"qty": 1,
+							"ship_method": "2Day",
+							"sku": "RSR-GUN"
+						}
+					],
+					"order_type": "Dropship Firearm",
+					"ship_ffl": "1-99-888-01-2D-09999",
+					"ship_to": null,
+					"transfer_dealer": {
+						"ffl_record": "ATF-REC-1",
+						"license": "1-99-888-01-2D-09999",
+						"premise_city": "Dallas",
+						"premise_state": "TX",
+						"premise_street": "9 Main",
+						"premise_zip": "75201"
+					}
+				}
+			],
+			"fds/mixed": {
+				"refused": "Only firearms belong on a firearm drop-ship order \u2014 the distributor refuses an accessory sent to a transfer dealer."
+			},
+			"fds/over_cap": {
+				"refused": "Only firearms belong on a firearm drop-ship order \u2014 the distributor refuses an accessory sent to a transfer dealer."
+			},
+			"stocking/accessory": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "RSR-ACC",
+							"qty": 2,
+							"ship_method": "Grnd",
+							"sku": "RSR-ACC"
+						}
+					],
+					"order_type": "Stocking",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"stocking/firearm": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "RSR-GUN",
+							"qty": 1,
+							"ship_method": "2Day",
+							"sku": "RSR-GUN"
+						}
+					],
+					"order_type": "Stocking",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"stocking/mixed": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "RSR-GUN",
+							"qty": 1,
+							"ship_method": "2Day",
+							"sku": "RSR-GUN"
+						},
+						{
+							"item_code": "RSR-RIFLE",
+							"qty": 1,
+							"ship_method": "Grnd",
+							"sku": "RSR-RIFLE"
+						}
+					],
+					"order_type": "Stocking",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				},
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "RSR-ACC",
+							"qty": 2,
+							"ship_method": "Grnd",
+							"sku": "RSR-ACC"
+						}
+					],
+					"order_type": "Stocking",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"stocking/over_cap": [
+				{
+					"account": "dealer",
+					"first_sku": "RSR-ACC-0",
+					"last_sku": "RSR-ACC-399",
+					"line_count": 400,
+					"order_type": "Stocking"
+				},
+				{
+					"account": "dealer",
+					"first_sku": "RSR-ACC-400",
+					"last_sku": "RSR-ACC-401",
+					"line_count": 2,
+					"order_type": "Stocking"
+				}
+			],
+			"to_store/accessory": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "RSR-ACC",
+							"qty": 2,
+							"ship_method": "Grnd",
+							"sku": "RSR-ACC"
+						}
+					],
+					"order_type": "Procure To Store",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"to_store/firearm": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "RSR-GUN",
+							"qty": 1,
+							"ship_method": "2Day",
+							"sku": "RSR-GUN"
+						}
+					],
+					"order_type": "Procure To Store",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"to_store/mixed": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "RSR-GUN",
+							"qty": 1,
+							"ship_method": "2Day",
+							"sku": "RSR-GUN"
+						},
+						{
+							"item_code": "RSR-RIFLE",
+							"qty": 1,
+							"ship_method": "Grnd",
+							"sku": "RSR-RIFLE"
+						}
+					],
+					"order_type": "Procure To Store",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				},
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "RSR-ACC",
+							"qty": 2,
+							"ship_method": "Grnd",
+							"sku": "RSR-ACC"
+						}
+					],
+					"order_type": "Procure To Store",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"to_store/over_cap": [
+				{
+					"account": "dealer",
+					"first_sku": "RSR-ACC-0",
+					"last_sku": "RSR-ACC-399",
+					"line_count": 400,
+					"order_type": "Procure To Store"
+				},
+				{
+					"account": "dealer",
+					"first_sku": "RSR-ACC-400",
+					"last_sku": "RSR-ACC-401",
+					"line_count": 2,
+					"order_type": "Procure To Store"
+				}
+			]
+		}
+	},
+	"ss": {
+		"capabilities": [
+			"catalog",
+			"check_availability",
+			"dropship",
+			"fds",
+			"place_order",
+			"search",
+			"to_store",
+			"verify_dealer"
+		],
+		"classification_error": "SKU 'SS-GUN': Sports South catalog says firearm=False but Item.is_firearm=True \u2014 order held for manual classification review (#12).",
+		"freight": {
+			"consumer": 19.98,
+			"store": 10.95
+		},
+		"plans": {
+			"direct/accessory": [
+				{
+					"account": "fulfillment",
+					"consumer_name": "Ann Buyer",
+					"contact_num": "5551234567",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "SS-AMMO",
+							"qty": 3,
+							"ship_method": "Grnd",
+							"sku": "SS-AMMO"
+						}
+					],
+					"order_type": "Dropship Accessory",
+					"ship_ffl": null,
+					"ship_to": {
+						"city": "Springfield",
+						"line1": "5 Elm St",
+						"line2": "Apt 2",
+						"state": "TX",
+						"zip": "75024"
+					},
+					"transfer_dealer": null
+				}
+			],
+			"direct/firearm": {
+				"refused": "A firearm cannot be drop-shipped to the buyer's address \u2014 it ships to the transfer dealer (order it on the firearm drop-ship lane)."
+			},
+			"direct/mixed": {
+				"refused": "A firearm cannot be drop-shipped to the buyer's address \u2014 it ships to the transfer dealer (order it on the firearm drop-ship lane)."
+			},
+			"direct/over_cap": [
+				{
+					"account": "fulfillment",
+					"first_sku": "SS-AMMO-0",
+					"last_sku": "SS-AMMO-199",
+					"line_count": 200,
+					"order_type": "Dropship Accessory"
+				},
+				{
+					"account": "fulfillment",
+					"first_sku": "SS-AMMO-200",
+					"last_sku": "SS-AMMO-201",
+					"line_count": 2,
+					"order_type": "Dropship Accessory"
+				}
+			],
+			"fds/accessory": {
+				"refused": "Only firearms belong on a firearm drop-ship order \u2014 the distributor refuses an accessory sent to a transfer dealer."
+			},
+			"fds/firearm": [
+				{
+					"account": "fulfillment",
+					"consumer_name": "Ann Buyer",
+					"contact_num": "5551234567",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "SS-GUN",
+							"qty": 1,
+							"ship_method": "2Day",
+							"sku": "SS-GUN"
+						}
+					],
+					"order_type": "Dropship Firearm",
+					"ship_ffl": "1-99-888-01-2D-09999",
+					"ship_to": null,
+					"transfer_dealer": {
+						"ffl_record": "ATF-REC-1",
+						"license": "1-99-888-01-2D-09999",
+						"premise_city": "Dallas",
+						"premise_state": "TX",
+						"premise_street": "9 Main",
+						"premise_zip": "75201"
+					}
+				}
+			],
+			"fds/mixed": {
+				"refused": "Only firearms belong on a firearm drop-ship order \u2014 the distributor refuses an accessory sent to a transfer dealer."
+			},
+			"fds/over_cap": {
+				"refused": "Only firearms belong on a firearm drop-ship order \u2014 the distributor refuses an accessory sent to a transfer dealer."
+			},
+			"stocking/accessory": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "SS-AMMO",
+							"qty": 3,
+							"ship_method": "Grnd",
+							"sku": "SS-AMMO"
+						}
+					],
+					"order_type": "Stocking",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"stocking/firearm": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "SS-GUN",
+							"qty": 1,
+							"ship_method": "2Day",
+							"sku": "SS-GUN"
+						}
+					],
+					"order_type": "Stocking",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"stocking/mixed": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "SS-GUN",
+							"qty": 1,
+							"ship_method": "2Day",
+							"sku": "SS-GUN"
+						},
+						{
+							"item_code": "SS-RIFLE",
+							"qty": 1,
+							"ship_method": "Grnd",
+							"sku": "SS-RIFLE"
+						}
+					],
+					"order_type": "Stocking",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				},
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "SS-AMMO",
+							"qty": 3,
+							"ship_method": "Grnd",
+							"sku": "SS-AMMO"
+						}
+					],
+					"order_type": "Stocking",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"stocking/over_cap": [
+				{
+					"account": "dealer",
+					"first_sku": "SS-AMMO-0",
+					"last_sku": "SS-AMMO-199",
+					"line_count": 200,
+					"order_type": "Stocking"
+				},
+				{
+					"account": "dealer",
+					"first_sku": "SS-AMMO-200",
+					"last_sku": "SS-AMMO-201",
+					"line_count": 2,
+					"order_type": "Stocking"
+				}
+			],
+			"to_store/accessory": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "SS-AMMO",
+							"qty": 3,
+							"ship_method": "Grnd",
+							"sku": "SS-AMMO"
+						}
+					],
+					"order_type": "Procure To Store",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"to_store/firearm": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "SS-GUN",
+							"qty": 1,
+							"ship_method": "2Day",
+							"sku": "SS-GUN"
+						}
+					],
+					"order_type": "Procure To Store",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"to_store/mixed": [
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "SS-GUN",
+							"qty": 1,
+							"ship_method": "2Day",
+							"sku": "SS-GUN"
+						},
+						{
+							"item_code": "SS-RIFLE",
+							"qty": 1,
+							"ship_method": "Grnd",
+							"sku": "SS-RIFLE"
+						}
+					],
+					"order_type": "Procure To Store",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				},
+				{
+					"account": "dealer",
+					"consumer_name": "",
+					"contact_num": "",
+					"fill_or_kill": true,
+					"lines": [
+						{
+							"item_code": "SS-AMMO",
+							"qty": 3,
+							"ship_method": "Grnd",
+							"sku": "SS-AMMO"
+						}
+					],
+					"order_type": "Procure To Store",
+					"ship_ffl": null,
+					"ship_to": null,
+					"transfer_dealer": null
+				}
+			],
+			"to_store/over_cap": [
+				{
+					"account": "dealer",
+					"first_sku": "SS-AMMO-0",
+					"last_sku": "SS-AMMO-199",
+					"line_count": 200,
+					"order_type": "Procure To Store"
+				},
+				{
+					"account": "dealer",
+					"first_sku": "SS-AMMO-200",
+					"last_sku": "SS-AMMO-201",
+					"line_count": 2,
+					"order_type": "Procure To Store"
+				}
+			]
+		},
+		"ship_to": {
+			"direct": {
+				"attn": "",
+				"city": "Springfield",
+				"line1": "5 Elm St",
+				"line2": "Apt 2",
+				"name": "Ann Buyer",
+				"phone": "5551234567",
+				"state": "TX",
+				"zip": "75024"
+			},
+			"fds": {
+				"attn": "Ann Buyer",
+				"city": "Dallas",
+				"line1": "9 Main",
+				"line2": "",
+				"name": "FFL 1-99-888-01-2D-09999",
+				"phone": "5551234567",
+				"state": "TX",
+				"zip": "75201"
+			},
+			"stocking": {
+				"attn": "",
+				"city": "Springfield",
+				"line1": "1 Range Rd",
+				"line2": "",
+				"name": "The Shop",
+				"phone": "5559876543",
+				"state": "TX",
+				"zip": "75024"
+			},
+			"to_store": {
+				"attn": "",
+				"city": "Springfield",
+				"line1": "1 Range Rd",
+				"line2": "",
+				"name": "The Shop",
+				"phone": "5559876543",
+				"state": "TX",
+				"zip": "75024"
+			}
+		}
+	}
+}

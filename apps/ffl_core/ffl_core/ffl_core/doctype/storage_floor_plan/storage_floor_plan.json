@@ -1,0 +1,103 @@
+{
+ "actions": [],
+ "autoname": "format:SFP-{#####}",
+ "creation": "2026-10-03 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-10-03 15:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "owner": "Administrator",
+ "states": [],
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1
+  },
+  {
+   "role": "Sales User",
+   "read": 1
+  }
+ ],
+ "name": "Storage Floor Plan",
+ "description": "A drawing of one room or floor of the store: where each storage zone sits, plus walls, doors, counters and labels. Drawn on the Storage Locations page.",
+ "title_field": "plan_name",
+ "allow_rename": 0,
+ "field_order": [
+  "company",
+  "plan_name",
+  "column_break_1",
+  "width",
+  "height",
+  "section_break_layout",
+  "layout"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "options": "Company",
+   "label": "Company",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "plan_name",
+   "fieldtype": "Data",
+   "label": "Plan",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "width",
+   "fieldtype": "Float",
+   "label": "Width (ft)",
+   "default": "60",
+   "read_only": 1
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Float",
+   "label": "Depth (ft)",
+   "default": "40",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_layout",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "layout",
+   "fieldtype": "JSON",
+   "label": "Layout",
+   "read_only": 1,
+   "description": "{\"shapes\": [...]}: each shape is a zone, wall, door, area or label, by its centre (x, y), size (w, h) in feet and rotation r in degrees; rows = lines of slots across a Slots zone's short side."
+  }
+ ]
+}

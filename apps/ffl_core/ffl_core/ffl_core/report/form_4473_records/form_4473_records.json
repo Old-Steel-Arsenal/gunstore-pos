@@ -1,0 +1,33 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2026-09-24 12:00:00.000000",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2026-09-24 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Form 4473 Records",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "POS Invoice",
+ "report_name": "Form 4473 Records",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
+}

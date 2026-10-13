@@ -1,0 +1,81 @@
+# GunStore-POS dev environment
+# Based on frappe_docker/devcontainer-example, adapted to mount our monorepo apps.
+# Run from repo root: make dev-up — never raw `docker compose`: the Makefile picks the compose project
+# (main checkout = `dev` / gunstore-*, a git worktree = dev-<dir> / gunstore-<dir>-*, see PROJECT in Makefile);
+# raw compose from a worktree would attach to project `dev` and rebuild the main containers onto that tree.
+#
+# After `up`, run `make dev-bench-init` once to bootstrap a Frappe bench inside
+# the frappe container with ERPNext + POS Awesome + our custom apps.
+
+services:
+  mariadb:
+    image: docker.io/mariadb:11.8
+    container_name: ${CONTAINER_PREFIX:-gunstore}-mariadb
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-changeme123}
+      MARIADB_AUTO_UPGRADE: 1
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-cache:
+    image: docker.io/redis:7-alpine
+    container_name: ${CONTAINER_PREFIX:-gunstore}-redis-cache
+
+  redis-queue:
+    image: docker.io/redis:7-alpine
+    container_name: ${CONTAINER_PREFIX:-gunstore}-redis-queue
+
+  frappe:
+    image: docker.io/frappe/bench:latest
+    container_name: ${CONTAINER_PREFIX:-gunstore}-frappe
+    command: sleep infinity
+    environment:
+      - SHELL=/bin/bash
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
+    volumes:
+      # Mount the entire monorepo so our apps/ are accessible inside the bench.
+      # bench will live at /workspace/frappe-bench (created by installer.py)
+      # our custom apps are at /workspace/apps/{ffl_core, ffl_integrations, ffl_woo_sync}
+      - ../..:/workspace:cached
+    working_dir: /workspace
+    ports:
+      # bench serve (web) — defaults keep the main checkout unchanged; a worktree stack drops them
+      # via docker-compose.noports.yml unless the Makefile sets WEB_PORTS/SOCKETIO_PORTS (PORT_OFFSET)
+      - "${WEB_PORTS:-8000-8005}:8000-8005"
+      # socketio
+      - "${SOCKETIO_PORTS:-9000-9005}:9000-9005"
+
+  # The local distributor catalog's worker, mirroring prod's queue-catalog
+  # (deploy/prod/compose.extensions.yaml). Opt-in: `COMPOSE_PROFILES=catalog make dev-up`.
+  # Not needed with `make dev-serve`: bench start's `worker` line listens on every
+  # queue common_site_config declares, the `catalog` queue included.
+  queue-catalog:
+    profiles: ["catalog"]
+    image: docker.io/frappe/bench:latest
+    container_name: ${CONTAINER_PREFIX:-gunstore}-queue-catalog
+    command: bash -lc 'cd /workspace/frappe-bench && env/bin/python -m ffl_integrations.catalog_local.declare_queue sites/common_site_config.json && exec bench worker --queue catalog'
+    restart: unless-stopped
+    depends_on:
+      frappe:
+        condition: service_started
+    volumes:
+      - ../..:/workspace:cached
+    working_dir: /workspace
+
+volumes:
+  mariadb-data:
