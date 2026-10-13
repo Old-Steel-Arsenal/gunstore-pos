@@ -638,3 +638,17 @@ test('negativeTicketFix: a card already captured is NOT zeroed away — it block
 	// cash typed (no card) is still cleared
 	assert.deepStrictEqual(negativeTicketFix({ ...doc, payroc_charged_amount: 0 }), { set: {}, zeroRows: ['p1'] });
 });
+
+// Counter pickup's 4473 ticket (counter_pickup.keep_ticket_free is the server side).
+test('pickupTicketState: a ticket, whether this copy carries money, never a return or a sale', () => {
+	const { pickupTicketState } = require('../../public/js/pos_tender_guard.js');
+	const free = { ffl_counter_order: ' SI-1 ', grand_total: 0, items: [{ rate: 0 }], payments: [{ amount: 0 }] };
+	assert.deepStrictEqual(pickupTicketState(free), { order: 'SI-1', carriesMoney: false });
+	assert.strictEqual(pickupTicketState({ ...free, payments: [{ amount: 670 }] }).carriesMoney, true);
+	assert.strictEqual(pickupTicketState({ ...free, items: [{ rate: 670 }] }).carriesMoney, true);
+	assert.strictEqual(pickupTicketState({ ...free, change_amount: 670 }).carriesMoney, true);
+	assert.strictEqual(pickupTicketState({ ...free, grand_total: 670 }).carriesMoney, true);
+	assert.strictEqual(pickupTicketState({ ...free, is_return: 1 }), null);
+	assert.strictEqual(pickupTicketState({ ...free, ffl_counter_order: '' }), null);
+	assert.strictEqual(pickupTicketState(null), null);
+});

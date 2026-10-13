@@ -679,6 +679,79 @@ class CounterToStoreIntegration(CounterToStoreFixtures):
 		res = counter_pickup.open_pickup_invoice(si_name)
 		self.assertFalse(res["already"], "with the pin back the ticket opens at $0")
 
+	def _reprice_like_the_register(self, pos, price=670):
+		"""What a later save from the POS page did to a live ticket: the price list
+		re-applied to the gun, the card tile filled with the total, and a stale
+		change amount ERPNext's validate_change_amount never resets."""
+		for row in pos.items:
+			row.price_list_rate = price
+			row.rate = price
+			row.amount = price
+		pay = pos.payments[0]
+		pay.amount = pay.base_amount = price
+		pos.paid_amount = pos.base_paid_amount = price
+		pos.change_amount = pos.base_change_amount = price
+		pos.grand_total = pos.rounded_total = price
+
+	def _assert_free(self, name):
+		pos = frappe.get_doc("POS Invoice", name)
+		self.assertEqual([flt(r.rate) for r in pos.items], [0.0])
+		self.assertEqual([flt(r.price_list_rate) for r in pos.items], [0.0])
+		self.assertEqual([flt(r.amount) for r in pos.items], [0.0])
+		self.assertTrue(all(flt(p.amount) == 0 and flt(p.base_amount) == 0 for p in pos.payments),
+			[(p.mode_of_payment, p.amount) for p in pos.payments])
+		self.assertEqual((flt(pos.grand_total), flt(pos.rounded_total), flt(pos.paid_amount),
+			flt(pos.change_amount), flt(pos.base_change_amount), flt(pos.write_off_amount)),
+			(0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+		return pos
+
+	def test_a_repriced_ticket_saves_back_to_zero_and_still_hands_over(self):
+		"""Incident: a POS-page save re-rated a live ticket to the gun's list price
+		with a matching card tender, and Complete Order asked to charge the
+		customer a second time. Every save of a ticket comes back at $0 — paid 0,
+		change 0 — and the $0 ticket still submits against its settled order."""
+		self._open_register()
+		out = self._pickup([self._line(GUN)])
+		si_name = out["sales_invoice"]
+		self._receive(self._ship_to_store(self._only_do(si_name), serial="TS-P2-SN-PU7"))
+		ticket = self._ticket_for(si_name)
+
+		pos = frappe.get_doc("POS Invoice", ticket)
+		pos.flags.ignore_permissions = True
+		self._reprice_like_the_register(pos)
+		pos.save()
+		self._assert_free(ticket)
+
+		# Complete Order on a register still holding the re-rated doc: the submit
+		# itself pins it, and both counter-order hooks still pass.
+		self._cover(ticket, "TS-P2-SN-PU7")
+		pos = frappe.get_doc("POS Invoice", ticket)
+		pos.flags.ignore_permissions = True
+		self._reprice_like_the_register(pos)
+		pos.submit()
+		self.assertEqual(frappe.db.get_value("POS Invoice", ticket, "docstatus"), 1)
+		self._assert_free(ticket)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si_name, "shipstation_status"), "Shipped",
+			"close_counter_order_on_pos_submit cleared the order")
+		self.assertIsNone(self._queue_row(si_name))
+
+	def test_a_ticket_refuses_an_item_the_order_did_not_sell(self):
+		"""The Sales Report skips tickets: anything rung on one would vanish from
+		reporting, and the $0 pin would give it away."""
+		self._open_register()
+		out = self._pickup([self._line(GUN)])
+		si_name = out["sales_invoice"]
+		self._receive(self._ship_to_store(self._only_do(si_name), serial="TS-P2-SN-PU8"))
+		ticket = self._ticket_for(si_name)
+		pos = frappe.get_doc("POS Invoice", ticket)
+		pos.flags.ignore_permissions = True
+		pos.append("items", {"item_code": ACC, "qty": 1, "rate": 40,
+			"warehouse": pos.items[0].warehouse})
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pos.save()
+		self.assertIn("ring other items as a separate sale", str(cm.exception))
+		self.assertEqual(len(frappe.get_doc("POS Invoice", ticket).items), 1)
+
 	def test_ticket_books_on_the_day_it_is_rung_not_the_day_the_gun_arrived(self):
 		"""Review: opened at arrival with set_posting_time, the ticket froze on
 		the arrival day and a later submit back-dated the stock issue and the

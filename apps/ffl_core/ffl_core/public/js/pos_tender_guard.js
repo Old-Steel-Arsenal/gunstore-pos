@@ -34,6 +34,7 @@
 		window.ffl.payoutSummary = api.payoutSummary;
 		window.ffl.PAYOUT_METHODS = api.PAYOUT_METHODS;
 		window.ffl.payoutProblem = api.payoutProblem;
+		window.ffl.pickupTicketState = api.pickupTicketState;
 	}
 })(function () {
 	'use strict';
@@ -458,8 +459,23 @@
 		};
 	}
 
+	// A counter pickup's 4473 ticket (POS Invoice.ffl_counter_order): the money is on the order it hands over, so
+	// the ticket never takes a tender. null for anything else (a return of a ticket mirrors the ticket); else the
+	// order and whether THIS copy carries money — the register re-applies the price list when it loads a draft —
+	// which a save hands to the server to pin back to $0 (counter_pickup.keep_ticket_free).
+	function pickupTicketState(doc) {
+		doc = doc || {};
+		var order = trim(doc.ffl_counter_order);
+		if (!order || parseInt(doc.is_return, 10)) return null;
+		var money = !!(flt(doc.grand_total) || flt(doc.rounded_total) || flt(doc.paid_amount) || flt(doc.change_amount));
+		(doc.items || []).forEach(function (r) { if (flt((r || {}).rate)) money = true; });
+		(doc.payments || []).forEach(function (p) { if (flt((p || {}).amount)) money = true; });
+		return { order: order, carriesMoney: money };
+	}
+
 	return {
 		PAYOUT_METHODS: PAYOUT_METHODS,
+		pickupTicketState: pickupTicketState,
 		payoutProblem: payoutProblem,
 		payoutSummary: payoutSummary,
 		isNegativeTicket: isNegativeTicket,

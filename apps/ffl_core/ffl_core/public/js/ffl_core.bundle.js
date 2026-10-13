@@ -2792,7 +2792,22 @@ frappe.provide('frappe.ui.form');
 		return s ? s.payrocEnabled() : true;   // no switches module → pre-switch behaviour
 	}
 
+	// A counter pickup's 4473 ticket (pos_tender_guard.pickupTicketState). Kernel
+	// missing (asset problem) → read the link here: a ticket never reaches the
+	// terminal, so fail toward "it is a ticket".
+	function pickupTicket(doc) {
+		const k = window.ffl && window.ffl.pickupTicketState;
+		if (k) return k(doc);
+		const order = ((doc || {}).ffl_counter_order || '').trim();
+		return order && !cint(doc.is_return) ? { order, carriesMoney: true } : null;
+	}
+
 	async function chargeViaPayroc(frm) {
+		// A counter pickup ticket carries no money — it is on the order the ticket
+		// hands over. Never the card dialog, never the terminal, whatever this copy
+		// of the doc says (submit_invoice has already saved it back to $0).
+		if (pickupTicket(frm.doc)) return { skip: true };
+
 		// Payroc switched off: cards are swiped on a standalone terminal and the
 		// Credit Card row is ordinary tender, so Complete Order finishes in one
 		// click. Decided HERE rather than after the save + round-trip the server
@@ -3411,6 +3426,21 @@ frappe.provide('frappe.ui.form');
 				if (!r.skip && !r.ok) return;
 				return originalSubmit();
 			}
+			// COUNTER PICKUP TICKET: the money is on the order it hands over. A copy
+			// the register re-priced (it re-applies the price list when it loads a
+			// draft, then fills a tender for that total) is saved first — the server
+			// pins it back to $0 (counter_pickup.keep_ticket_free) — and repainted,
+			// so the cashier sees $0 and nothing below asks for a tender reference
+			// or reaches the terminal.
+			const ticket = pickupTicket(controller.frm.doc);
+			if (ticket && ticket.carriesMoney) {
+				frappe.show_alert({ message: __('This is a pickup ticket for {0} — the money is on that order.',
+					[ticket.order]), indicator: 'orange' }, 7);
+				controller.frm.dirty();
+				try { await controller.frm.save(); } catch (e) { return; }   // the server said why
+				try { controller.cart.load_invoice(); controller.payment.render_payment_section(); } catch (e) { /* cosmetic */ }
+				if (pickupTicket(controller.frm.doc).carriesMoney) return;   // never submit a ticket still charging
+			}
 			// NEGATIVE TICKET (trade-ins exceed the goods): the store pays the customer.
 			// Nothing is tendered, so the Zelle / card prompts and the charge below
 			// have nothing to do; what has to hold is the payout method (+ reference
@@ -3444,7 +3474,8 @@ frappe.provide('frappe.ui.form');
 			// charge stamps payroc_unique_reference + payroc_charged_amount, so
 			// re-clicking Complete Order after the 4473 clears never re-charges.
 			// Counter pickup ticket: collect what the ORDER still owes before the
-			// gun is handed over (the ticket itself is $0, so the charge below skips).
+			// gun is handed over (the ticket itself is $0 — pinned above and by the
+			// server — and the charge below never runs for it).
 			const balance = await collectCounterBalance(controller.frm);
 			if (!balance.ok) return;
 			const pcm = payrocMath();

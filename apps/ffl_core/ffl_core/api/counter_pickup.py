@@ -11,8 +11,9 @@ stock). So when the gun arrives this module opens a DRAFT POS Invoice for it:
 
 * the gun line(s) at **$0**, with the serial the receive hung on the order —
   the money is already on the Sales Invoice, and a second full-price line would
-  book the sale twice. The remark says so, and the ticket's own total is
-  asserted to be zero before it is saved;
+  book the sale twice. The remark says so, and every save of the ticket —
+  whoever makes it — re-pins it to $0 and refuses items the order did not sell
+  (:func:`keep_ticket_free`, :func:`assert_ticket_free`);
 * linked back through ``POS Invoice.ffl_counter_order``, which is also the
   idempotency key (one open draft per order) and what the queue reads to offer
   "Open counter order" instead of "Pickup";
@@ -187,6 +188,84 @@ def _pin_zero(doc) -> None:
 		row.price_list_rate = 0
 		row.discount_amount = 0
 		row.discount_percentage = 0
+		row.margin_rate_or_amount = 0
+		# A rule left on the row makes core's validate re-derive it
+		# (set_missing_item_details' pricing_rule_removed branch).
+		row.pricing_rules = None
+
+
+def _is_ticket(doc) -> bool:
+	"""A counter pickup ticket — not a return of one, which mirrors whatever the
+	ticket carried."""
+	return bool((getattr(doc, LINK_FIELD, None) or "").strip()) \
+		and not cint(getattr(doc, "is_return", 0) or 0)
+
+
+# Header money a ticket must not carry. Payments are zeroed row by row; core
+# does not recompute paid_amount for a POS Invoice (taxes_and_totals only does
+# for a Sales Invoice), and validate_change_amount only fills change while it is
+# 0 and never resets it — so all of these are pinned here, not left to core.
+_ZERO_HEADER = ("paid_amount", "base_paid_amount", "change_amount", "base_change_amount",
+	"write_off_amount", "base_write_off_amount", "write_off_outstanding_amount_automatically",
+	"additional_discount_percentage", "discount_amount", "base_discount_amount")
+
+
+def keep_ticket_free(doc, method: str | None = None) -> None:
+	"""POS Invoice before_validate — a pickup ticket stays at $0 on EVERY save.
+
+	The ticket opens at $0, but any later save — the POS page refreshes posting
+	time and re-applies the price list when it loads a draft — can re-rate the
+	gun and fill a tender for it, and Complete Order then asks for the money a
+	second time. This re-asserts $0 whoever saves.
+
+	Hook point: before_validate, first in the list. Frappe runs it on save AND
+	submit, before ERPNext's validate (document.run_before_save_methods; the
+	controller method runs before doc_events, Document.hook), so core's
+	set_missing_values / calculate_taxes_and_totals / validate_change_amount /
+	validate_full_payment and every validate hook after it see $0 — the same
+	reasoning as compliance/locked_lines. ``ignore_pricing_rule`` keeps core's
+	validate from applying a Rate rule or adding a free item behind it;
+	:func:`assert_ticket_free` fails closed on anything else.
+	"""
+	if not _is_ticket(doc):
+		return
+	_refuse_items_off_the_order(doc)
+	doc.ignore_pricing_rule = 1
+	_pin_zero(doc)
+	for p in doc.get("payments") or []:
+		p.amount = 0
+		p.base_amount = 0
+	for field in _ZERO_HEADER:
+		setattr(doc, field, 0)
+	doc.calculate_taxes_and_totals()
+
+
+def _refuse_items_off_the_order(doc) -> None:
+	"""A ticket hands over what the order sold. Anything else rung on it would
+	be given away (the pin above) and vanish from reporting (the Sales Report
+	skips tickets)."""
+	link = getattr(doc, LINK_FIELD).strip()
+	sold = set(frappe.get_all("Sales Invoice Item",
+		filters={"parent": link, "parenttype": "Sales Invoice"}, pluck="item_code"))
+	extra = sorted({r.item_code for r in doc.items if r.item_code and r.item_code not in sold})
+	if extra:
+		frappe.throw(_(
+			"{0} is not on order {1}. A pickup ticket hands over what the order "
+			"sold; ring other items as a separate sale.").format(", ".join(extra), link),
+			title=_("Not on the order"))
+
+
+def assert_ticket_free(doc, method: str | None = None) -> None:
+	"""POS Invoice validate, after ERPNext's own — fail closed: a ticket that
+	core's validate put money back on is refused, never saved charging."""
+	if not _is_ticket(doc):
+		return
+	money = [flt(doc.get(f)) for f in ("grand_total", "rounded_total", "paid_amount",
+		"change_amount", "write_off_amount")]
+	if any(money) or any(flt(r.rate) for r in doc.items):
+		frappe.throw(_(
+			"Pickup ticket for {0} came out at {1} instead of 0 — the sale is "
+			"already on the order.").format(getattr(doc, LINK_FIELD), flt(doc.grand_total)))
 
 
 def _zero_payment_row(doc) -> None:
@@ -214,11 +293,10 @@ def ticket_remarks(sales_invoice: str) -> str:
 
 def _open_ticket(si, pending: list[dict], shift) -> str:
 	"""Insert the $0 ticket and return its name, or raise having left NOTHING
-	behind: the assertion below runs after the insert, and the arrival path
-	swallows the raise (the receive is already committed), so a ticket that
-	came out charging would otherwise stay on the order — linked, offered as
-	"Open counter order", and blocking Edit / Cancel until deleted by hand.
-	The savepoint makes the raise undo the insert."""
+	behind: the arrival path swallows the raise (the receive is already
+	committed), so a half-made ticket would otherwise stay on the order —
+	linked, offered as "Open counter order", and blocking Edit / Cancel until
+	deleted by hand. The savepoint makes the raise undo the insert."""
 	payload = {
 		"doctype": "POS Invoice",
 		"company": si.company,
@@ -241,27 +319,17 @@ def _open_ticket(si, pending: list[dict], shift) -> str:
 	doc = frappe.get_doc(payload)
 	doc.flags.ignore_permissions = True
 	set_missing_values_keeping_taxes(doc)
-	_pin_zero(doc)
-	doc.calculate_taxes_and_totals()
 	_zero_payment_row(doc)
 	savepoint = "counter_pickup_ticket"
 	frappe.db.savepoint(savepoint)
-	doc.insert()
-	# The first save's pricing pass may have re-rated the lines (the same reason
-	# api/manual_order re-pins after its first save). Fail CLOSED: a ticket that
-	# would charge is not a ticket.
-	doc.reload()
-	if any(flt(row.rate) or flt(row.price_list_rate) for row in doc.items):
-		_pin_zero(doc)
-		doc.calculate_taxes_and_totals()
-		doc.save()
-		doc.reload()
-	if flt(doc.grand_total) or flt(doc.rounded_total):
-		total = doc.grand_total
+	# The insert's own save pins $0 (keep_ticket_free, before_validate) and
+	# refuses a ticket core's validate re-priced (assert_ticket_free). Fail
+	# CLOSED and leave nothing behind: a ticket that would charge is not a ticket.
+	try:
+		doc.insert()
+	except Exception:
 		frappe.db.rollback(save_point=savepoint)
-		frappe.throw(_(
-			"Pickup ticket for {0} came out at {1} instead of 0 — not opened, "
-			"the sale is already on the order.").format(si.name, total))
+		raise
 	si.add_comment("Comment", _(
 		"Counter pickup ticket {0} opened for serial {1} — run the 4473 there and "
 		"Complete Order to hand the firearm over.").format(

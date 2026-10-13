@@ -387,6 +387,10 @@ doc_events = {
 	"POS Invoice": {
 		# Same ordering reason as the Sales Invoice entry above.
 		"before_validate": [
+			# Counter pickup ticket: $0 on every save, refusing items the order did
+			# not sell — first, so the hooks below and ERPNext's validate (pricing,
+			# totals, change amount) all see $0. Closed by assert_ticket_free.
+			"ffl_core.api.counter_pickup.keep_ticket_free",
 			"ffl_core.compliance.consignment.freeze_consignment_commission",
 			# Locked lines pinned before core prices/totals the rows — see the
 			# Sales Invoice entry.
@@ -431,6 +435,9 @@ doc_events = {
 			# account: the owner-scoped nightly close will skip this sale (8/25,
 			# 8/26 incidents); the sweep posts it later.
 			"ffl_core.api.pos_consolidate.warn_owner_shift_mismatch",
+			# Counter pickup ticket: refuse one ERPNext's validate put money back on
+			# after the before_validate pin (fail closed).
+			"ffl_core.api.counter_pickup.assert_ticket_free",
 			# Locked lines: refuse what ERPNext's own validate did to them after the
 			# before_validate pin (pricing rules, coupons). Last, after every other hook.
 			"ffl_core.compliance.locked_lines.assert_locked_lines",
