@@ -5646,7 +5646,7 @@
           "ffl_core"
         ],
         "summary": "Open (or return) the DRAFT POS Invoice that hands over a counter pickup's",
-        "description": "firearm(s) — the Pending Order page's Pickup button on a counter row.\n\n**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\n**Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.\n\nSource: `apps/ffl_core/ffl_core/api/counter_pickup.py:122`",
+        "description": "firearm(s) — the Pending Order page's Pickup button on a counter row.\n\n**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\n**Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.\n\nSource: `apps/ffl_core/ffl_core/api/counter_pickup.py:123`",
         "operationId": "ffl_core.api.counter_pickup.open_pickup_invoice",
         "responses": {
           "200": {

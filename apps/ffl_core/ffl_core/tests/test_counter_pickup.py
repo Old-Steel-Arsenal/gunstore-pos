@@ -83,6 +83,45 @@ class ZeroTicket(unittest.TestCase):
 			"warehouse": "Stores - X"}])
 
 
+class TicketStaysFreeScope(unittest.TestCase):
+	"""keep_ticket_free / assert_ticket_free touch a draft TICKET only: a return
+	of one and an ordinary sale keep their prices (the ticket path itself runs
+	against a real site in test_counter_to_store)."""
+
+	def _priced(self, **over):
+		base = {"ffl_counter_order": "", "is_return": 0, "grand_total": 670,
+			"paid_amount": 670, "change_amount": 0,
+			"items": [frappe._dict(item_code="G", rate=670, price_list_rate=670)],
+			"payments": [frappe._dict(mode_of_payment="Credit Card", amount=670, base_amount=670)]}
+		base.update(over)
+		return frappe._dict(base)
+
+	def _untouched(self, doc):
+		self.assertEqual((doc["items"][0].rate, doc.payments[0].amount, doc.grand_total, doc.paid_amount),
+			(670, 670, 670, 670))
+
+	def test_an_ordinary_sale_keeps_its_price(self):
+		doc = self._priced()
+		counter_pickup.keep_ticket_free(doc)
+		counter_pickup.assert_ticket_free(doc)
+		self._untouched(doc)
+
+	def test_a_return_of_a_ticket_is_left_alone(self):
+		doc = self._priced(ffl_counter_order="SI-1", is_return=1, grand_total=-670, paid_amount=-670)
+		doc["items"][0].rate = 670
+		counter_pickup.keep_ticket_free(doc)
+		counter_pickup.assert_ticket_free(doc)
+		self.assertEqual(doc["items"][0].rate, 670)
+		self.assertEqual(doc.paid_amount, -670)
+
+	def test_hooks_are_registered_before_and_after_core_validate(self):
+		from ffl_core import hooks
+		pos = hooks.doc_events["POS Invoice"]
+		self.assertEqual(pos["before_validate"][0], "ffl_core.api.counter_pickup.keep_ticket_free",
+			"first, so every later before_validate hook and ERPNext's validate see $0")
+		self.assertIn("ffl_core.api.counter_pickup.assert_ticket_free", pos["validate"])
+
+
 class SubmitHook(unittest.TestCase):
 	def test_an_ordinary_pos_invoice_is_left_alone(self):
 		with mock.patch.object(counter_pickup, "_clear_if_done") as clear:

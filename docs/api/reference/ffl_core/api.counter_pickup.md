@@ -22,4 +22,4 @@ firearm(s) — the Pending Order page's Pickup button on a counter row.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/counter_pickup.py:122`</sub>
+<sub>`apps/ffl_core/ffl_core/api/counter_pickup.py:123`</sub>
