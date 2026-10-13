@@ -752,6 +752,35 @@ class CounterToStoreIntegration(CounterToStoreFixtures):
 		self.assertIn("ring other items as a separate sale", str(cm.exception))
 		self.assertEqual(len(frappe.get_doc("POS Invoice", ticket).items), 1)
 
+	def test_a_ticket_refuses_more_of_the_ordered_gun_than_the_order_sold(self):
+		"""Review r1: the check compared item codes only, so a second serial of the
+		same model, or qty 2 of the sold line, passed and was pinned to $0."""
+		self._open_register()
+		out = self._pickup([self._line(GUN)])
+		si_name = out["sales_invoice"]
+		self._receive(self._ship_to_store(self._only_do(si_name), serial="TS-P2-SN-PU9"))
+		ticket = self._ticket_for(si_name)
+
+		pos = frappe.get_doc("POS Invoice", ticket)
+		pos.flags.ignore_permissions = True
+		pos.append("items", {"item_code": GUN, "qty": 1, "serial_no": "TS-P2-SN-NOT-SOLD",
+			"use_serial_batch_fields": 1, "warehouse": pos.items[0].warehouse})
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pos.save()
+		self.assertIn("TS-P2-SN-NOT-SOLD", str(cm.exception))
+		self.assertIn("is not on order", str(cm.exception))
+
+		pos = frappe.get_doc("POS Invoice", ticket)
+		pos.flags.ignore_permissions = True
+		pos.items[0].qty = 2
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pos.save()
+		self.assertIn("more than order", str(cm.exception))
+
+		saved = frappe.get_doc("POS Invoice", ticket)
+		self.assertEqual([(r.item_code, flt(r.qty), r.serial_no) for r in saved.items],
+			[(GUN, 1.0, "TS-P2-SN-PU9")], "the ticket kept only what the order sold")
+
 	def test_ticket_books_on_the_day_it_is_rung_not_the_day_the_gun_arrived(self):
 		"""Review: opened at arrival with set_posting_time, the ticket froze on
 		the arrival day and a later submit back-dated the stock issue and the

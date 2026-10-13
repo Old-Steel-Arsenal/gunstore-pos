@@ -2793,13 +2793,68 @@ frappe.provide('frappe.ui.form');
 	}
 
 	// A counter pickup's 4473 ticket (pos_tender_guard.pickupTicketState). Kernel
-	// missing (asset problem) → read the link here: a ticket never reaches the
-	// terminal, so fail toward "it is a ticket".
+	// missing (asset problem) → the same reading here, so a ticket is still never
+	// charged and a $0 one still completes. Keep the two in step.
 	function pickupTicket(doc) {
 		const k = window.ffl && window.ffl.pickupTicketState;
 		if (k) return k(doc);
-		const order = ((doc || {}).ffl_counter_order || '').trim();
-		return order && !cint(doc.is_return) ? { order, carriesMoney: true } : null;
+		doc = doc || {};
+		const order = (doc.ffl_counter_order || '').trim();
+		if (!order || cint(doc.is_return)) return null;
+		const carriesMoney = [doc.grand_total, doc.rounded_total, doc.paid_amount, doc.change_amount].some((v) => flt(v))
+			|| (doc.items || []).some((r) => flt((r || {}).rate))
+			|| (doc.payments || []).some((p) => flt((p || {}).amount));
+		return { order, carriesMoney };
+	}
+
+	// The save did not bring the ticket to $0 (something re-priced this copy
+	// again): never let it take money, and say so — a silent stop reads as a
+	// dead button.
+	function ticketStillPriced(order) {
+		frappe.msgprint({
+			title: __('Pickup ticket still shows a price'), indicator: 'red',
+			message: __('This pickup ticket for {0} is still showing a price. Do not take any payment — the money is on that order. Reload the page and open the ticket again.', [order]),
+		});
+	}
+
+	// When the register loads a pickup ticket into its cart (Recent Orders → Edit,
+	// Open counter order, any load_invoice) and this copy carries money — the
+	// register re-applies the price list to a draft — save it so the server pins
+	// $0 (counter_pickup.keep_ticket_free), repaint, and tell the cashier to take
+	// no payment. Before Complete Order, so cash is never collected against a
+	// list price. A $0 ticket is left alone; one save per load (the repaint's
+	// own load_invoice is a no-op while this ticket is being pinned).
+	const pinningTickets = new Set();
+	async function pinLoadedTicket(cart) {
+		const frm = cart && cart.events && typeof cart.events.get_frm === 'function' && cart.events.get_frm();
+		const doc = frm && frm.doc;
+		if (!doc || doc.__islocal || cint(doc.docstatus) !== 0 || pinningTickets.has(doc.name)) return;
+		const ticket = pickupTicket(doc);
+		if (!ticket || !ticket.carriesMoney) return;
+		pinningTickets.add(doc.name);
+		try {
+			frappe.show_alert({ message: __('Pickup ticket — the money is on order {0}. Take no payment.',
+				[ticket.order]), indicator: 'orange' }, 10);
+			frm.dirty();
+			try { await frm.save(); } catch (e) { return; }   // the server said why
+			try { cart.load_invoice(); } catch (e) { /* cosmetic */ }
+			const after = pickupTicket(frm.doc);
+			if (after && after.carriesMoney) ticketStillPriced(ticket.order);
+		} finally {
+			pinningTickets.delete(doc.name);
+		}
+	}
+
+	function patchCartLoad(ItemCart) {
+		const proto = ItemCart && ItemCart.prototype;
+		if (!proto || proto.__fflTicketLoadPatched || typeof proto.load_invoice !== 'function') return;
+		const original = proto.load_invoice;
+		proto.load_invoice = function fflLoadInvoice(...args) {
+			const out = original.apply(this, args);
+			pinLoadedTicket(this).catch((e) => console.error('ffl: pickup ticket pin failed', e));
+			return out;
+		};
+		proto.__fflTicketLoadPatched = true;
 	}
 
 	async function chargeViaPayroc(frm) {
@@ -3439,7 +3494,10 @@ frappe.provide('frappe.ui.form');
 				controller.frm.dirty();
 				try { await controller.frm.save(); } catch (e) { return; }   // the server said why
 				try { controller.cart.load_invoice(); controller.payment.render_payment_section(); } catch (e) { /* cosmetic */ }
-				if (pickupTicket(controller.frm.doc).carriesMoney) return;   // never submit a ticket still charging
+				if (pickupTicket(controller.frm.doc).carriesMoney) {   // never submit a ticket still charging
+					ticketStillPriced(ticket.order);
+					return;
+				}
 			}
 			// NEGATIVE TICKET (trade-ins exceed the goods): the store pays the customer.
 			// Nothing is tendered, so the Zelle / card prompts and the charge below
@@ -3608,6 +3666,13 @@ frappe.provide('frappe.ui.form');
 	}
 
 	function tryPatch(retriesLeft) {
+		// Cart loads of a pickup ticket (pinLoadedTicket). installClassHook
+		// (pos_tender_guard.js, loaded after this bundle — hence here, on the POS
+		// route, not at parse time) patches ItemCart now or when ERPNext defines it.
+		const hook = window.ffl && window.ffl.installClassHook;
+		if (hook && window.erpnext && window.erpnext.PointOfSale && !tryPatch.__cartHooked) {
+			tryPatch.__cartHooked = hook(window.erpnext.PointOfSale, 'ItemCart', patchCartLoad);
+		}
 		const C = window.erpnext && window.erpnext.PointOfSale && window.erpnext.PointOfSale.Controller;
 		if (!C) {
 			if (retriesLeft > 0) setTimeout(() => tryPatch(retriesLeft - 1), 200);

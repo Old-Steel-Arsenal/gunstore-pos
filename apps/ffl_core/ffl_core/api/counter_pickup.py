@@ -241,17 +241,39 @@ def keep_ticket_free(doc, method: str | None = None) -> None:
 
 
 def _refuse_items_off_the_order(doc) -> None:
-	"""A ticket hands over what the order sold. Anything else rung on it would
-	be given away (the pin above) and vanish from reporting (the Sales Report
-	skips tickets)."""
+	"""A ticket hands over what the order sold — those items, those serials, no
+	more units. Anything else rung on it would be given away (the pin above) and
+	vanish from reporting (the Sales Report skips tickets)."""
+	from ffl_core.serials import serials_for_line, serials_for_lines
+
 	link = getattr(doc, LINK_FIELD).strip()
-	sold = set(frappe.get_all("Sales Invoice Item",
-		filters={"parent": link, "parenttype": "Sales Invoice"}, pluck="item_code"))
-	extra = sorted({r.item_code for r in doc.items if r.item_code and r.item_code not in sold})
+	sold_rows = frappe.get_all("Sales Invoice Item",
+		filters={"parent": link, "parenttype": "Sales Invoice"},
+		fields=["item_code", "qty", "serial_no", "serial_and_batch_bundle"])
+	sold_qty: dict[str, float] = {}
+	sold_serials: set[str] = set()
+	for row, serials in zip(sold_rows, serials_for_lines(sold_rows)):
+		sold_qty[row.item_code] = sold_qty.get(row.item_code, 0) + flt(row.qty)
+		sold_serials.update(serials)
+
+	rows = [r for r in doc.items if r.item_code]
+	refuse = _("{0} is not on order {1}. A pickup ticket hands over what the order "
+		"sold; ring other items as a separate sale.")
+	extra = sorted({r.item_code for r in rows if r.item_code not in sold_qty})
 	if extra:
+		frappe.throw(refuse.format(", ".join(extra), link), title=_("Not on the order"))
+	stray = sorted({s for r in rows for s in serials_for_line(r) if s not in sold_serials})
+	if stray:
+		frappe.throw(refuse.format(_("Serial {0}").format(", ".join(stray)), link),
+			title=_("Not on the order"))
+	rung: dict[str, float] = {}
+	for r in rows:
+		rung[r.item_code] = rung.get(r.item_code, 0) + flt(r.qty)
+	over = sorted(code for code, qty in rung.items() if qty > sold_qty[code] + 1e-9)
+	if over:
 		frappe.throw(_(
-			"{0} is not on order {1}. A pickup ticket hands over what the order "
-			"sold; ring other items as a separate sale.").format(", ".join(extra), link),
+			"{0}: more than order {1} sold. A pickup ticket hands over what the order "
+			"sold; ring other units as a separate sale.").format(", ".join(over), link),
 			title=_("Not on the order"))
 
 

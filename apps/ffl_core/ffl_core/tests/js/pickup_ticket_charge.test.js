@@ -24,13 +24,19 @@ function zeroed(doc) {
 	Object.assign(doc, { grand_total: 0, rounded_total: 0, paid_amount: 0, change_amount: 0 });
 }
 
-function harness(doc) {
-	const seen = { calls: [], dialogs: [], alerts: [], saves: 0, submits: 0, repaints: [] };
+// opts.kernel=false: pos_tender_guard.js missing (the bundle's own fallback decides).
+// opts.saveKeepsPrice: the save comes back still priced (something re-priced the copy again).
+function harness(doc, opts = {}) {
+	const seen = { calls: [], dialogs: [], alerts: [], msgprints: [], saves: 0, submits: 0, repaints: [], loads: 0 };
 	const frm = {
 		doc,
 		is_dirty: () => false,
 		dirty() { frm._dirty = true; },
-		save() { seen.saves++; if (doc.ffl_counter_order) zeroed(doc); return Promise.resolve(); },
+		save() {
+			seen.saves++;
+			if (doc.ffl_counter_order && !opts.saveKeepsPrice) zeroed(doc);
+			return Promise.resolve();
+		},
 		reload_doc: () => Promise.resolve(),
 	};
 	class Dialog {
@@ -51,9 +57,15 @@ function harness(doc) {
 		},
 		db: { get_value: async () => ({ message: { outstanding_amount: 0 } }) },
 		show_alert: (m) => { seen.alerts.push(m.message); },
-		msgprint: (m) => { seen.alerts.push(m.message || m); },
+		msgprint: (m) => { seen.msgprints.push(m.message || m); },
 		utils: { escape_html: (v) => String(v) },
+		provide() {},
 	};
+	// ERPNext's ItemCart, just enough: load_invoice paints the cart from the frm.
+	class ItemCart {
+		constructor() { this.events = { get_frm: () => frm }; }
+		load_invoice() { seen.loads++; }
+	}
 	const controller = {
 		frm,
 		cart: { load_invoice: () => seen.repaints.push('cart') },
@@ -70,21 +82,26 @@ function harness(doc) {
 		document: { readyState: 'complete' },
 		location: { hash: '#point-of-sale', pathname: '/app/point-of-sale' },
 		setTimeout,
-		erpnext: { PointOfSale: { Controller: function Controller() {} } },
+		erpnext: { PointOfSale: { Controller: function Controller() {}, ItemCart } },
 		cur_pos: controller,
 		ffl: {
 			payrocCharges,
-			pickupTicketState: kernel.pickupTicketState,
 			negativeTicketState: kernel.negativeTicketState,
+			installClassHook: kernel.installClassHook,
 		},
 	};
+	if (opts.kernel !== false) sandbox.ffl.pickupTicketState = kernel.pickupTicketState;
 	sandbox.window = sandbox;
 	const start = BUNDLE.indexOf('(function setupPayrocPosHook() {');
 	assert.ok(start > 0, 'Payroc block not found in the bundle');
 	const end = BUNDLE.indexOf('\n})();', start) + '\n})();'.length;
 	vm.runInNewContext(BUNDLE.slice(start, end), sandbox);
 	assert.ok(controller.payment.__payrocWrapped, 'the block wrapped Complete Order');
-	return { seen, submit: () => controller.payment.events.submit_invoice() };
+	return {
+		seen, submit: () => controller.payment.events.submit_invoice(),
+		// the register loading the ticket into its cart (Recent Orders → Edit, Open counter order)
+		load: async () => { new ItemCart().load_invoice(); for (let i = 0; i < 5; i++) await new Promise((r) => setTimeout(r, 0)); },
+	};
 }
 
 const REPRICED_TICKET = () => ({
@@ -123,4 +140,55 @@ test('control: an ordinary card sale on the same harness reaches the card dialog
 	await submit();
 	assert.deepStrictEqual(seen.dialogs, ['Card payment']);
 	assert.strictEqual(seen.submits, 0, 'the cashier backed out of the dialog');
+});
+
+test('kernel missing: the bundle fallback reads the money off the doc like the kernel does', async () => {
+	const free = REPRICED_TICKET();
+	zeroed(free);
+	let h = harness(free, { kernel: false });
+	await h.submit();
+	assert.deepStrictEqual([h.seen.saves, h.seen.submits, h.seen.dialogs], [0, 1, []], 'a $0 ticket still completes');
+	h = harness(REPRICED_TICKET(), { kernel: false });
+	await h.submit();
+	assert.deepStrictEqual([h.seen.saves, h.seen.submits, h.seen.dialogs], [1, 1, []], 'a priced one is saved to $0 first');
+	assert.ok(!h.seen.calls.some((m) => /payroc/.test(m)));
+});
+
+test('a ticket still priced after the save stops Complete Order out loud', async () => {
+	const { seen, submit } = harness(REPRICED_TICKET(), { saveKeepsPrice: true });
+	await submit();
+	assert.strictEqual(seen.submits, 0);
+	assert.ok(seen.msgprints.some((m) => /still showing a price/.test(m) && /[Rr]eload/.test(m) && /payment/.test(m)),
+		`clear message: ${seen.msgprints}`);
+	assert.deepStrictEqual(seen.dialogs, []);
+});
+
+test('loading a priced ticket into the cart pins it once: save, repaint, "take no payment"', async () => {
+	const doc = REPRICED_TICKET();
+	const { seen, load } = harness(doc);
+	await load();
+	assert.strictEqual(seen.saves, 1, 'saved so the server pins $0 — and no save loop from the repaint');
+	assert.strictEqual(seen.loads, 2, 'the load, then one repaint from the pinned doc');
+	assert.ok(seen.alerts.some((m) => /order SI-1/.test(m) && /take no payment/i.test(m)), `${seen.alerts}`);
+	assert.strictEqual(flt(doc.grand_total), 0);
+});
+
+test('loading a $0 ticket, a submitted one or an ordinary sale does nothing', async () => {
+	const free = REPRICED_TICKET();
+	zeroed(free);
+	const submitted = { ...REPRICED_TICKET(), docstatus: 1 };
+	const sale = { ...REPRICED_TICKET(), ffl_counter_order: '' };
+	for (const doc of [free, submitted, sale]) {
+		const { seen, load } = harness(doc);
+		await load();
+		assert.deepStrictEqual([seen.saves, seen.loads, seen.alerts], [0, 1, []]);
+	}
+});
+
+test('a ticket the save cannot bring to $0 on load says so once, no loop', async () => {
+	const { seen, load } = harness(REPRICED_TICKET(), { saveKeepsPrice: true });
+	await load();
+	assert.strictEqual(seen.saves, 1);
+	assert.strictEqual(seen.loads, 2);
+	assert.strictEqual(seen.msgprints.filter((m) => /still showing a price/.test(m)).length, 1);
 });
