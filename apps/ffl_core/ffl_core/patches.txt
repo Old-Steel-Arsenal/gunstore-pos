@@ -77,3 +77,5 @@ ffl_core.patches.retire_special_orders
 ffl_core.patches.remove_dealer_store
 # 0.1.0 restarts the version line below 1.15.1: stored What's New versions above it go back to 0.0.1.
 ffl_core.patches.v0_1_0_reset_last_known_versions
+# 0.1.2: the Gun Shop sidebars use the product mark ("gunstore") as their header icon.
+ffl_core.patches.v0_1_2_gunstore_header_icon

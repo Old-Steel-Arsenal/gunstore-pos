@@ -78,7 +78,7 @@ def gun_shop_items() -> list[dict]:
 
 
 def mirror_gun_shop_sidebar(name: str, *, module: str | None = None, app: str | None = POS_APP,
-		header_icon: str = "retail", extra_items: list[dict] | None = None) -> bool:
+		header_icon: str = "gunstore", extra_items: list[dict] | None = None) -> bool:
 	"""Make module ``module``'s sidebar (titled ``name``) the Gun Shop links + ``extra_items``.
 
 	An extension's pages live in its own module, and without a `Sidebar` that module gets the
