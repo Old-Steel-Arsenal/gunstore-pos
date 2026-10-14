@@ -701,7 +701,7 @@ def _hidden_store():
     return store
 
 
-class TestCounterSaleRouting(FrappeTestCase):
+class TestCounterSaleRouting(_PatchClock):
     """ERPNext v16 flips Serial No status with a direct QB UPDATE that never
     fires on_update, so the stock-ledger hook is the ONLY exit signal a counter
     sale produces. It is how SP000279 got drafted in the first place."""
