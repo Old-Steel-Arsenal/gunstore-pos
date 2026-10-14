@@ -53,8 +53,6 @@ See [The cash drawer](../selling/cash-drawer.md).
 
 **Distributor order.** One purchase from one wholesale house, numbered like `DO-2609-0001` (year, month, running number). It waits in Draft until a person confirms it. See [Distributor orders](../distributors/restock.md).
 
-**Drop-ship.** A distributor ships a product straight to the customer or to the receiving dealer without it passing through your building. The order and the paperwork are yours. The box never touches your shelf. See [Drop-shipping](../distributors/dropship.md).
-
 **Extension.** An add-on that brings its own pages and records, installed and switched on or off under Settings → Extensions. See [Extensions](../../extensions/README.md).
 
 **eZ Check.** The ATF's public service for confirming that an FFL number is valid and unexpired. This system checks other dealers against it before receiving or shipping firearms, either by querying the ATF form directly or through a shared data service. See [FFL verification](../compliance/ffl-verification.md).

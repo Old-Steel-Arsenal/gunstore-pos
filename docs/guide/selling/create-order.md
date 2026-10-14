@@ -4,7 +4,7 @@ Counter staff use the **Create Order** page when the buyer is not walking out
 with the goods today. It builds an order for a firearm mailed to another
 dealer's FFL or to a collector's C&R license, for accessories shipped to a
 buyer, for a business buying on its own license, and for anything you order
-from a distributor, drop-shipped or shipped to your store first. An order for a
+from a distributor to your store. An order for a
 customer who pays a deposit and collects the goods when they come in is taken
 here too.
 
@@ -42,7 +42,7 @@ The choice also sets the payment rule. An individual's firearms may not leave th
 store until the order is paid in full. A business may ship on account.
 
 Distributor lines are for individual retail customers only. A **Business (FFL)**
-order cannot include a drop-ship or ship-to-store line.
+order cannot include a ship-to-store line.
 
 ## 1. Buyer
 
@@ -142,10 +142,7 @@ Tick **Pickup in store — the customer collects at the counter** when the
 customer collects the goods here. The address boxes clear, lock, and are not
 saved with the order. The note reads "Counter pickup — no shipping address
 needed. Distributor lines can only be ordered to the store." No shipping is
-charged, and in the fulfillment plan the **Dropship** buttons are greyed with
-the tip "Pickup in store — order it to the store". A distributor can send the
-goods to you, not to a doorstep you did not take. Lines already planned as
-drop-ship go back to the plan.
+charged.
 
 A firearm on a pickup order depends on where the gun is now:
 
@@ -323,7 +320,7 @@ distributor, in the priority order set on the
 | **_N_ in stock** | Your own stock. It fills the line when it covers the quantity |
 | **serial in hand** | The line already carries a serial from your stock |
 | **short _N_ — click to split** | Some stock, not enough. Click to split the line |
-| Cost · **qty**, then **Dropship** and **Ship to store** | The distributor's cost and live quantity, and the ways it can fill the line |
+| Cost · **qty**, then **Ship to store** | The distributor's cost and live quantity, and the button that orders the line to your store |
 | **—** | The distributor does not carry the item |
 | **unavailable** | The distributor could not be quoted. The other columns still work |
 
@@ -331,37 +328,26 @@ Where local stock is short, clicking the local cell keeps the on-hand quantity
 as a local line and moves the remainder to a new line you then route to a
 distributor.
 
-A distributor shows a button only for a way it can ship at all. A greyed-out
-button is a way it cannot fill this line, and the reason is written under the
-buttons.
+A greyed-out **Ship to store** button means the distributor cannot fill this
+line, and the reason is written under the button.
 
-| Reason under the buttons | Why |
+| Reason under the button | Why |
 |---|---|
-| drop-ship is switched off for this distributor — ship to store only | **Drop-ship** is unticked on that distributor |
 | ship to store is switched off for this distributor | **Stocking** is unticked on that distributor |
-| _Brand_: _reason_ — ship to store only | A brand policy of **To Store** for that distributor |
-| distributor block — ship to store only | The distributor will not drop-ship this item |
-| vendor approval required — ship to store only | The distributor needs vendor approval to drop-ship it |
-| this distributor ships it only to a dealer — ship to store | A part the distributor sends only to a licensed dealer |
-| insufficient distributor stock | The distributor holds fewer than the line needs. Both buttons are greyed out |
+| insufficient distributor stock | The distributor holds fewer than the line needs |
 
 ### Choose a channel for each line
 
 The plan opens with a suggestion for every line. Local stock comes first when it
 covers the line. Otherwise the plan picks the lowest-cost distributor that can
-fill it, the higher-priority one on a tie, and drop-ship where that distributor
-allows it. A line you planned before keeps its choice while that choice still
-works. On a pickup order the suggestion is always ship to store.
+fill it, the higher-priority one on a tie. A line you planned before keeps its
+choice while that choice still works.
 
-- Click **Dropship** or **Ship to store** in a distributor's cell to choose that
-  distributor and that way.
-- Click anywhere else in a distributor's cell to choose that distributor. It
-  drop-ships when it can and ships to the store when it cannot.
+- Click a distributor's cell to order the line from that distributor to your
+  store.
 - Click the cell under **Local stock** to fill the line from your own stock.
 
-**Dropship** has the distributor ship straight to the buyer, or to the
-destination FFL when the line is a firearm. A drop-shipped firearm never enters
-your bound book. **Ship to store** has the distributor ship to your store, and
+**Ship to store** has the distributor ship to your store, and
 you ship the goods on from there or hand them over at the counter. A firearm
 shipped to the store is received into your bound book like any other
 acquisition, and its serial is assigned to this order when it arrives.
@@ -381,8 +367,7 @@ cost, the estimated freight, and the margin excluding local cost, with the
 freight already taken off. When a line has no way to be filled it reads "_N_
 line(s) have no feasible channel — remove them." instead.
 
-Below it, one line per distributor order gives the distributor, **dropship**,
-**dropship firearm** or **to store**, the number of lines, and the estimated
+Below it, one line per distributor order gives the distributor, **to store**, the number of lines, and the estimated
 freight or **free**. Lines are grouped the way they will be ordered, so a
 distributor's firearms and accessories count as separate orders.
 
@@ -411,7 +396,6 @@ item name:
 
 | Tag | Note |
 |---|---|
-| **Drop-ship** and the distributor | Ships from distributor — no in-store serial |
 | **Ship to store** and the distributor, on a firearm | Ordered to the store — serial assigned and held when it arrives |
 | **Ship to store** and the distributor, on anything else | Ordered to the store — ships once it arrives |
 
@@ -419,9 +403,8 @@ Once planned distributor lines exist, section 6 stops offering the dispose
 choice. It lists the legs instead, with **Estimated distributor freight** while
 the lines stay as planned, because an order with a distributor line always
 defers. The legs are placed with **Place order** on the
-[Pending Order queue](pending-orders.md#place-order). A drop-ship leg waits
-for the order to be paid in full. A ship-to-store leg may be placed on a deposit,
-or before anything is paid, because the goods come to your own shelf.
+[Pending Order queue](pending-orders.md#place-order). A leg may be placed on a
+deposit, or before anything is paid, because the goods come to your own shelf.
 
 ## 5. Payment
 
@@ -539,8 +522,7 @@ terminal charge that did not go through, **Retry card** sits beside it.
     whole order.
 
 An order containing any distributor line always defers, whatever you chose.
-Local and ship-to-store lines ship from the Pending Order queue, and drop-ship
-lines ship from the distributor once their order is placed.
+Local and ship-to-store lines ship from the Pending Order queue.
 
 ## Save Draft and Drafts
 
@@ -589,8 +571,6 @@ unchanged:
   ordered twice.
 - You may change its price, the note, and the other lines. A new line, or more
   of an item than was ordered, is planned and ordered on its own.
-- While a **drop-ship** order is on its way to the buyer's dealer, the buyer and
-  the destination FFL are fixed too. Goods coming to the store do not fix them.
 - A distributor order still in Draft or Queued is withdrawn and created again
   from the edited order.
 
@@ -619,15 +599,13 @@ gun over on a completed pickup ticket. Use **Cancel Order** and rebuild instead.
 | "…" is not a valid US state. | The premises state cannot be read. | Type the state code or full name. |
 | Required: Fulfillment plan (unconfirmed distributor lines) | A distributor line has no confirmed channel. | Click **Plan fulfillment**, then **Apply plan**. |
 | _N_ line(s) have no feasible channel — remove them. | No stock, and no distributor can fill the line. | Remove the line, or lower its quantity. |
-| … can't drop-ship … — drop-ship is switched off for this distributor. Reopen the fulfillment plan. | Drop-ship was switched off for it after you planned. | Click **Plan fulfillment** and choose again. |
-| … can't drop-ship … — distributor … is not enabled. Reopen the fulfillment plan. | It was disabled after you planned. | Click **Plan fulfillment** and choose again. |
+| … can't order … to the store — … Reopen the fulfillment plan. | The distributor was disabled, or its **Stocking** switch turned off, after you planned. | Click **Plan fulfillment** and choose again. |
 | … can't be shipped to … (state restriction) | The item, or the distributor you chose, will not ship there. | Remove the line, or plan it from another distributor. |
-| Distributor ordering (drop-ship or ship to store) is for individual retail customers only … | A **Business (FFL)** order has a distributor line. | Remove the line, or sell from stock. |
-| Not a Counter Pickup | A pickup order has a gun from stock, a destination FFL, or a drop-ship line. | Do what the message says: ring the gun on the register, clear one of the two, or order the line to the store. |
+| Distributor ordering … is for individual retail customers only … | A **Business (FFL)** order has a distributor line. | Remove the line, or sell from stock. |
+| Not a Counter Pickup | A pickup order has a gun from stock, or a destination FFL. | Do what the message says: ring the gun on the register, or clear **Pickup in store** or the FFL. |
 | Destination FFL … is not on file — verify it first. | The license has never been fetched. | Use **Lookup by FFL #**, then **Verify FFL**. |
 | Destination FFL Expired | The license on file has lapsed. | Run **Verify FFL** to refresh it. |
 | Destination FFL Address Incomplete | No street or no valid state on the record. | Open the ATF FFL Record and complete it, or verify it again. |
-| Shipping Address Not Saved | A drop-ship order's address could not be stored, so tax could not be decided. | Check the address and create the order again. |
 | Shipping Tax Setting Changed | Someone changed **Shipping Price Includes Sales Tax** while this page was open. | Reload the page to see the correct total, then create the order. |
 | Individual orders must be paid IN FULL before shipping | You chose **Dispose & ship now** with a deposit, or with **Pay later**. | Collect the balance, or switch to **Create only — dispose later**. |
 | Enter the ACH Transaction Number to mark this order paid by ACH | The page hides the reference box for ACH, but the server requires it. | Switch **Payment Method** to Zelle to expose the box, or tick **Pay later** and collect through **Record Payment**. |
@@ -637,8 +615,6 @@ gun over on a completed pickup ticket. Use **Cancel Order** and rebuild instead.
 | Some firearms are no longer available | A gun on the draft sold or was claimed since you saved. | Pick replacements from the item search. |
 | Wrong company for this inventory | The guns belong to a different company than your POS Profile. | Use a POS Profile for that company, or open a shift on it. |
 | That reference looks like a full card number | A card number was typed into the reference box. | Enter the terminal's approval code instead. |
-| Distributor order(s) … are already shipping to this buyer's dealer … | You changed the buyer or the destination on an order whose drop-ship is in transit. | Keep both, or use **Cancel Order** and coordinate the return. |
 | … was already ordered from … — it can't be removed or reduced here … | You removed or reduced a line a distributor is already sending. | Put it back. Only its price may change. |
-| … was already ordered from … — how it is fulfilled can't be changed here … | You switched a placed line between drop-ship and ship to store. | Leave it as it was ordered. |
 | … has an open pickup ticket … for the current buyer … | You changed the buyer while the gun's pickup ticket is open. | Delete that POS Invoice first, then change the buyer. |
 | … handed its firearm over on … — a completed counter pickup cannot be cancelled or edited … | The gun already left on its pickup ticket. | Nothing to edit here. Ask a manager about a return. |

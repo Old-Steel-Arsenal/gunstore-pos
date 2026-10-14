@@ -11,7 +11,7 @@ Pick the section that matches your job.
 | [Inventory](inventory/index.md) | Inventory staff, managers | Receiving goods, trade-ins, consignment, items and serial numbers, photos, the store map, counts and corrections |
 | [Compliance](compliance/index.md) | Counter staff, managers | The bound book, Form 4473 and NICS, FastBound, verifying an FFL and the daily checks |
 | [Online channels](channels/index.md) | Inventory staff, counter staff | Your WooCommerce store, GunBroker and the orders that come back |
-| [Distributors](distributors/index.md) | Purchasing staff, managers | Ordering from wholesale houses, tracking orders and drop-shipping |
+| [Distributors](distributors/index.md) | Purchasing staff, managers | Ordering from wholesale houses and tracking orders |
 | [Reports](reports/index.md) | Managers, bookkeeper | Every report, the Sales Report and the month-end checklist |
 | [Settings](settings/index.md) | Managers, administrators | FFL Settings and the connection pages for each integration |
 | [Reference](reference/glossary.md) | Everyone | The [glossary](reference/glossary.md), [troubleshooting](reference/troubleshooting.md) and [what the system does on its own](reference/background-jobs.md) |

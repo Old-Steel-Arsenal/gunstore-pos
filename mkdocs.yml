@@ -143,7 +143,6 @@ nav:
           - guide/distributors/index.md
           - Distributors hub: guide/distributors/hub.md
           - Distributor orders: guide/distributors/restock.md
-          - Drop-shipping: guide/distributors/dropship.md
       - Reports:
           - guide/reports/index.md
           - Sales Report: guide/reports/sales-report.md

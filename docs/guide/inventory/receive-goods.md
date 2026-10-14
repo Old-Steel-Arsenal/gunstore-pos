@@ -15,7 +15,7 @@ The page shows where the goods came from at the top, the scanner below it, and t
 
 A parcel from a distributor is usually somebody's order: a customer's ship-to-store line from the counter, or a restock. The page knows about it before it arrives. **Incoming shipments (_n_)** at the top right opens the list. It shows one group per customer order, with each distributor order under it, its status, the distributor's tracking number (or "not shipped yet") and _n of m_ outstanding.
 
-The list also shows parcels that were ordered **outside the POS**, on the distributor's website or by phone. Each one appears as **Invoice** and the invoice number, with an orange **Outside POS** pill. The POS learns about these from the distributor's invoices, so nobody types them in. A drop-ship invoice never appears here, because nothing arrives at the store.
+The list also shows parcels that were ordered **outside the POS**, on the distributor's website or by phone. Each one appears as **Invoice** and the invoice number, with an orange **Outside POS** pill. The POS learns about these from the distributor's invoices, so nobody types them in.
 
 There are four ways to work a parcel:
 

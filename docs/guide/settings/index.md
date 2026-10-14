@@ -21,7 +21,7 @@ The integration shortcuts are:
 | Data Service (FFL & Catalog) | Data Service Settings |
 | Extensions | The Extensions page at `/app/extensions` |
 
-The two hubs are pages, not settings forms. The **Payments** hub lists every card processor as a card showing whether it is enabled, whether it is ready, the mode of payment it is wired to, and when it last took money. Each card has **Test Connection** and **Credentials** buttons. The **Distributors** hub has one card per distributor, with its **Enabled**, **Drop-ship**, **Stocking** and **Poll** switches, feed and order health, and **Test Connection**, **Pricing & stock** and **Account & shipping** buttons. See [the Distributors hub](../distributors/hub.md).
+The two hubs are pages, not settings forms. The **Payments** hub lists every card processor as a card showing whether it is enabled, whether it is ready, the mode of payment it is wired to, and when it last took money. Each card has **Test Connection** and **Credentials** buttons. The **Distributors** hub has one card per distributor, with its **Enabled**, **Stocking** and **Poll** switches, feed and order health, and **Test Connection**, **Pricing & stock** and **Account & shipping** buttons. See [the Distributors hub](../distributors/hub.md).
 
 The three configuration cards are:
 
