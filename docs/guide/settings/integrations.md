@@ -84,10 +84,8 @@ chosen on Data Service Settings, not through the ordering fields. See
 
 **Account tab.** **Allow live orders** is the master switch for ordering, off by
 default. While it is off nothing is sent to RSR, and the catalog still syncs.
-There are two separate credential pairs: **Dealer account #** with **Dealer API
-password** for stocking and procure-to-store orders, and
-**Fulfillment account #** with **Fulfillment API password** for drop-ship.
-Leave the fulfillment account blank and drop-ship is unavailable. The collapsed **Advanced** section
+**Dealer account #** with **Dealer API password** is the login for stocking and
+procure-to-store orders. The collapsed **Advanced** section
 holds **API base URL**, RSR's production server by default. RSR's testing
 environment is test.rsrgroup.com.
 
@@ -110,7 +108,7 @@ store at no charge, and orders to the store then estimate at nothing. Otherwise
 an order to the store ships free when its merchandise is above **Store orders
 ship free above**, 500.00 by default, and pays the rate when it is not. The rate
 is **Ground**, 10.00 by default, or **2Day (handguns)**, 15.00, when the order
-holds a handgun. A drop-ship order always pays the rate. A firearm order adds
+holds a handgun. A firearm order adds
 **Adult signature (firearm orders)**, 5.00, except on a store order with free
 freight ticked. The RSR card on the hub reads the store rule back as **Ship to
 store: free** or **free over** the threshold. **Alert when invoiced freight
@@ -179,7 +177,7 @@ error rather than shipping somewhere unverified.
 them once the parcel ships. The first section holds one flat rate per service,
 from **Handgun, 2-Day Air** to **Next-Day Air**. **Per-order fees** holds
 **Signature**, **Adult signature**, **Insurance, % of order** and **Insurance
-minimum**, added to a drop-ship estimate when the matching delivery option on the
+minimum**, added to the freight estimate when the matching delivery option on the
 Ordering tab is ticked. **Shipped to the store** holds the rule for orders to the
 shop:
 

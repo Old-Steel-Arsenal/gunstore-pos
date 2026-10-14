@@ -4,6 +4,10 @@ Read this on your first day. It covers signing in, the Dashboard and the sidebar
 you will find your way around with, how to find anything, and how to switch the
 screen to dark.
 
+Anyone who receives, prices or lists guns should also read
+[Models, serials and prices](models-and-serials.md): one Item per model, one
+Serial No per gun, and the two ways a gun can be priced.
+
 ## Signing in
 
 Open the store's system address in a browser and sign in with the email address

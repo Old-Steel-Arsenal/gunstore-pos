@@ -72,7 +72,6 @@ The reasons a row lands in **Needs attention**:
 | Serial rejected | A serial arrived from the web store and did not match free stock. |
 | FFL expired | The receiving license on file has lapsed. |
 | Awaiting payment | A GunBroker sale whose payment has not been recorded. |
-| Unpaid — settle the balance before placing the distributor order | A drop-ship leg is in Draft and the order still owes money. |
 | Unpaid — record payment before shipping | An individual's order that ships still owes money. |
 | Shipped on account — record payment | The goods left and the order still owes money. |
 
@@ -307,22 +306,17 @@ on the spot.
 
 ### Place order
 
-Counter rows with at least one Distributor Order still in Draft that may be
-placed now. It places every draft distributor leg of that invoice with its
-distributor.
+Counter rows with at least one Distributor Order still in Draft. It places
+every draft distributor leg of that invoice with its distributor.
 
-Which legs may be placed depends on the leg:
-
-- A **drop-ship** leg waits until the order is paid in full. The goods go
-  straight to the buyer or their FFL, and a placed order cannot be cancelled
-  from here.
-- A **ship-to-store** leg may be placed on a deposit, or before anything is
-  paid. The goods come to your shelf, and the gun is not handed over until the
-  order is settled. This is how an order for goods you do not have, taken with a deposit, is placed.
+A leg may be placed on a deposit, or before anything is paid. The goods come to
+your shelf, and the gun is not handed over until the order is settled. This is
+how an order for goods you do not have, taken with a deposit, is placed. A placed
+order cannot be cancelled from here.
 
 The confirmation asks "Place _N_ distributor order(s) with the distributor now?"
 and, when the order still owes money, adds how much and that the balance is
-collected at pickup. A leg the rule refuses stays in Draft and is listed under
+collected at pickup. A leg that fails stays in Draft and is listed under
 **Some distributor orders were not placed** with its reason, so you can fix it
 and place again.
 
@@ -401,8 +395,6 @@ because tracking goes back to GunBroker automatically once the label is bought.
 | … was already ordered from … — it can't be removed or reduced here … | An edit removed or reduced goods a distributor is already sending. | Put the line back. Only its price may change. |
 | … has a 4473 disposition — counter-pickup sales cannot be cancelled from the Pending Order page. | The gun was already sold on its pickup ticket. | Ask a manager about a return. |
 | … has an open pickup ticket … — delete that POS Invoice first. | You tried to cancel a pickup while its ticket is open. | Delete the draft POS Invoice, then cancel. |
-| Unpaid — settle the balance before placing the distributor order | A drop-ship leg is in Draft and the order still owes money. | Collect the balance, then **Place order**. |
-| Counter order … is not paid in full — record the balance from Pending Order before placing it with the distributor | The same rule, refused for one drop-ship leg when you pressed **Place order**. | Collect the balance, then place again. |
 | Some distributor orders were not placed | One or more legs failed to confirm. | Read each reason, fix it, and place again. |
 | No other house can ship to the store. | **Re-source** found no other enabled distributor that ships to the store. | Cancel the line, or wait for the distributor to restock. |
 | Terminal not configured | The card terminal device is not set up on this store. | Take the card on the Virtual Terminal, then tick **Already charged on Virtual Terminal** and enter the code. |
