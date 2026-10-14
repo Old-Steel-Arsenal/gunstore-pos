@@ -177,7 +177,7 @@ The product version lives in all three apps and is set with `make bump-version V
 
 ## Contributing
 
-Contributions are welcome. Branch model, release preparation and CI behavior are in [`CONTRIBUTING.md`](CONTRIBUTING.md); please run `make test` and, if you touched an endpoint or docstring, `make api-docs` before opening a pull request.
+Contributions are welcome. Open pull requests against `develop`, the default branch; `main` only receives release PRs from `develop`. Branch model, release preparation and CI behavior are in [`CONTRIBUTING.md`](CONTRIBUTING.md); please run `make test` and, if you touched an endpoint or docstring, `make api-docs` before opening a pull request.
 
 This repository starts from a cleaned snapshot. Its version line starts at 0.1.0, which continues the privately developed 1.x line (last release 1.15.1); see [Version line](docs/versions.md#version-line).
 
