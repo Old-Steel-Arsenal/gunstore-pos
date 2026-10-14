@@ -11,6 +11,12 @@ import frappe
 
 MODULE_PATH = "ffl_integrations.gunbroker.webhooks"
 
+# The URLs we hand GunBroker. Its subscription form refuses an endpoint path of 50
+# characters or more (support ticket 3060016) and `/api/method/<MODULE_PATH>.<slug>`
+# runs to 59, so hooks.py maps each `gb.<slug>` onto the real method
+# (``override_whitelisted_methods``).
+ALIAS_PREFIX = "/api/method/gb."
+
 # Where the stripped Authorization header is parked in ``frappe.local.flags``.
 STASH = "gunbroker_webhook_authorization"
 
@@ -29,7 +35,8 @@ def shield_basic_auth() -> None:
 	try:
 		request = frappe.local.request
 		# One substring test: this runs on every request of the site.
-		if f"/{MODULE_PATH}." not in request.path:
+		path = request.path
+		if not path.startswith(ALIAS_PREFIX) and f"/{MODULE_PATH}." not in path:
 			return
 		frappe.local.flags[STASH] = request.environ.pop("HTTP_AUTHORIZATION", None) or ""
 	except Exception:  # noqa: BLE001 — a hook on every request must not break any of them

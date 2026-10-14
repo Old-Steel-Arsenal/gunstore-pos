@@ -625,9 +625,14 @@ scheduler_events = {
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "ffl_integrations.event.get_events"
-# }
+# GunBroker's webhook form refuses an endpoint path of 50+ characters and the real
+# ones run to 59, so the URLs it is given are /api/method/gb.<slug>
+# (see gunbroker/webhook_shield.py).
+override_whitelisted_methods = {
+	f"gb.{slug}": f"ffl_integrations.gunbroker.webhooks.{slug}"
+	for slug in ("items_sold", "winning_bid_received", "order_status_update",
+		"items_unsold_not_relisted", "fixed_price_listing_failed")
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,

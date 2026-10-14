@@ -47,7 +47,7 @@ from frappe.utils.password import get_decrypted_password
 
 from ffl_core.utils import commit as safe_commit  # no-op inside the test transaction
 from ffl_integrations.gunbroker import item_listings, listings, orders, tasks
-from ffl_integrations.gunbroker.webhook_shield import MODULE_PATH, STASH
+from ffl_integrations.gunbroker.webhook_shield import ALIAS_PREFIX, STASH
 from ffl_integrations.gunbroker.client import get_field
 from ffl_integrations.integration_gate import gunbroker_enabled
 from ffl_integrations.notifications import safe_log_error
@@ -90,10 +90,11 @@ def webhook_urls() -> list[dict]:
 	"""The five URLs to paste into gunbroker.com/account/webhooks.
 
 	Built from the site's own URL (``frappe.utils.get_url``), so a staging copy
-	shows its own addresses and not production's.
+	shows its own addresses and not production's. The short ``gb.<slug>`` aliases,
+	because GunBroker refuses a longer path (see ``webhook_shield.ALIAS_PREFIX``).
 	"""
 	return [
-		{"event": name, "url": get_url(f"/api/method/{MODULE_PATH}.{slug}")}
+		{"event": name, "url": get_url(f"{ALIAS_PREFIX}{slug}")}
 		for slug, name in EVENTS.items()
 	]
 
