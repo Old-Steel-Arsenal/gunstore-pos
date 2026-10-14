@@ -6,7 +6,7 @@ Pick the section that matches your job.
 
 | Section | For | What it covers |
 |---|---|---|
-| [Getting started](getting-started/index.md) | Everyone | Signing in, the Dashboard and sidebar, and which roles open which pages |
+| [Getting started](getting-started/index.md) | Everyone | Signing in, the Dashboard and sidebar, which roles open which pages, and how models, serials and prices fit together |
 | [Selling](selling/index.md) | Counter staff | The register, firearm sales, customer transfers, payments, the cash drawer and closing the day |
 | [Inventory](inventory/index.md) | Inventory staff, managers | Receiving goods, trade-ins, consignment, items and serial numbers, photos, the store map, counts and corrections |
 | [Compliance](compliance/index.md) | Counter staff, managers | The bound book, Form 4473 and NICS, FastBound, verifying an FFL and the daily checks |

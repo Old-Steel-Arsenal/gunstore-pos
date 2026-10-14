@@ -1,6 +1,6 @@
 # Items and serials
 
-The Item form describes a model. The Serial No form describes one physical gun. Managers use both to price stock and to record what a particular firearm actually is. Open them from **Inventory → Items** and **Inventory → Serial numbers** in the sidebar.
+The Item form describes a model. The Serial No form describes one physical gun. For how the two fit together and where a gun's price lives, read [Models, serials and prices](../getting-started/models-and-serials.md) first. Managers use both to price stock and to record what a particular firearm actually is. Open them from **Inventory → Items** and **Inventory → Serial numbers** in the sidebar.
 
 ## The Item form
 

@@ -102,6 +102,7 @@ nav:
       - guide/index.md
       - Getting started:
           - guide/getting-started/index.md
+          - Models, serials and prices: guide/getting-started/models-and-serials.md
           - The Dashboard: guide/getting-started/dashboard.md
           - Roles and permissions: guide/getting-started/roles.md
       - Selling:
