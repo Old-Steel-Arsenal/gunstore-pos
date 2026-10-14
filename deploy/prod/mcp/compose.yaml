@@ -1,4 +1,4 @@
-# Remote MCP servers (gunstore-pos-mcp) on a POS host — deployed by THIS repo's
+# Remote MCP servers (opengunstore-mcp) on a POS host — deployed by THIS repo's
 # release: auto_deploy.sh writes .env next to this file (site URL, local POS
 # frontend, the pinned MCP_TAG from version.env) and runs `up -d` here, so every
 # POS release ships the MCP build it was tested with.
