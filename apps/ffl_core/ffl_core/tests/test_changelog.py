@@ -45,7 +45,9 @@ class TestVersion(FrappeTestCase):
 		from pathlib import Path
 
 		bundle = Path(frappe.get_app_path("ffl_core", "public", "js", "ffl_core.bundle.js")).read_text()
-		js_title = re.search(r"const OUR_APP_TITLE = '([^']+)';", bundle).group(1)
+		m = re.search(r"""\bOUR_APP_TITLE\s*=\s*['"]([^'"]+)['"]""", bundle)
+		self.assertIsNotNone(m, "OUR_APP_TITLE not found in ffl_core.bundle.js")
+		js_title = m.group(1)
 		self.assertEqual(frappe.get_hooks("app_title", app_name="ffl_core")[0], js_title)
 		self.assertEqual(js_title, "OpenGunstore")
 
