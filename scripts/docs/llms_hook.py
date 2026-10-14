@@ -111,9 +111,11 @@ def on_post_build(config):
             "markdown": markdown,
         })
 
-        # The page's own Markdown, one URL along from the page itself.
-        target = site_dir / (page.file.src_path if page.file.src_path != "index.md"
-                             else "index.md")
+        # The page's own Markdown at its URL plus ".md": guide/selling/pos/ ->
+        # guide/selling/pos.md, and a section index such as extensions/ ->
+        # extensions.md. The site root keeps index.md.
+        stem = page.url.rstrip("/")
+        target = site_dir / (f"{stem}.md" if stem else "index.md")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(markdown, encoding="utf-8")
 
@@ -122,20 +124,34 @@ def on_post_build(config):
 
 
 def _section_of(src_path: str) -> str:
-    head = src_path.split("/")[0]
+    parts = src_path.split("/")
+    if parts[0] == "guide":
+        # The user guide is one nav tab; group its pages by the guide's own sections.
+        head = parts[1] if len(parts) > 2 else "guide"
+    else:
+        head = parts[0]
     if head.endswith(".md"):
-        return "Start here"
+        # Pages at the docs root belong to different nav tabs.
+        return {
+            "self-hosting.md": "Self-hosting",
+            "deploy-with-ai.md": "Self-hosting",
+            "versions.md": "Self-hosting",
+            "data-service.md": "Developers",
+            "testing.md": "Developers",
+        }.get(head, "Start here")
     return {
+        "guide": "User guide",
         "getting-started": "Getting started",
         "selling": "Selling",
         "inventory": "Inventory",
         "compliance": "Compliance",
         "channels": "Online channels",
-        "consignment": "Consignment",
         "distributors": "Distributors",
         "reports": "Reports",
         "settings": "Settings",
         "reference": "Reference",
+        "developers": "Developers",
+        "extensions": "Extensions",
         "ai": "For AI agents",
     }.get(head, head.replace("-", " ").capitalize())
 
@@ -146,32 +162,31 @@ def _write_index(site_dir: Path, site_url: str, config, entries) -> None:
         "",
         f"> {config['site_description']}",
         "",
-        "This is the staff manual for a single-store federal firearms licensee "
-        "running a POS built on ERPNext. It covers selling at the counter, "
-        "receiving inventory, the ATF acquisition-and-disposition record, Form "
-        "4473 and NICS, the WooCommerce and GunBroker sales channels, outbound "
-        "consignment to partner dealers, distributor drop-ship, and the reports "
-        "a manager reads.",
+        "OpenGunstore is an open-source (GPLv3) point of sale and back office for "
+        "US federal firearms licensees, built on Frappe and ERPNext v16. These docs "
+        "have three parts: the user guide (selling at the counter, receiving "
+        "inventory, the acquisition-and-disposition record, Form 4473 and NICS, the "
+        "WooCommerce and GunBroker channels, distributors, reports and settings), "
+        "self-hosting, and the developer docs (architecture, extensions, the MCP "
+        "server). Source: https://github.com/Old-Steel-Arsenal/opengunstore",
         "",
         "Every page is also available as Markdown at its own URL plus `.md`. "
-        f"The whole manual as one file is at {site_url}/llms-full.txt.",
+        f"All of it as one file is at {site_url}/llms-full.txt. The HTTP API is "
+        f"described by {site_url}/api/openapi.json.",
         "",
         "Anything describing a firearm transfer, the bound book, Form 4473 or a "
         "background check states a legal duty as well as a workflow. Read those "
         "pages as constraints, not as options.",
         "",
     ]
-    current = None
+    # One heading per section, in the order the nav first reaches it.
+    sections: dict[str, list[str]] = {}
     for entry in entries:
-        section = _section_of(entry["src"])
-        if section != current:
-            if current is not None:
-                lines.append("")
-            lines += [f"## {section}", ""]
-            current = section
         summary = f": {entry['summary']}" if entry["summary"] else ""
-        lines.append(f"- [{entry['title']}]({entry['url']}){summary}")
-    lines.append("")
+        sections.setdefault(_section_of(entry["src"]), []).append(
+            f"- [{entry['title']}]({entry['url']}){summary}")
+    for section, items in sections.items():
+        lines += [f"## {section}", "", *items, ""]
     (site_dir / "llms.txt").write_text("\n".join(lines), encoding="utf-8")
 
 
