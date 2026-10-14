@@ -1,4 +1,4 @@
-# GunStore POS vhost for a host-level Caddy.
+# OpenGunstore vhost for a host-level Caddy.
 # The POS stack does not run its own proxy (see the compose.noproxy override): its
 # frontend is published on 127.0.0.1:8080 and fronted by this block. If you change
 # HTTP_PUBLISH_PORT in deploy/prod/.env, change the reverse_proxy line below to match.

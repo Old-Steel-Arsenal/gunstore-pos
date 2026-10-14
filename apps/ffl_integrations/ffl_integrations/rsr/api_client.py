@@ -106,7 +106,7 @@ PROBE_SKU = "POS-PING"
 # batch Items) was itself run against the test env (2026-08-18): clean
 # geolocated response, per-item 02, no top-level StatusCode.
 PROBE_SHIP_CONTEXT = {
-	"Storename": "GunStore POS Connection Probe",
+	"Storename": "OpenGunstore Connection Probe",
 	"ShipAddress": "4405 Metric Dr",
 	"ShipCity": "Winter Park",
 	"ShipState": "FL",

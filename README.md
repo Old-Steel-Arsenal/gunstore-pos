@@ -1,15 +1,17 @@
 <div align="center">
 
-# GunStore POS
+# OpenGunstore
 
 **A point of sale and back office for licensed firearm retailers, built on Frappe / ERPNext v16, with support for AI assistants.**
+
+[opengunstore.com](https://opengunstore.com)
 
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
 [![Frappe v16](https://img.shields.io/badge/Frappe-v16-0089FF)](https://github.com/frappe/frappe)
 [![ERPNext v16](https://img.shields.io/badge/ERPNext-v16-5E64FF)](https://github.com/frappe/erpnext)
 [![Python 3.14+](https://img.shields.io/badge/python-3.14%2B-3776AB?logo=python&logoColor=white)](docs/versions.md)
 [![MCP ready](https://img.shields.io/badge/MCP-ready-8A2BE2)](#ai-native)
-[![CI](https://github.com/Old-Steel-Arsenal/gunstore-pos/actions/workflows/release-image.yml/badge.svg?branch=main)](https://github.com/Old-Steel-Arsenal/gunstore-pos/actions/workflows/release-image.yml)
+[![CI](https://github.com/Old-Steel-Arsenal/opengunstore/actions/workflows/release-image.yml/badge.svg?branch=main)](https://github.com/Old-Steel-Arsenal/opengunstore/actions/workflows/release-image.yml)
 
 [AI-native](#ai-native) · [Features](#features) · [Architecture](#architecture) · [Quick start](#quick-start) · [Self-hosting](#self-hosting) · [AI deployment](#deploying-with-an-ai-assistant) · [Extensions](#extensions) · [Contributing](#contributing)
 
@@ -19,7 +21,7 @@
 
 ## Why
 
-Running a gun store means selling from one inventory of serialized firearms through several channels (the counter, a website, an auction marketplace) while keeping a federally mandated bound book and a Form 4473 for every transfer. GunStore POS puts the counter, the books and the channels in one system, with the compliance rules enforced in the sale flow rather than left to memory. It was originally built for an independent firearm retailer and runs in production there.
+Running a gun store means selling from one inventory of serialized firearms through several channels (the counter, a website, an auction marketplace) while keeping a federally mandated bound book and a Form 4473 for every transfer. OpenGunstore puts the counter, the books and the channels in one system, with the compliance rules enforced in the sale flow rather than left to memory. It was originally built for an independent firearm retailer and runs in production there.
 
 It is a set of Frappe apps on top of stock ERPNext. ERPNext stays the source of truth for inventory, customers and accounting; the apps never patch Frappe or ERPNext core and customize only through Frappe's own extension points (doc events, custom-field fixtures, client scripts, whitelisted methods).
 
@@ -29,7 +31,7 @@ Staff, owners and accountants can work with the store through an AI assistant. T
 
 ### Bring your own assistant
 
-The POS is an OAuth authorization server for the [Model Context Protocol](https://modelcontextprotocol.io). Claude (claude.ai, Claude Desktop, Claude Code), ChatGPT or any other MCP client connects to the store's connector URL and signs in with a POS account. It then works through the [GunStore MCP server](https://github.com/Old-Steel-Arsenal/gunstore-pos-mcp), which has more than a hundred tools covering inventory, orders, receiving, the cash drawer, stock counts, distributors and accounting reports.
+The POS is an OAuth authorization server for the [Model Context Protocol](https://modelcontextprotocol.io). Claude (claude.ai, Claude Desktop, Claude Code), ChatGPT or any other MCP client connects to the store's connector URL and signs in with a POS account. It then works through the [GunStore MCP server](https://github.com/Old-Steel-Arsenal/opengunstore-mcp), which has more than a hundred tools covering inventory, orders, receiving, the cash drawer, stock counts, distributors and accounting reports.
 
 - Each call runs as the signed-in user, with that user's permissions.
 - A read-only connector for the accountant exposes 26 reporting tools and no write tools.
@@ -181,7 +183,7 @@ This repository starts from a cleaned snapshot. Its version line starts at 0.1.0
 
 ## Security
 
-Please do not open a public issue for a security vulnerability. Report it privately through [GitHub security advisories](https://github.com/Old-Steel-Arsenal/gunstore-pos/security/advisories/new). This software handles firearm transaction records and payment flows, so reports are treated as a priority.
+Please do not open a public issue for a security vulnerability. Report it privately through [GitHub security advisories](https://github.com/Old-Steel-Arsenal/opengunstore/security/advisories/new). This software handles firearm transaction records and payment flows, so reports are treated as a priority.
 
 ## License
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, GunStore POS and contributors
+# Copyright (c) 2026, OpenGunstore and contributors
 # For license information, please see license.txt
 
 from frappe.model.document import Document

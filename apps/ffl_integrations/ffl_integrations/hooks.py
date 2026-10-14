@@ -1,6 +1,6 @@
 app_name = "ffl_integrations"
 app_title = "FFL Integrations"
-app_publisher = "GunStore POS"
+app_publisher = "OpenGunstore"
 app_description = "FastBound, Payroc, ACH, ATF EZ Check clients"
 app_email = "info@oldsteelarsenal.com"
 app_license = "GNU General Public License (v3)"

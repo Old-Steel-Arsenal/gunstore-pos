@@ -1,4 +1,4 @@
-# GunStore-POS dev environment
+# OpenGunstore dev environment
 # Based on frappe_docker/devcontainer-example, adapted to mount our monorepo apps.
 # Run from repo root: make dev-up — never raw `docker compose`: the Makefile picks the compose project
 # (main checkout = `dev` / gunstore-*, a git worktree = dev-<dir> / gunstore-<dir>-*, see PROJECT in Makefile);

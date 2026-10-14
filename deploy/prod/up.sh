@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Thin wrapper around `docker compose` for the GunStore-POS production stack.
+# Thin wrapper around `docker compose` for the OpenGunstore production stack.
 # Combines the vendored frappe_docker base compose with the overrides we use
 # (mariadb, redis, noproxy, backup-cron) and loads deploy/prod/.env.
 #
