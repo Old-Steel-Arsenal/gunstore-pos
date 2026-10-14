@@ -39,7 +39,7 @@ The Orders view has seventeen columns in this order: Date, Invoice, Order Ref, C
 
 Order Ref is the storefront order number for a web or marketplace sale and shows a dash for a counter sale. Serial lists the guns on the invoice. Category is the line's Item Group, or **Mixed** when the invoice spans more than one group. Channel Fees is the marketplace's cut, and Profit after Fees is what is left after it. Trade-in Applied is the trade-in allowance that came off the taxable goods, and Trade-in Paid Out is what the store paid the customer on a ticket whose trade-ins came to more than the sale. Both read zero on an ordinary sale. Total is the grand total actually charged.
 
-Click **Columns** on the toolbar to choose what shows. Total, Channel Fees, Profit after Fees, Trade-in Applied and Trade-in Paid Out start hidden in the Orders view, and are always in the export. Your choice is remembered per view, on this browser, and **Reset to default** puts back the curated set rather than showing everything. The Invoice column cannot be hidden.
+The **Tax lines** view adds a **Consignment?** column that is ticked on the line of a consigned gun. Click **Columns** on the toolbar to choose what shows. Total, Channel Fees, Profit after Fees, Trade-in Applied and Trade-in Paid Out start hidden in the Orders view, and are always in the export. Your choice is remembered per view, on this browser, and **Reset to default** puts back the curated set rather than showing everything. The Invoice column cannot be hidden.
 
 ## The summary cards
 
@@ -56,6 +56,7 @@ Nothing stores cost on an invoice line, so the report computes it per line:
 | Line | Cost used |
 |---|---|
 | Trade-in credit | Zero. The allowance buys a gun into inventory; it is not a cost of this sale. |
+| Consigned gun | Net sales times one minus the commission rate, so profit equals the commission the store earns. See [Selling guns on consignment](../inventory/consignment.md). |
 | Firearm | The sum of the purchase price recorded on each serial on the line. |
 | Anything else | Signed quantity times the item's moving-average cost in that warehouse. |
 
@@ -80,6 +81,7 @@ The Invoice column is a live link. Click it to open the POS Invoice or Sales Inv
 | Warning, orange | Cost understated, or per-line tax disagrees with the charged sales tax |
 | Dot, orange | A charge on an account that is neither sales tax nor shipping |
 | Half circle, blue | Trade-in allowance on this sale |
+| Triangle, teal | Consigned gun, so the profit shown is the store's commission rather than full margin |
 
 **A refunded web order comes off its own lines.** A web refund takes the refunded sales tax and shipping off the invoice's tax and shipping lines rather than off the goods, so in a month with refunds the Tax lines view shows lower tax and shipping, not a goods discount.
 

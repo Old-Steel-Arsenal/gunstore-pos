@@ -33,7 +33,13 @@ See [The cash drawer](../selling/cash-drawer.md).
 
 **Charge exactly.** A box under the total on the register and on Create Order. Type the total the customer pays, tax included, and the line prices are worked back from it.
 
+**Commission.** The store's cut of a consigned gun's sale price before tax. The consignor is owed the rest. A gun carries its own rate, which starts from the store default. See [Selling guns on consignment](../inventory/consignment.md).
+
 **Connector Audit Log.** The permanent record of every call made through the store's remote MCP connectors: who, which tool, with what, and whether it worked. See [The MCP server](../../ai/mcp.md).
+
+**Consignment.** A gun that belongs to someone else, left with the store to sell. Its Serial No is ticked **Consignment** and names the **Consignor**. The store sells it, keeps the commission and owes the consignor the rest. See [Selling guns on consignment](../inventory/consignment.md).
+
+**Consignor.** The person who left a gun with the store on consignment. The system keeps a Supplier record for them, and what the store owes them sits in the **Consignment Payable** account until it is paid out.
 
 **Custody warehouse.** A stock location holding firearms that belong to customers rather than to the store, typically a gun received for a transfer and waiting for its owner to collect it. A gun in a custody warehouse is not yours to sell, so it is excluded from sellable stock and hidden from Inventory Receipts unless you ask for it.
 

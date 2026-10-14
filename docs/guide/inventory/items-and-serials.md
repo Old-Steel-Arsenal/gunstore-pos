@@ -133,7 +133,7 @@ Importer is the exception on purpose. On a generic surplus SKU an item-level imp
 
 ### Status flags
 
-These tell you why a gun is or is not available. All but **Service Needed** are read-only.
+These tell you why a gun is or is not available. All but **Service Needed** and the three consignment fields are read-only.
 
 | Field | Meaning |
 |---|---|
@@ -142,8 +142,13 @@ These tell you why a gun is or is not available. All but **Service Needed** are 
 | **FastBound Item Id** | The bound-book item this serial maps to, stamped 1:1 when the acquisition is pushed. Empty means the gun is not in FastBound. |
 | **Reserved via Woo** | Sold on the web store, awaiting fulfillment. |
 | **Reserved via GunBroker** | Sold on GunBroker, awaiting fulfillment. |
+| **Consignment** | Ticked when the gun belongs to someone else and the store is selling it for them. Set by a `Consignment` receipt. |
+| **Consignment Commission %** | Shows while **Consignment** is ticked. The store's cut of the sale price before tax. |
+| **Consignor** | Shows while **Consignment** is ticked. The Supplier record the consignor's share is owed to. |
 
 Both reservation flags are read through one rule, so no channel can sell a gun another channel has already taken.
+
+**Consignment**, **Consignment Commission %** and **Consignor** are editable, unlike the rest of the table. A receipt fills them in. You can also tick **Consignment** on a gun already in stock, which requires a **Consignor**. See [Selling guns on consignment](consignment.md).
 
 **GunBroker Free Shipping** is ticked from **Free shipping (seller pays)** in **Send to GunBroker**. While it is ticked, the gun lists on GunBroker with free shipping.
 

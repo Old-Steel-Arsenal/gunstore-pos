@@ -119,6 +119,7 @@ nav:
           - guide/inventory/index.md
           - Receiving goods: guide/inventory/receive-goods.md
           - Trade-ins: guide/inventory/trade-ins.md
+          - Selling guns on consignment: guide/inventory/consignment.md
           - Items and serial numbers: guide/inventory/items-and-serials.md
           - Photos: guide/inventory/photos.md
           - Storage locations and the store map: guide/inventory/storage-locations.md
