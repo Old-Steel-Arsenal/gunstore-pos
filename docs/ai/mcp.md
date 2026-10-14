@@ -101,8 +101,8 @@ Only a System Manager can read it. Rows can never be deleted.
 
 | Surface | Tools | What it is for |
 |---|---|---|
-| Read-only (`gunstore-pos-cpa`) | Reporting tools only, none of which write | Month-end, a tax question, a stock count, anything an outside bookkeeper would do |
-| Full (`gunstore-pos`) | More than a hundred | Day-to-day work, within the user's own role |
+| Read-only (`gunstore-pos-cpa`) | 27, all reporting, none of which write | Month-end, a tax question, a stock count, anything an outside bookkeeper would do |
+| Full (`gunstore-pos`) | 108, or 111 when the store turns on GunBroker actions | Day-to-day work, within the user's own role |
 
 The read-only surface is not a suggestion enforced by prompting. Three layers
 each fail closed on their own:

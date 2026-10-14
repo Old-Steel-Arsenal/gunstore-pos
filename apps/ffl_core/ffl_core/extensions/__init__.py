@@ -1,4 +1,4 @@
-"""The extension SDK — the stable surface an extension may depend on (core ≥ 1.1).
+"""The extension SDK — the stable surface an extension may depend on (present since core 0.1.0).
 
 An extension is a separate Frappe app that lives on the
 apps-ext volume. Whether it is *installed* is a bench/site fact;

@@ -34,7 +34,7 @@ Staff, owners and accountants can work with the store through an AI assistant. T
 The POS is an OAuth authorization server for the [Model Context Protocol](https://modelcontextprotocol.io). Claude (claude.ai, Claude Desktop, Claude Code), ChatGPT or any other MCP client connects to the store's connector URL and signs in with a POS account. It then works through the [GunStore MCP server](https://github.com/Old-Steel-Arsenal/opengunstore-mcp), which has more than a hundred tools covering inventory, orders, receiving, the cash drawer, stock counts, distributors and accounting reports.
 
 - Each call runs as the signed-in user, with that user's permissions.
-- A read-only connector for the accountant exposes 26 reporting tools and no write tools.
+- A read-only connector for the accountant exposes 27 reporting tools and no write tools; the full connector has 108 (111 when the store turns on GunBroker actions).
 - Every call is recorded in a permanent *Connector Audit Log* before it executes, with credentials redacted.
 - Tools that move money or stock, or change compliance state, require explicit confirmation.
 - Both connectors are off by default and are enabled per store in *MCP Settings*.

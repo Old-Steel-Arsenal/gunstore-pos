@@ -147,7 +147,7 @@ def _hashed(rel_path: str) -> str:
 	return f"/assets/ffl_core/{rel_path}?v={digest}"
 
 
-# Extension SDK (core ≥ 1.1): frappe.boot.gunshop_extensions = {id: {enabled, version, title}}
+# Extension SDK (since core 0.1.0): frappe.boot.gunshop_extensions = {id: {enabled, version, title}}
 # is what gunstore.extensions renders from.
 extend_bootinfo = ["ffl_core.extensions.extend_bootinfo"]
 
