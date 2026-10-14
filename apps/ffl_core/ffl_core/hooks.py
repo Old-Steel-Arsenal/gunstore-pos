@@ -76,7 +76,9 @@ add_to_apps_screen = [
 		# The app id on the apps screen = the Python app: the Gun Shop Sidebar
 		# ffl_core ships (app ffl_core) is this shell's (setup/sidebar.py).
 		"name": "ffl_core",
-		"logo": "/assets/ffl_core/images/gun_shop.svg",
+		# A new file name, not new bytes under the old one: the asset carries no Cache-Control, so a
+		# browser keeps an image it fetched long ago for days and would go on showing the old logo.
+		"logo": "/assets/ffl_core/images/gunstore_logo.svg",
 		"title": "Gun Shop",
 		"route": "/" + _LANDING,
 		"has_permission": "ffl_core.check_app_permission",

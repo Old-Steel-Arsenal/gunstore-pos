@@ -41,3 +41,11 @@ class TestGunstoreHeaderIcon(FrappeTestCase):
 		path = os.path.join(frappe.get_app_path("ffl_core"), "public", "icons", "gunstore.svg")
 		with open(path) as f:
 			self.assertIn('id="icon-gunstore"', f.read())
+
+	def test_the_apps_screen_logo_file_exists(self):
+		import os
+
+		logo = frappe.get_hooks("add_to_apps_screen", app_name="ffl_core")[0]["logo"]
+		self.assertTrue(logo.startswith("/assets/ffl_core/"), logo)
+		path = os.path.join(frappe.get_app_path("ffl_core"), "public", logo[len("/assets/ffl_core/"):])
+		self.assertTrue(os.path.exists(path), path)
