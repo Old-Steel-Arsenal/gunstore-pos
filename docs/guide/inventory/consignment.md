@@ -16,7 +16,7 @@ The commission is the store's cut of the sale price before tax. The consignor is
 - You need the **Stock Manager** or **System Manager** role to receive the gun. See [Receive Goods](receive-goods.md#before-you-start).
 - The consignor must be a **Customer** record. Receive Goods records them as a private seller, so it asks for their name, address and photo ID. See [Buying from a private party](receive-goods.md#buying-from-a-private-party).
 - The **Acquisition Type** list comes from your FastBound account, and it must include `Consignment`. If the list is empty or the choice is missing, a System Manager clicks **Sync FastBound Lists** on FastBound Settings. See [Integrations](../settings/integrations.md). Without FastBound there is nothing to pick the type from, and the gun cannot be received as a consignment from this page.
-- Decide the commission. The store-wide default is 20%. A manager changes it in [FFL Settings](../settings/ffl-settings.md) under **Default Consignment Commission %**. You can also set a different rate for each gun as you receive it.
+- Decide the commission. The store-wide default is 20%. You can set a different rate for each gun as you receive it, and change it later. See [Changing the commission](#changing-the-commission).
 - Agree the price with the consignor. It goes in the **Sell Price** box on the line card.
 
 ## Taking a gun in on consignment
@@ -64,9 +64,22 @@ If the commission % resolves to zero, or to more than 100, the invoice is refuse
 
 Two guns with different commission rates cannot share one invoice line, because the line holds only one rate. Put each gun on its own line.
 
-### Changing the commission for one sale
+## Changing the commission
 
-The commission on the invoice line starts from the gun's own rate. A manager who wants a different rate for a single sale can set **Consignment Commission %** on the item row of the draft invoice in Desk before submitting. A blank or zero value on the line means "use the gun's rate". A commission of zero is not possible.
+The rate can be changed at four levels. A sale uses the most specific one that is set.
+
+| Where | Who | What it changes |
+|---|---|---|
+| **FFL Settings → Default Consignment Commission %** | System Manager | The rate offered for guns received from now on. Guns already in stock keep their own rate. |
+| **Receive Goods → Consignment Commission %**, at the top or on a line card | Stock Manager | The rate stamped on the gun as it is received. |
+| **Serial No → Consignment Commission %** | Stock Manager or Item Manager | That gun's rate, at any time before it sells. The next sale uses the new rate. |
+| **Consignment Commission %** on the item row of a draft invoice in Desk | Accounts User | That one sale only. The gun's own rate is not changed. |
+
+A blank or zero rate on an invoice line means "use the gun's rate". A blank or zero rate on a Serial No is filled with the store default when the form is saved. A commission of zero is not possible: the store always keeps a cut.
+
+Once the sale is submitted the rate is frozen on the invoice line. Changing the Serial No or the store default afterwards does not change a past sale.
+
+The register screen itself has no commission box. To sell one gun at a different rate, change the rate on its Serial No before ringing it up, or change the line in Desk before the invoice is submitted.
 
 ## What the store owes the consignor
 
