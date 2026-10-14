@@ -616,8 +616,8 @@ doctype_list_js = {
 
 # Svg Icons
 # ------------------
-# include app icons in desk
-# app_include_icons = "ffl_core/public/icons.svg"
+# include app icons in desk: "gunstore" is the Gun Shop mark the sidebar header shows
+app_include_icons = ["/assets/ffl_core/icons/gunstore.svg"]
 
 # Home Pages
 # ----------
