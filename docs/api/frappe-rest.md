@@ -4,7 +4,7 @@ Besides the custom RPC endpoints ([reference/](reference/README.md)), every
 DocType — stock ERPNext ones and the
 [custom DocTypes](reference/doctypes.md) — is reachable through Frappe's
 generic REST API. Authentication and error
-envelope are the same as for RPC calls ([README.md](README.md)).
+envelope are the same as for RPC calls (see the [API reference](index.html)).
 
 ## CRUD
 
