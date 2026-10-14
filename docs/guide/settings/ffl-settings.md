@@ -15,6 +15,8 @@ The form has three tabs: Store, Compliance and FFL Verification.
 
 **Receive Sources.** One source per line. It fills the Source dropdown on [Receive Goods](../inventory/receive-goods.md), on the FFL Acquisition form and on Purchase Receipt. The default list covers the usual procurement channels, such as RSR, Distributor, Individual (trade-in) and Manufacturer. Edits take effect the next time a form is refreshed. No restart is needed.
 
+**Default Consignment Commission %.** 20 by default. The store's cut on a consigned gun when the receipt line or the gun does not carry its own rate. It prefills the commission box on [Receive Goods](../inventory/receive-goods.md) for a `Consignment` receipt. Changing it does not touch guns already received. See [Selling guns on consignment](../inventory/consignment.md).
+
 **Pending Order overdue after (days).** 7 by default. A queue row older than this is marked overdue on [the Pending Order queue](../selling/pending-orders.md). Once a day, the counter orders that are blocked or older than this go out in one email, "Pending orders needing attention", to the Alert Recipients. No email is sent on a day with nothing stuck.
 
 **Receipt Footer Note.** Store policy printed under every receipt, one line per line. Empty prints nothing, because a returns policy is each store's own call. Plain text only. It goes into the receipt without escaping, so angle brackets and ampersands would be read as markup.

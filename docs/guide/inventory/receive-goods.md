@@ -44,7 +44,7 @@ A barcode no item carries is looked up in the distributor catalogs. When it is f
 3. For an FFL purchase, pick the **Supplier**.
 4. For an individual purchase, fill in the seller block that appears. See [Buying from a private party](#buying-from-a-private-party).
 5. Pick a **Source**. This is your own procurement channel, not an ATF field. A manager manages the list in FFL Settings.
-6. Pick an **Acquisition Type** if you use one. This is the FastBound bound-book acquisition type, and the list is pulled from your FastBound account. If you leave it blank, the system falls back to a default derived from the source type.
+6. Pick an **Acquisition Type** if you use one. This is the FastBound bound-book acquisition type, and the list is pulled from your FastBound account. If you leave it blank, the system falls back to a default derived from the source type. Choose `Consignment` when the gun belongs to someone who is leaving it with the store to sell. See [Selling guns on consignment](consignment.md).
 
 ### 2. Scan or search for the item
 
@@ -113,7 +113,7 @@ When the store buys from a private party, **Submit & Receive** first opens **Pay
 2. For Zelle, Check or ACH, type the **Check number, Zelle confirmation or ACH reference**. It is required.
 3. Click **Pay & Receive**.
 
-The payment is booked with the receipt, in the same step. Cash comes off what the [cash drawer](../selling/cash-drawer.md) should hold straight away. The dialog is skipped when nobody is paid at receipt: an **Acquisition Type** other than blank, `Purchase` or `Individual`, a customer transfer, or lines that all cost $0.
+The payment is booked with the receipt, in the same step. Cash comes off what the [cash drawer](../selling/cash-drawer.md) should hold straight away. The dialog is skipped when nobody is paid at receipt: an **Acquisition Type** other than blank, `Purchase` or `Individual` (such as `Consignment`), a customer transfer, or lines that all cost $0.
 
 A purchase from a private seller with no payment on record shows on the Cash Drawer page under "Purchases from private sellers with no seller payment recorded", where a manager records it. See [The cash drawer](../selling/cash-drawer.md).
 
@@ -159,7 +159,7 @@ Submitting is one transaction. Either everything below happens or nothing does.
 
 1. **Creates and submits a Purchase Receipt.** Stock moves, and the receipt is the source document for the whole receive. Find it later in the Purchase Receipt list or on the Inventory Receipts report (see [Reports](../reports/index.md)).
 2. **Writes the bound-book acquisition.** For each firearm serial that is not an antique, one submitted [FFL Acquisition](../compliance/bound-book.md) record is created. That is the A side of the book: date, source, item and serial.
-3. **Stamps each Serial No.** Manufacturer, importer, model, caliber and year made land on the individual gun, along with the cost, the sell price, the service flag and any zero-cost confirmation.
+3. **Stamps each Serial No.** Manufacturer, importer, model, caliber and year made land on the individual gun, along with the cost, the sell price, the service flag and any zero-cost confirmation. On a `Consignment` receipt it also records the consignor and the commission %.
 4. **Updates the item.** Model, caliber and firearm type are kept current on the item because they define the model. Manufacturer seeds a blank item and never overwrites one. Importer is never written to the item.
 5. **Applies the Sell Price.** On a non-firearm item, or a firearm with Uniform Pricing, the price you typed becomes the item's selling price and the register's price. A per-gun firearm stamps it on the serial instead. A customer transfer writes no price anywhere.
 6. **Puts the goods in their locations.** Each line goes into the storage location you picked. A slot that someone filled a moment ago stops the whole receive instead of half-booking it.
@@ -215,6 +215,7 @@ A status of `Pending` is accepted at receiving time, so a clerk's first receipt 
 ## Related pages
 
 - [Trade-ins](trade-ins.md) for taking a gun in against a sale.
+- [Selling guns on consignment](consignment.md) for taking in a gun to sell for its owner.
 - [Items and serials](items-and-serials.md) for pricing and describing what you received.
 - [Corrections](corrections.md) if something went in wrong.
 - [Storage locations and the store map](storage-locations.md) for placing goods after the receive.

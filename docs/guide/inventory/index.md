@@ -12,6 +12,7 @@ The **Inventory** group in the sidebar holds **Items**, **Serial numbers**, **St
 | Receive a parcel ordered on a distributor's website or by phone | [Receive Goods](receive-goods.md), **Incoming shipments** |
 | Buy a gun from a private party and pay them | [Receive Goods](receive-goods.md), Acquisition Source **Individual**, then **Pay the seller** |
 | Take a gun in trade against a sale, or buy it at the counter | [Trade-ins](trade-ins.md) |
+| Take in a gun to sell for its owner, and pay the owner when it sells | [Selling guns on consignment](consignment.md) |
 | Log a customer's gun that arrived for a transfer | [Receive Goods](receive-goods.md), **FFL Transfer (customer's gun)** |
 | Set or change a price | [Items and serials](items-and-serials.md) |
 | Record barrel length, finish, condition, year made | [Items and serials](items-and-serials.md) |

@@ -8,7 +8,7 @@ Pick the section that matches your job.
 |---|---|---|
 | [Getting started](getting-started/index.md) | Everyone | Signing in, the Dashboard and sidebar, and which roles open which pages |
 | [Selling](selling/index.md) | Counter staff | The register, firearm sales, customer transfers, payments, the cash drawer and closing the day |
-| [Inventory](inventory/index.md) | Inventory staff, managers | Receiving goods, trade-ins, items and serial numbers, photos, the store map, counts and corrections |
+| [Inventory](inventory/index.md) | Inventory staff, managers | Receiving goods, trade-ins, consignment, items and serial numbers, photos, the store map, counts and corrections |
 | [Compliance](compliance/index.md) | Counter staff, managers | The bound book, Form 4473 and NICS, FastBound, verifying an FFL and the daily checks |
 | [Online channels](channels/index.md) | Inventory staff, counter staff | Your WooCommerce store, GunBroker and the orders that come back |
 | [Distributors](distributors/index.md) | Purchasing staff, managers | Ordering from wholesale houses, tracking orders and drop-shipping |
