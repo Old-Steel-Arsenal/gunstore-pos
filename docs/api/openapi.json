@@ -16016,7 +16016,7 @@
           "webhooks"
         ],
         "summary": "GunBroker FixedPriceListingFailed webhook: a listing failed, so record why and re-check the gun.",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's ``{ItemTitle, ItemID, SKU, Quantity, \"Error Message\"}`` JSON. The item number, SKU and error text are read; the text is stored as plain text on the gun's (or item's) GunBroker sync error.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:445`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's ``{ItemTitle, ItemID, SKU, Quantity, \"Error Message\"}`` JSON. The item number, SKU and error text are read; the text is stored as plain text on the gun's (or item's) GunBroker sync error.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:446`",
         "operationId": "ffl_integrations.gunbroker.webhooks.fixed_price_listing_failed",
         "responses": {
           "200": {
@@ -16047,7 +16047,7 @@
           "webhooks"
         ],
         "summary": "GunBroker ItemsSold webhook: an item sold, so pull the order now.",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's Order JSON. Only the order number is read; the order is then fetched from the GunBroker API by the order sync. The buyer details in the body are not stored or logged.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:381`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's Order JSON. Only the order number is read; the order is then fetched from the GunBroker API by the order sync. The buyer details in the body are not stored or logged.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:382`",
         "operationId": "ffl_integrations.gunbroker.webhooks.items_sold",
         "responses": {
           "200": {
@@ -16078,7 +16078,7 @@
           "webhooks"
         ],
         "summary": "GunBroker ItemsUnsoldNotRelisted webhook: a listing ended with no sale, so re-check the gun.",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's Item JSON. Only the item number and SKU are read.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:431`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's Item JSON. Only the item number and SKU are read.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:432`",
         "operationId": "ffl_integrations.gunbroker.webhooks.items_unsold_not_relisted",
         "responses": {
           "200": {
@@ -16109,7 +16109,7 @@
           "webhooks"
         ],
         "summary": "GunBroker OrderStatusUpdate webhook: an order changed, so pull it now.",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's order-status JSON (OrderID and the milestone dates). Only the order number is read.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:399`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's order-status JSON (OrderID and the milestone dates). Only the order number is read.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:400`",
         "operationId": "ffl_integrations.gunbroker.webhooks.order_status_update",
         "responses": {
           "200": {
@@ -16140,7 +16140,7 @@
           "webhooks"
         ],
         "summary": "GunBroker WinningBidReceived webhook: an auction took a bid, so lock the gun now.",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's ``{item, currentBid}`` JSON. The item number, SKU, bid count, current bid and ending time are read; the gun is found by SKU, then item number.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:414`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's ``{item, currentBid}`` JSON. The item number, SKU, bid count, current bid and ending time are read; the gun is found by SKU, then item number.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:415`",
         "operationId": "ffl_integrations.gunbroker.webhooks.winning_bid_received",
         "responses": {
           "200": {

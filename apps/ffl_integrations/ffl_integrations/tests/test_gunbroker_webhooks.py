@@ -150,8 +150,16 @@ class TestAuthentication(_Case):
 		urls = webhooks.webhook_urls()
 		self.assertEqual([u["event"] for u in urls], list(webhooks.EVENTS.values()))
 		for slug, row in zip(webhooks.EVENTS, urls):
-			self.assertTrue(row["url"].endswith(f"/api/method/{webhook_shield.MODULE_PATH}.{slug}"))
+			self.assertTrue(row["url"].endswith(f"/api/method/gb.{slug}"))
 			self.assertTrue(row["url"].startswith(frappe.utils.get_url()))
+
+	def test_each_url_is_short_enough_for_gunbroker_and_reaches_its_endpoint(self):
+		# GunBroker's form refuses an endpoint path of 50 characters or more.
+		for slug, row in zip(webhooks.EVENTS, webhooks.webhook_urls()):
+			path = row["url"][len(frappe.utils.get_url()):]
+			self.assertLess(len(path), 50, path)
+			method = frappe.override_whitelisted_method(path.removeprefix("/api/method/"))
+			self.assertIs(frappe.get_attr(method), getattr(webhooks, slug), path)
 
 
 class TestRequestHook(_Case):
@@ -172,13 +180,15 @@ class TestRequestHook(_Case):
 			frappe.get_hooks("before_request"))
 
 	def test_the_header_is_lifted_off_a_webhook_url_and_parked(self):
-		environ, parked = self._run("/api/method/ffl_integrations.gunbroker.webhooks.items_sold")
-		self.assertNotIn("HTTP_AUTHORIZATION", environ)
-		self.assertEqual(parked, "Basic abc")
+		for path in ("/api/method/gb.items_sold",
+				"/api/method/ffl_integrations.gunbroker.webhooks.items_sold"):
+			environ, parked = self._run(path)
+			self.assertNotIn("HTTP_AUTHORIZATION", environ, path)
+			self.assertEqual(parked, "Basic abc", path)
 
 	def test_every_other_url_keeps_its_header(self):
 		for path in ("/api/method/ping", "/api/method/ffl_integrations.fastbound.webhook.fastbound_event",
-				"/api/resource/Item", "/app/gunbroker-settings"):
+				"/api/resource/Item", "/app/gunbroker-settings", "/files/gb.items_sold.png"):
 			environ, parked = self._run(path)
 			self.assertEqual(environ, {"HTTP_AUTHORIZATION": "Basic abc"}, path)
 			self.assertIsNone(parked, path)
