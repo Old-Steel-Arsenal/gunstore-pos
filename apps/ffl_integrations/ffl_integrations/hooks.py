@@ -626,7 +626,7 @@ scheduler_events = {
 # ------------------------------
 #
 # GunBroker's webhook form refuses an endpoint path of 50+ characters and the real
-# ones run to 59, so the URLs it is given are /api/method/gb.<slug>
+# ones run to 58-74, so the URLs it is given are /api/method/gb.<slug>
 # (see gunbroker/webhook_shield.py).
 override_whitelisted_methods = {
 	f"gb.{slug}": f"ffl_integrations.gunbroker.webhooks.{slug}"
