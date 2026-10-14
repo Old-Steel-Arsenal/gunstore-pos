@@ -1,7 +1,7 @@
 """Tax-exempt Create Order — the Sales Invoice must stay at ZERO tax
 end-to-end, mirroring the Sales Order it's derived from.
 
-Prod bug (2026-07-09, SAL-ORD-2026-00033 / A past invoice): a tax-exempt
+Bug (2026-07-09, found on a past invoice): a tax-exempt
 buyer's create_order correctly skipped _apply_default_tax_template on the
 Sales Order AND the invoice's first pass, but paying in full inline (the
 is_pos path staff use for a normal counter sale) reran si.set_missing_values()

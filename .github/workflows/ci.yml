@@ -28,9 +28,8 @@ jobs:
   # the parallel runner keeps the suite near a minute); unset (public repo, fork) or the
   # `hosted` dispatch input = GitHub-hosted ubuntu-latest, which is slower and has the
   # longer limit below.
-  # Note the split: this file and _app-tests.yml come from main (schedules run
-  # the default branch), the checked-out code and scripts/ci from develop. A
-  # change to parallel_tests.py's arguments must stay compatible until released.
+  # Schedules run the default branch's copy of this file, and the default branch is
+  # develop, so the workflow, _app-tests.yml and the checked-out code all come from develop.
   upgrade-regression:
     name: Upgrade regression (main → develop)
     uses: ./.github/workflows/_app-tests.yml

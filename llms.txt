@@ -1,49 +1,49 @@
-# GunStore POS
+# OpenGunstore
 
-> GunStore POS is an open-source point of sale and back office for US firearms retailers (FFL holders), built on Frappe and ERPNext v16. Three apps (ffl_core, ffl_integrations, ffl_woo_sync) add firearm and serial-number rules, the A&D bound book, the ATF Form 4473 workflow (through FastBound, or paper), trade-ins, a cash drawer, inventory counts, distributor ordering and a WooCommerce connector. It runs as one container image (linux/amd64, GPL-3.0) with MariaDB and Redis on a single Linux server behind your own reverse proxy. This file lists the documents an AI assistant needs to install, configure, operate or change it; start with the AI deployment guide.
+> OpenGunstore is an open-source point of sale and back office for US firearms retailers (FFL holders), built on Frappe and ERPNext v16. Three apps (ffl_core, ffl_integrations, ffl_woo_sync) add firearm and serial-number rules, the A&D bound book, the ATF Form 4473 workflow (through FastBound, or paper), trade-ins, a cash drawer, inventory counts, distributor ordering and a WooCommerce connector. It runs as one container image (linux/amd64, GPL-3.0) with MariaDB and Redis on a single Linux server behind your own reverse proxy. This file lists the documents an AI assistant needs to install, configure, operate or change it; start with the AI deployment guide.
 
 Notes for assistants: the self-hosting guide is the source of truth for commands; never invent store facts (name, FFL number, tax rate, address) and never print or commit secrets. Anything irreversible (DNS, firewall, overwriting a database, enabling FastBound) needs the user's explicit go-ahead.
 
 ## Install
 
-- [Deploying with an AI assistant](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/deploy-with-ai.md): the install as a checklist with what to ask first, checks, expected results, stop points and a final verification list
-- [Self-hosting guide](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/self-hosting.md): the full install on one Linux server, the source of truth for every command
-- [.env template](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/deploy/prod/.env.example): server settings (image, tag, database password, site name)
-- [Store configuration template](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/deploy/prod/store.env.example): the store's own facts (name, address, FFL number, tax rate), read by scripts/store_setup.sh
-- [Site bootstrap script](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/scripts/prod_bootstrap.sh): creates the site and installs the apps
-- [Store setup script](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/scripts/store_setup.sh): configures the company, taxes, POS Profile and receipts from store.env
-- [Image build file](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/deploy/prod/Dockerfile): build your own linux/amd64 image
-- [Caddy example](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/deploy/prod/Caddyfile.example): the HTTPS reverse-proxy site block
+- [Deploying with an AI assistant](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/deploy-with-ai.md): the install as a checklist with what to ask first, checks, expected results, stop points and a final verification list
+- [Self-hosting guide](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/self-hosting.md): the full install on one Linux server, the source of truth for every command
+- [.env template](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/deploy/prod/.env.example): server settings (image, tag, database password, site name)
+- [Store configuration template](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/deploy/prod/store.env.example): the store's own facts (name, address, FFL number, tax rate), read by scripts/store_setup.sh
+- [Site bootstrap script](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/scripts/prod_bootstrap.sh): creates the site and installs the apps
+- [Store setup script](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/scripts/store_setup.sh): configures the company, taxes, POS Profile and receipts from store.env
+- [Image build file](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/deploy/prod/Dockerfile): build your own linux/amd64 image
+- [Caddy example](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/deploy/prod/Caddyfile.example): the HTTPS reverse-proxy site block
 
 ## Configure
 
-- [Settings field notes](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/field-notes.md): what each setting does, including Paper 4473 Mode
-- [Data Service](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/data-service.md): the optional hosted catalog and what works without it
-- [FastBound integration notes](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/fastbound/README.md): the A&D bound book and 4473 API the POS talks to
-- [GunBroker webhooks](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/gunbroker-webhooks.md): instant sale notices from GunBroker
-- [Sports South drop-ship](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/sports-south-dropship.md): operator guide for the second distributor
-- [Catalog API contract](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/catalog-api/README.md): what a catalog service must implement
+- [Settings field notes](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/field-notes.md): what each setting does, including Paper 4473 Mode
+- [Data Service](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/data-service.md): the optional hosted catalog and what works without it
+- [FastBound integration notes](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/fastbound/README.md): the A&D bound book and 4473 API the POS talks to
+- [GunBroker webhooks](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/gunbroker-webhooks.md): instant sale notices from GunBroker
+- [Sports South drop-ship](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/sports-south-dropship.md): operator guide for the second distributor
+- [Catalog API contract](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/catalog-api/README.md): what a catalog service must implement
 
 ## Operate
 
-- [Backups, restore and upgrades](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/self-hosting.md#backups-and-restore): machine snapshots, the 6-hourly database backup, restoring one database
-- [Extensions](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/self-hosting.md#extensions): installing, upgrading and rolling back extensions
-- [Cash drawer](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/cash-drawer.md): the daily count, entries and weekly report
-- [Receiving distributor parcels](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/receiving-scan-first.md): scan-first receiving at the counter
-- [RSR after-sale procedure](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/rsr-fds-after-sale-sop.md): denied 4473, refused transfer and returns for drop-shipped guns
-- [Consignment payouts](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/consignment-payout.md): tracking and paying consignors
-- [Pinned versions](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/versions.md): the Frappe, ERPNext and runtime versions in use
+- [Backups, restore and upgrades](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/self-hosting.md#backups-and-restore): machine snapshots, the 6-hourly database backup, restoring one database
+- [Extensions](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/self-hosting.md#extensions): installing, upgrading and rolling back extensions
+- [Cash drawer](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/cash-drawer.md): the daily count, entries and weekly report
+- [Receiving distributor parcels](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/receiving-scan-first.md): scan-first receiving at the counter
+- [RSR after-sale procedure](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/rsr-fds-after-sale-sop.md): denied 4473, refused transfer and returns for drop-shipped guns
+- [Consignment payouts](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/consignment-payout.md): tracking and paying consignors
+- [Pinned versions](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/versions.md): the Frappe, ERPNext and runtime versions in use
 
 ## Develop
 
-- [README](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/README.md): what the project is, the local development quick start, architecture
-- [Contributing](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/CONTRIBUTING.md): branches, CI, release preparation
-- [Testing](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/testing.md): how make test works and the traps that make it lie
-- [API reference](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/api/README.md): every whitelisted endpoint, generated from source (make api-docs)
-- [Extension hooks](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/docs/extensions/hooks.md): the named hooks the core exposes to extensions
-- [Makefile](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/Makefile): every development entry point (make help lists them)
+- [README](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/README.md): what the project is, the local development quick start, architecture
+- [Contributing](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/CONTRIBUTING.md): branches, CI, release preparation
+- [Testing](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/testing.md): how make test works and the traps that make it lie
+- [API reference](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/api/README.md): every whitelisted endpoint, generated from source (make api-docs)
+- [Extension hooks](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/extensions/hooks.md): the named hooks the core exposes to extensions
+- [Makefile](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/Makefile): every development entry point (make help lists them)
 
 ## Optional
 
-- [Security policy](https://github.com/Old-Steel-Arsenal/gunstore-pos/security/advisories/new): report a vulnerability privately
-- [License](https://github.com/Old-Steel-Arsenal/gunstore-pos/blob/main/LICENSE): GNU GPL v3.0
+- [Security policy](https://github.com/Old-Steel-Arsenal/opengunstore/security/advisories/new): report a vulnerability privately
+- [License](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/LICENSE): GNU GPL v3.0

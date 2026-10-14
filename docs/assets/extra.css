@@ -1,0 +1,40 @@
+/* Match opengunstore.com: Inter, near-black ink, a single green for status. */
+:root {
+  --md-primary-fg-color:        #171717;
+  --md-primary-fg-color--light: #525252;
+  --md-primary-fg-color--dark:  #0a0a0a;
+  --md-primary-bg-color:        #ffffff;
+  --md-accent-fg-color:         #278f5e;
+  --md-typeset-a-color:         #171717;
+}
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color:        #171717;
+  --md-accent-fg-color:         #30a66d;
+  --md-typeset-a-color:         #e8e8e8;
+  --md-default-bg-color:        #121212;
+}
+
+.md-typeset a { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); }
+.md-typeset a:hover { text-decoration-color: currentColor; }
+.md-typeset h1, .md-typeset h2 { font-weight: 700; letter-spacing: -0.02em; }
+.md-header__button.md-logo img { height: 1.5rem; border-radius: 0.3rem; }
+
+/* Screenshots read as physical artifacts, not page furniture. */
+.md-typeset img[src*="screenshots/"] {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 8px;
+  display: block;
+  margin: 1.4em auto;
+}
+.md-typeset figure { margin: 1.6em 0; }
+.md-typeset figcaption {
+  font-size: .78rem;
+  color: var(--md-default-fg-color--light);
+  text-align: center;
+  margin-top: -.6em;
+}
+
+/* Keep wide tables scrollable rather than crushing the columns. */
+.md-typeset__table { width: 100%; }
+.md-typeset table:not([class]) { font-size: .74rem; }
+.md-typeset table:not([class]) th { font-weight: 600; }

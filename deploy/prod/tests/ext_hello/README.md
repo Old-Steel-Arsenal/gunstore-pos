@@ -1,6 +1,6 @@
 # Ext Hello
 
-An extension for GunStore POS, started from `make ext-new`. It works as
+An extension for OpenGunstore, started from `make ext-new`. It works as
 shipped — a **Say hi** button on the sale screen and a welcome message for new
 customers — so every seam is in place before you replace the greeting with your
 feature. The rules it follows are in the core's `docs/extensions/hooks.md`
@@ -30,7 +30,7 @@ the ticket, and a customer gets a short welcome when they are added.
 - Where things are: `ext_hello/hooks.py` (manifest and hooks), `hooks_impl/`
   (handlers), `api/` (endpoints), `public/js/ext_hello.bundle.js` (POS registry),
   `change_log/` (release notes), `tests/`.
-- From a gunstore-pos checkout, with its dev stack up (`make dev-up`):
+- From an OpenGunstore checkout, with its dev stack up (`make dev-up`):
   - install on the dev site, run the tests, lint, check the API docs:
     `make ext-test ID=ext_hello DIR=<this folder>`; run it again after a change
     (it copies the folder again and migrates the dev site)

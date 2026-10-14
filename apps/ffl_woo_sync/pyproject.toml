@@ -1,7 +1,7 @@
 [project]
 name = "ffl_woo_sync"
 authors = [
-    { name = "GunStore POS", email = "info@oldsteelarsenal.com"}
+    { name = "OpenGunstore", email = "info@oldsteelarsenal.com"}
 ]
 description = "Bidirectional WooCommerce sync (products + orders + stock)"
 requires-python = ">=3.14"

@@ -1,6 +1,6 @@
 name: Build & push production image
 
-# Builds the GunStore-POS production image (frappe + erpnext + our 3 apps), checks it,
+# Builds the OpenGunstore production image (frappe + erpnext + our 3 apps), checks it,
 # pushes it to GHCR, tags releases, and hands the result to the deploy repo. This repo
 # deploys nothing itself: rollout to the stores (prod, demo) lives in the repository named
 # by the variable DEPLOY_REPO.

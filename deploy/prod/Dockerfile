@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Production image for GunStore-POS: frappe + erpnext + our 3 apps
+# Production image for OpenGunstore: frappe + erpnext + our 3 apps
 # (ffl_core, ffl_integrations, ffl_woo_sync).
 #
 # Built in CI (.github/workflows/release-image.yml) and pushed to GHCR; the

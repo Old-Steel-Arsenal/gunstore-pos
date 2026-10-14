@@ -1,6 +1,6 @@
 app_name = "ffl_woo_sync"
 app_title = "FFL Woo Sync"
-app_publisher = "GunStore POS"
+app_publisher = "OpenGunstore"
 app_description = "Bidirectional WooCommerce sync (products + orders + stock)"
 app_email = "info@oldsteelarsenal.com"
 app_license = "GNU General Public License (v3)"

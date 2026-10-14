@@ -16,7 +16,7 @@ GunBroker FixedPriceListingFailed webhook: a listing failed, so record why and r
 
 **Returns:** 200 ``{ok: true}`` once accepted, including when no gun matches. 401 on bad credentials, identical to the other GunBroker webhook endpoints.
 
-<sub>`apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:445`</sub>
+<sub>`apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:446`</sub>
 
 ## `items_sold`
 
@@ -30,7 +30,7 @@ GunBroker ItemsSold webhook: an item sold, so pull the order now.
 
 **Returns:** 200 ``{ok: true}`` once accepted, including when nothing could be matched. 401 when the HTTP Basic credentials are missing or wrong, word for word the same as when GunBroker is switched off or the webhook credentials are not set on this site.
 
-<sub>`apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:381`</sub>
+<sub>`apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:382`</sub>
 
 ## `items_unsold_not_relisted`
 
@@ -44,7 +44,7 @@ GunBroker ItemsUnsoldNotRelisted webhook: a listing ended with no sale, so re-ch
 
 **Returns:** 200 ``{ok: true}`` once accepted, including when no gun matches. 401 on bad credentials, identical to the other GunBroker webhook endpoints.
 
-<sub>`apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:431`</sub>
+<sub>`apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:432`</sub>
 
 ## `order_status_update`
 
@@ -58,7 +58,7 @@ GunBroker OrderStatusUpdate webhook: an order changed, so pull it now.
 
 **Returns:** 200 ``{ok: true}`` once accepted. 401 on bad credentials, identical to the other GunBroker webhook endpoints.
 
-<sub>`apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:399`</sub>
+<sub>`apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:400`</sub>
 
 ## `winning_bid_received`
 
@@ -72,4 +72,4 @@ GunBroker WinningBidReceived webhook: an auction took a bid, so lock the gun now
 
 **Returns:** 200 ``{ok: true}`` once accepted; a gun that cannot be matched falls back to a full auction watch. 401 on bad credentials, identical to the other GunBroker webhook endpoints.
 
-<sub>`apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:414`</sub>
+<sub>`apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:415`</sub>

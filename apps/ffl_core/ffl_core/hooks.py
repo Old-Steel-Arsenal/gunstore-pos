@@ -1,6 +1,6 @@
 app_name = "ffl_core"
-app_title = "Gun Shop"
-app_publisher = "GunStore POS"
+app_title = "OpenGunstore"
+app_publisher = "OpenGunstore"
 app_description = "FFL gun store core: Item/Customer extensions, A&D doctypes, Intake Tool"
 app_email = "info@oldsteelarsenal.com"
 app_license = "GNU General Public License (v3)"
@@ -79,7 +79,7 @@ add_to_apps_screen = [
 		# A new file name, not new bytes under the old one: the asset carries no Cache-Control, so a
 		# browser keeps an image it fetched long ago for days and would go on showing the old logo.
 		"logo": "/assets/ffl_core/images/gunstore_logo.svg",
-		"title": "Gun Shop",
+		"title": "OpenGunstore",
 		"route": "/" + _LANDING,
 		"has_permission": "ffl_core.check_app_permission",
 	},
@@ -147,7 +147,7 @@ def _hashed(rel_path: str) -> str:
 	return f"/assets/ffl_core/{rel_path}?v={digest}"
 
 
-# Extension SDK (core ≥ 1.1): frappe.boot.gunshop_extensions = {id: {enabled, version, title}}
+# Extension SDK (since core 0.1.0): frappe.boot.gunshop_extensions = {id: {enabled, version, title}}
 # is what gunstore.extensions renders from.
 extend_bootinfo = ["ffl_core.extensions.extend_bootinfo"]
 

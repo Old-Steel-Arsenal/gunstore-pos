@@ -675,7 +675,7 @@ class TestLiveContractShapes(FrappeTestCase):
 		client.probe_connection(account="fulfillment")
 		body = _last_json(session)
 		# the fulfillment account geolocates a ship-to on every call (97 without)
-		self.assertEqual(body["Storename"], "GunStore POS Connection Probe")
+		self.assertEqual(body["Storename"], "OpenGunstore Connection Probe")
 		self.assertEqual(body["ShipZip"], "32792")
 
 	def test_place_order_status_60_queued_is_not_an_error(self):

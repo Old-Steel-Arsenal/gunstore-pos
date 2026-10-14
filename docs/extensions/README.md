@@ -1,9 +1,17 @@
-# Extensions — what lives in this repository
+# Extensions
 
-The contract for an extension is [hooks.md](hooks.md), the docstrings of the SDK in `ffl_core.extensions`, and the lint (`make ext-lint`), which checks the rules mechanically.
-This folder holds the core-side contracts; the tooling is below.
+An extension is a separate Frappe app that adds behavior to one store without a new core release. It is installed per site from Settings → Extensions, switched on and off there, and checked by a linter before anything runs. This section is for the developers who write extensions and the operators who test them.
 
-- [hooks.md](hooks.md) — the named hooks the core reads on behalf of extensions.
+## Where to read
+
+| To do this | Read |
+|---|---|
+| Build and package a first extension in a few minutes | [Quick start](quickstart.md) |
+| Know every rule the lint enforces: naming, manifest, permissions, endpoints, compliance limits | [Developer specification](developer-spec.md) |
+| See what the core lets an extension plug into: the Python SDK, the `gunshop_*` hooks and the JavaScript registry | [Core hooks](hooks.md) |
+| Install, upgrade, roll back and repair extensions on a server | [Extensions in the self-hosting guide](../self-hosting.md#extensions) |
+
+The contract for an extension is the first three pages above, the docstrings of the SDK in `ffl_core.extensions`, and the lint (`make ext-lint`), which checks the rules mechanically. A few extensions are published by the project maintainers and are called first-party. They follow the same rules, plus a short list of extra permissions (specification §8.1). The repository includes a complete example, `deploy/prod/tests/ext_hello`, and the skeleton that `make ext-new` copies, `deploy/prod/tests/ext_template`.
 
 ## Commands (from the repository root)
 
@@ -21,8 +29,8 @@ template and fixture drift. After changing the template, regenerate the fixture:
 (keep the date unless the release note should change).
 
 `make ext-test` leaves the extension installed on the dev site. Back the site up before the first run
-(`bench --site dev.localhost backup`): an extension whose own tests leave records refuses `uninstall-app` —
-osa_consignment does — and restoring that backup is then the only way back. To take it off:
+(`bench --site dev.localhost backup`): an extension whose own tests leave records refuses `uninstall-app`,
+and restoring that backup is then the only way back. To take it off:
 `bench --site dev.localhost uninstall-app <id>`, or `bench --site dev.localhost restore <that backup>`; then delete
 `frappe-bench/apps/<id>` (the link), `frappe-bench/apps-ext/<id>` (the copy), `env/lib/python*/site-packages/<id>.pth`
 and the `<id>` line of `sites/apps.txt`, and run `make test` only after that.
