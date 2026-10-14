@@ -2,7 +2,7 @@
 
 The **Data Service** is an optional, hosted service that the POS reads for shared data: the cross-distributor product catalog, offers, a national FFL directory, and an extension update feed. The POS is fully usable without it. This page says what works without it, what needs it, and how to run a **local catalog** instead of the hosted one.
 
-The connection lives in **Data Service Settings** (endpoint, client id, secret; Test Connection records the contract version the service reports). Credentials are issued by whoever operates the service you use. The service speaks the published [catalog contract](catalog-api/README.md), so any service that passes the conformance runner described there can be used.
+The connection lives in **Data Service Settings** (endpoint, client id, secret; Test Connection records the contract version the service reports). Credentials are issued by whoever operates the service you use. The service speaks the published [catalog contract](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/catalog-api/README.md), so any service that passes the conformance runner described there can be used.
 
 ## What works without it
 
@@ -99,4 +99,4 @@ The same call with `{'code': 'ss', 'lane': 'snapshot', 'force': True}` rebuilds 
 
 ## The catalog contract
 
-The catalog is read through a small published contract: [catalog-api/README.md](catalog-api/README.md) (semantics, authentication, conformance runner) and [catalog-api/openapi.json](catalog-api/openapi.json) (shapes). A third-party catalog service, the local catalog and the hosted service all implement it.
+The catalog is read through a small published contract: [catalog-api/README.md](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/catalog-api/README.md) (semantics, authentication, conformance runner) and [catalog-api/openapi.json](https://github.com/Old-Steel-Arsenal/opengunstore/blob/main/docs/catalog-api/openapi.json) (shapes). A third-party catalog service, the local catalog and the hosted service all implement it.

@@ -1,9 +1,47 @@
-# Core hooks for extensions
+# Core hooks and the registry
 
-The named hooks `ffl_core` reads on behalf of extensions (core ≥ 0.1). Declare them in the extension's `hooks.py` like any Frappe hook;
+For developers. This page lists everything the POS core offers an extension to plug into: the Python SDK, the named hooks the core reads on an extension's behalf, and the JavaScript registry that places an extension's buttons in the POS. Anything not on this page is internal to the core and can change in any release. The [developer specification](developer-spec.md) says which of these an extension may use, and the lint refuses any hook in an extension's `hooks.py` that is not listed there or here.
+
+## The Python SDK — `ffl_core.extensions`
+
+```python
+from ffl_core.extensions import extension_hook, require_enabled, is_enabled
+from ffl_core.roles import COUNTER_ROLES
+
+@extension_hook("acme_layaway")                 # switched off: returns None, does nothing
+def on_sales_invoice_submit(doc, method):
+    ...
+
+@frappe.whitelist(methods=["POST"])
+def start_plan(customer: str, item: str):
+    """Start a layaway plan.
+
+    Args:
+        customer: Customer name.
+        item: Item code.
+
+    Returns:
+        dict: {"plan": name}
+    """
+    require_enabled("acme_layaway", roles=COUNTER_ROLES)   # must be the first statement
+    ...
+```
+
+| Function | Behavior |
+|---|---|
+| `extension_hook(app)` | Decorator for `doc_events` and `scheduler_events` handlers. When the store has switched the extension off, the handler returns `None` without running. |
+| `require_enabled(app, *, roles=None)` | Raises `frappe.PermissionError` when the extension is off or the user has none of `roles`. The built-in gate audit requires it (or `frappe.only_for`) to be the first executable statement of every whitelisted endpoint. Always pass `roles`: the audit counts only the `roles=` form as a gate. |
+| `is_enabled(app)` | For templates and branches. Never use it to bypass `require_enabled`. |
+| `title_of(app)` | The extension's title as the registry knows it. |
+
+Roles: reuse `ffl_core.roles.COUNTER_ROLES`, `STOCK_ROLES` and `SYSTEM_ROLES`, or your own role.
+
+## Named hooks the core reads (`gunshop_*`)
+
+The named hooks `ffl_core` reads on behalf of extensions. Declare them in the extension's `hooks.py` like any Frappe hook;
 values are dotted paths to functions unless the table says otherwise. Every
 provider is called inside `try/except`: a failure is written to Error Log and
-the row below says what core assumes in that case.
+the last column says what core assumes in that case.
 
 | hook | value | called with → returns | when a provider fails |
 |---|---|---|---|
@@ -22,7 +60,7 @@ the row below says what core assumes in that case.
 | `gunshop_distributor_source_settled` | dotted path | `(source_doctype, source_name)` once every distributor order of a non-counter source (a web order) has settled; the layer that created those orders completes the source (enqueue after commit — the call can come from inside the last order's save). Called for every provider. | raises into the distributor order save that settled it (the save rolls back, as the inline enqueue did) |
 | `gunshop_distributor_feed_stale` | dotted path | `(distributor, *, aged: bool) → bool` when a distributor's quantity feed is stale (`aged`: it had a heartbeat and aged out — a cold start is not). Zero what you publish from that feed only when `aged`; return True when your zero-stock interlock is on (the admin alert says so). | raises into the watchdog run (a stale feed must not pass as "interlock off") |
 | `gunshop_distributor_hub_rows` | dotted path | `(rows)` — the Distributors hub's rows (`frappe._dict` per house); add your own display columns in place. The hub card shows the markup line when a provider sets `markup_rules` (the drop-ship layer also sets `default_markup_pct` and the house's stock-publishing fields). The Catalog Service / Drop-ship Center buttons follow `dropship_hooks.layer_active()`, not this hook: no `gunshop_dropship_listing` provider — or only one from an extension the store has switched off — no buttons. | logged, the column stays blank |
-| `gunshop_ai_connected` | dotted path | `() → bool` — whether the extension's AI assistant is connected (its service set up and reachable as far as it knows, without a network call: the answer is read at every desk boot). Any truthy answer makes `ffl_integrations.data_service.capabilities()["ai"]` `"connected"` (else `"off"`), which the desk reads as `frappe.boot.ffl_capabilities.ai`. Wrap it in `@extension_hook` so a switched-off extension answers None. ffl_integrations reads it; the core never imports the extension. | treated as not connected; logged at most once an hour |
+| `gunshop_ai_connected` | dotted path | `() → bool` — whether the extension's AI service is connected (its service set up and reachable as far as it knows, without a network call: the answer is read at every desk boot). Any truthy answer makes `ffl_integrations.data_service.capabilities()["ai"]` `"connected"` (else `"off"`), which the desk reads as `frappe.boot.ffl_capabilities.ai`. Wrap it in `@extension_hook` so a switched-off extension answers None. ffl_integrations reads it; the core never imports the extension. | treated as not connected; logged at most once an hour |
 | `gunshop_catalog_change_cursors` | **`"DocType.field"`** (string) | A product change-feed cursor the extension keeps on one of its Singles (it follows `catalog.changes` / `/products/changes`). While any registered cursor holds a value, Data Service Settings refuses to change *Catalog source* and names the field: the Data Service and the Local catalog number changes differently, so a stored cursor would skip or replay changes against the other. When a site moves the other way, from the Local catalog to a Data Service, the core clears every registered cursor (straight on `tabSingles`, without running your controller), so a blank cursor must mean "start over": read the feed from its start, or take a fresh baseline. ffl_integrations registers `Data Service Settings.category_products_cursor`. | — (data, not code; a malformed entry is skipped) |
 
 `enabled` on the POS Extension row is the manager's intent; the core never
@@ -41,7 +79,7 @@ Contract tests: `ffl_core/tests/test_extension_hooks.py` (a fake provider per ho
 
 Registered only by an extension whose manifest declares `first_party` (the lint refuses them otherwise):
 they decide what the website sells and at what price, or answer another app's endpoint path. Today the
-`osa_dropship` extension (the website drop-ship layer) is their one provider; without it every caller
+maintainers' website drop-ship extension is their one provider; without it every caller
 falls back as the last column says.
 
 | hook | value | called with → returns | without a provider / when it fails |
@@ -54,3 +92,44 @@ falls back as the last column says.
 | `distributor_listing_push_failed` | dotted path | `(item_code, site, error)` — a queued Woo push of a listed product failed (ffl_woo_sync push tasks). | logged |
 | `woo_order_cancelled` | dotted path | `(woo_online_order_name)` — the customer cancelled a web order (ffl_woo_sync's cancel handler writes with `db.set_value`, so no doc_event fires). | logged; the order stays cancelled |
 | `override_whitelisted_methods` | **dict** `{old dotted path: new dotted path}` | Frappe's own hook: a request to the old endpoint path runs the new one. For endpoints that moved out of the core into the extension, so existing API clients keep working. | — |
+
+## The JavaScript registry
+
+An extension's bundle registers once with `gunstore.extensions`. The core decides where things render, in what order, and hides everything while the extension is not running (switched off, or paused because it does not fit this core). Never insert nodes into the POS yourself and never override `erpnext.PointOfSale.*` prototypes.
+
+```js
+// public/js/acme_layaway.bundle.js
+gunstore.extensions.register('acme_layaway', {
+  posActions: [{
+    id: 'acme-layaway-start',
+    label: __('Layaway'),
+    icon: 'calendar',
+    condition: (ctx) => ctx.invoice && ctx.invoice.customer && !ctx.invoice.is_return,
+    onClick: (ctx) => gunstore.ext.acme_layaway.openDialog(ctx),
+  }],
+  serialActions:   [{ id, label, onClick({ frm }) }],   // Serial No form
+  customerActions: [{ id, label, onClick({ frm }) }],   // Customer form
+  settingsLinks:   [{ label: __('Layaway'), doctype: 'Acme Layaway Settings' }],
+  onDeskReady() { /* once per page load, after the desk is ready */ },
+});
+```
+
+| Entry | Where it appears | Notes |
+|---|---|---|
+| `posActions` | Buttons on the sale screen, after the core's own | `condition(ctx)` must be synchronous and cheap. `ctx` is a read-only snapshot (current invoice, customer, selected serial, POS Profile). |
+| `serialActions` | Serial No form toolbar, under an **Extensions** group | `onClick({ frm })`. |
+| `customerActions` | Customer form toolbar, under an **Extensions** group | `onClick({ frm })`. |
+| `settingsLinks` | The **Settings** button on the extension's card in Settings → Extensions | One entry per Settings Single you ship. |
+| `onDeskReady()` | Nowhere; it runs code | Called once after the desk is ready, for each extension that is effectively on. Use it to mount something on every desk page. A throw is logged to the console and does not stop other extensions. |
+
+Other useful pieces: `gunstore.extensions.isEnabled(id, boot)`, `ffl.featureOffPage(page, featureTitle, whereToTurnOn)` for an extension's own Desk pages, and `gunstore.renderReleaseNotes(entries)`.
+
+Desk pages: an extension's pages live in its own module. To list them in the Gun Shop sidebar and the Dashboard's **All records**, declare `gunshop_sidebar_items` (above). The core keeps that section in step with the switch. To give your module's own pages the same sidebar as the core pages, call `ffl_core.setup.sidebar.mirror_gun_shop_sidebar(<name>, module=<module>, extra_items=[...])` from `after_install` / `after_migrate`. Frappe lets it write a sidebar only during install, migrate, a patch or developer mode, so called from a switch handler it writes nothing until the next migrate. Declare `add_to_apps_screen` with a `has_permission` that returns False so the extension does not become a separate app in the app switcher.
+
+## Workspace shortcuts
+
+`ffl_core.workspace_shortcuts.ensure_shortcut(label, link_to, *, anchor, block_id, color="Blue", shortcut_type="DocType", workspace="Settings")` and `remove_shortcut(label, *, workspace="Settings")` add and remove cards on a workspace. `shortcut_type` is `DocType`, `Page`, `Report` or `URL`, and `link_to` is the matching target. Call them from `gunshop_extension_toggled` so the cards follow whether the extension runs. Staff land on the Dashboard, not on a workspace, so put the way to your pages in `gunshop_sidebar_items` first.
+
+## First-party surface
+
+Extensions published by the project maintainers (permission `first_party`, and an id on the list shipped in the lint) may also call a documented set of core functions that third-party extensions may not: dealer-transfer dispositions, custody flags, the consignment warehouses, settlement invoicing and the ShipStation client. They may also register the first-party-only hooks above.
