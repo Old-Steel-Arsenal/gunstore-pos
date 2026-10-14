@@ -369,7 +369,7 @@ gunstore.ExtensionsPage = class ExtensionsPage {
 	permLabel(perm) {
 		const [kind, rest] = perm.includes(':') ? perm.split(/:(.+)/) : [perm, ''];
 		const map = {
-			first_party: __('Built by the GunStore POS maintainers — may act on the bound book, custody and settlement'),
+			first_party: __('Built by the OpenGunstore maintainers — may act on the bound book, custody and settlement'),
 			doc_events: __('Reacts when a {0} is saved', [rest]),
 			custom_fields: __('Adds its own fields to {0}', [rest]),
 			pos_ui: __('Adds buttons to the sale screen'),
@@ -738,7 +738,7 @@ gunstore.ExtensionsPage = class ExtensionsPage {
 						${up ? `<span class="xt-pill ${up.allowed ? 'upd' : 'bad'}">${up.allowed ? __('Upgrade') : __('Cannot upgrade')}</span>` : ''}
 						<span class="xt-pill side">${__('Unsigned')}</span></div>
 					<div class="xt-pub">${e(r.publisher || __('Unknown publisher'))}${r.publisher_id ? ` (${e(r.publisher_id)})` : ''} · <span class="xt-mono">${e(r.app_id || '')}</span> · ${origin}</div>
-					<div class="xt-notice warn"><span class="xt-ni">!</span><div><b>${__('You are installing code that nobody on the GunStore POS team has reviewed.')}</b> ${__('Once installed it can read and change everything in this POS — sales, customers, the bound book. Only install packages from a developer you trust.')}</div></div>
+					<div class="xt-notice warn"><span class="xt-ni">!</span><div><b>${__('You are installing code that nobody on the OpenGunstore team has reviewed.')}</b> ${__('Once installed it can read and change everything in this POS — sales, customers, the bound book. Only install packages from a developer you trust.')}</div></div>
 					${up ? this.permissionDiff(r) : chips ? `<div class="xt-perms">${chips}</div>` : ''}
 					${up && !up.allowed ? `<div class="xt-failed" role="alert">${__('This package cannot replace the version on this server: {0}', [e(up.reason || '')])}</div>` : ''}
 					${!up && r.on_bench ? `<div class="xt-failed" role="alert">${__('{0} is already on this server. Uninstall it first.', [e(r.app_id)])}</div>` : ''}

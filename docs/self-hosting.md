@@ -1,6 +1,6 @@
-# Self-hosting GunStore POS
+# Self-hosting OpenGunstore
 
-How to run the GunStore POS stack (Frappe/ERPNext with the `ffl_core`, `ffl_integrations` and `ffl_woo_sync` apps) on one Linux server: install, back up and restore, upgrade, and manage extensions, including rolling an extension upgrade back.
+How to run the OpenGunstore stack (Frappe/ERPNext with the `ffl_core`, `ffl_integrations` and `ffl_woo_sync` apps) on one Linux server: install, back up and restore, upgrade, and manage extensions, including rolling an extension upgrade back.
 
 The stack runs in containers: the image is built by CI and pushed to a container registry, and the server only pulls and runs it. The database (MariaDB), Redis, the scheduler and the workers all run in containers on the same machine. The stack does **not** ship its own reverse proxy: the frontend is published on `127.0.0.1:8080` and a proxy you run on the host (the Caddy example below) terminates HTTPS and forwards to it.
 
@@ -40,7 +40,7 @@ docker version && docker compose version
 ## Get the code
 
 ```bash
-cd ~ && git clone https://github.com/<owner>/gunstore-pos.git
+cd ~ && git clone https://github.com/<owner>/opengunstore.git gunstore-pos
 cd gunstore-pos
 # frappe_docker is upstream and .gitignored; the runtime compose files need it, so clone it separately:
 git clone --depth 1 https://github.com/frappe/frappe_docker.git deploy/frappe_docker

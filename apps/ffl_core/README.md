@@ -4,7 +4,7 @@ FFL gun store core: Item/Customer extensions, A&D doctypes, Intake Tool
 
 ### Installation
 
-This app is one of three in the GunStore POS monorepo and is not installed on its own. See the [root README](../../README.md) for the dev stack and the [self-hosting guide](../../docs/self-hosting.md) for a server.
+This app is one of three in the OpenGunstore monorepo and is not installed on its own. See the [root README](../../README.md) for the dev stack and the [self-hosting guide](../../docs/self-hosting.md) for a server.
 
 ### Contributing
 

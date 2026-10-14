@@ -1,4 +1,4 @@
-# Ext Hello — started from `make ext-new` (gunstore-pos): the standard extension
+# Ext Hello — started from `make ext-new` (OpenGunstore): the standard extension
 # skeleton, working. A manifest, a doc_events handler that honours the store's
 # switch, a gated and documented endpoint, a button on the POS through the
 # registry, a release note, and the tests every extension owes (switched off /

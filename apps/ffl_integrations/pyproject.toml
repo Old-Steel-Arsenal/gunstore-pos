@@ -1,7 +1,7 @@
 [project]
 name = "ffl_integrations"
 authors = [
-    { name = "GunStore POS", email = "info@oldsteelarsenal.com"}
+    { name = "OpenGunstore", email = "info@oldsteelarsenal.com"}
 ]
 description = "FastBound, Payroc, ACH, ATF EZ Check clients"
 requires-python = ">=3.14"

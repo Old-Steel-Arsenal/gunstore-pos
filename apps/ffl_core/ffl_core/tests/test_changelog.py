@@ -41,7 +41,13 @@ class TestVersion(FrappeTestCase):
 	def test_app_title_is_what_the_popup_filter_expects(self):
 		# the changelog bundle keeps only the entry titled like this; a rename would let
 		# ERPNext's own release notes back onto the counter.
-		self.assertEqual(frappe.get_hooks("app_title", app_name="ffl_core")[0], "Gun Shop")
+		import re
+		from pathlib import Path
+
+		bundle = Path(frappe.get_app_path("ffl_core", "public", "js", "ffl_core.bundle.js")).read_text()
+		js_title = re.search(r"const OUR_APP_TITLE = '([^']+)';", bundle).group(1)
+		self.assertEqual(frappe.get_hooks("app_title", app_name="ffl_core")[0], js_title)
+		self.assertEqual(js_title, "OpenGunstore")
 
 
 class TestChangelogApi(FrappeTestCase):

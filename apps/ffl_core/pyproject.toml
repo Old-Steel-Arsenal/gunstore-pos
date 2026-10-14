@@ -1,7 +1,7 @@
 [project]
 name = "ffl_core"
 authors = [
-    { name = "GunStore POS", email = "info@oldsteelarsenal.com"}
+    { name = "OpenGunstore", email = "info@oldsteelarsenal.com"}
 ]
 description = "FFL gun store core: Item/Customer extensions, A&D doctypes, Intake Tool, Portal API"
 requires-python = ">=3.14"

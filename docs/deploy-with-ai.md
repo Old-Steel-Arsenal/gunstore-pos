@@ -1,6 +1,6 @@
 # Deploying with an AI assistant
 
-This page is for an AI coding agent (Claude Code, Codex, Cursor and the like) that is installing GunStore POS on a server for a person. It is a checklist with checks and stop points. It does not repeat the commands: **[self-hosting.md](self-hosting.md) is the source of truth**, and each step below names the section to run. If this page and that one disagree, follow self-hosting.md and tell the user.
+This page is for an AI coding agent (Claude Code, Codex, Cursor and the like) that is installing OpenGunstore on a server for a person. It is a checklist with checks and stop points. It does not repeat the commands: **[self-hosting.md](self-hosting.md) is the source of truth**, and each step below names the section to run. If this page and that one disagree, follow self-hosting.md and tell the user.
 
 If you are the person and not the agent, read [self-hosting.md](self-hosting.md) instead; it has the same steps with the explanations.
 

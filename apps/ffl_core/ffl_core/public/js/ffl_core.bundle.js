@@ -794,7 +794,7 @@ ffl.FirearmItemPicker = class FirearmItemPicker {
 	// numbers, not for the counter. Keep only ours (hooks.app_title). Done on
 	// app_ready, before desk.js's 1 s timer fires the native popup for
 	// System Manager, so admins see the same trimmed dialog.
-	const OUR_APP_TITLE = 'Gun Shop';
+	const OUR_APP_TITLE = 'OpenGunstore';
 	function keepOnlyOurChangeLog() {
 		if (!window.frappe || !Array.isArray(frappe.boot?.change_log)) return;
 		frappe.boot.change_log = frappe.boot.change_log.filter((e) => e.title === OUR_APP_TITLE);
