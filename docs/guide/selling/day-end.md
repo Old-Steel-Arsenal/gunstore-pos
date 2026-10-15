@@ -72,7 +72,9 @@ Three details worth knowing:
   books expect and is marked as not counted. If nobody closed the day, the
   Cash Drawer page shows the day as not counted and books nothing for it. The
   next real count covers every day since the last one.
-- Card, Zelle and the other modes are taken as the system recorded them.
+- Card, Zelle and the other modes are taken as the system recorded them. A
+  customer's check or money order is booked to the bank, so it is not part of
+  the drawer count.
 - A shift opened in the last hour before the job runs is left alone, and the
   next night's run takes it.
 
