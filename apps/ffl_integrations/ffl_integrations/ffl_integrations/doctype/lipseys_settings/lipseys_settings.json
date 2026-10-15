@@ -1,0 +1,210 @@
+{
+ "actions": [],
+ "creation": "2026-10-14 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_account",
+  "section_connection",
+  "ordering_enabled",
+  "column_connection",
+  "customer_number",
+  "section_dealer",
+  "dealer_email",
+  "column_dealer",
+  "dealer_password",
+  "section_dropship",
+  "dropship_email",
+  "column_dropship",
+  "dropship_password",
+  "section_advanced",
+  "base_url",
+  "tab_ordering",
+  "section_order_options",
+  "disable_email",
+  "column_order_options",
+  "dropship_overnight",
+  "tab_status",
+  "section_status",
+  "shipping_polled_through",
+  "column_status",
+  "last_shipping_poll_at",
+  "section_error",
+  "last_error"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_account",
+   "fieldtype": "Tab Break",
+   "label": "Account"
+  },
+  {
+   "fieldname": "section_connection",
+   "fieldtype": "Section Break",
+   "label": "Ordering API"
+  },
+  {
+   "fieldname": "ordering_enabled",
+   "fieldtype": "Check",
+   "label": "Allow live orders",
+   "default": "0",
+   "description": "Off: nothing is sent to Lipsey's API; the catalog still syncs through Data Service."
+  },
+  {
+   "fieldname": "column_connection",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_number",
+   "fieldtype": "Data",
+   "label": "Customer number",
+   "description": "Optional: when set, a login that answers for another Lipsey's account is refused."
+  },
+  {
+   "fieldname": "section_dealer",
+   "fieldtype": "Section Break",
+   "label": "Dealer login",
+   "description": "Store orders are placed with this login and ship to the address on its Lipsey's account."
+  },
+  {
+   "fieldname": "dealer_email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "options": "Email",
+   "mandatory_depends_on": "eval:doc.ordering_enabled"
+  },
+  {
+   "fieldname": "column_dealer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dealer_password",
+   "fieldtype": "Password",
+   "label": "Password",
+   "mandatory_depends_on": "eval:doc.ordering_enabled"
+  },
+  {
+   "fieldname": "section_dropship",
+   "fieldtype": "Section Break",
+   "label": "Drop-ship login",
+   "description": "Optional: Lipsey's separate drop-ship account; drop-ship orders stay unavailable until it is filled in."
+  },
+  {
+   "fieldname": "dropship_email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "column_dropship",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dropship_password",
+   "fieldtype": "Password",
+   "label": "Password"
+  },
+  {
+   "fieldname": "section_advanced",
+   "fieldtype": "Section Break",
+   "label": "Advanced",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "base_url",
+   "fieldtype": "Data",
+   "label": "API base URL",
+   "default": "https://api.lipseys.com/api/Integration"
+  },
+  {
+   "fieldname": "tab_ordering",
+   "fieldtype": "Tab Break",
+   "label": "Ordering"
+  },
+  {
+   "fieldname": "section_order_options",
+   "fieldtype": "Section Break",
+   "label": "Order options"
+  },
+  {
+   "fieldname": "disable_email",
+   "fieldtype": "Check",
+   "label": "No confirmation email from Lipsey's",
+   "default": "0",
+   "description": "On: Lipsey's sends no order confirmation email for orders placed from here."
+  },
+  {
+   "fieldname": "column_order_options",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dropship_overnight",
+   "fieldtype": "Check",
+   "label": "Accessory drop-ship orders ship overnight",
+   "default": "0",
+   "description": "On: accessory drop-ship orders ask Lipsey's for overnight shipping, at overnight rates."
+  },
+  {
+   "fieldname": "tab_status",
+   "fieldtype": "Tab Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "section_status",
+   "fieldtype": "Section Break",
+   "label": "Shipping poll"
+  },
+  {
+   "fieldname": "shipping_polled_through",
+   "fieldtype": "Date",
+   "label": "Shipping polled through",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_shipping_poll_at",
+   "fieldtype": "Datetime",
+   "label": "Last shipping poll",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_error",
+   "fieldtype": "Section Break",
+   "label": "Last error"
+  },
+  {
+   "fieldname": "last_error",
+   "fieldtype": "Long Text",
+   "label": "Last error",
+   "read_only": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-14 12:00:00",
+ "modified_by": "Administrator",
+ "module": "FFL Integrations",
+ "name": "Lipseys Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

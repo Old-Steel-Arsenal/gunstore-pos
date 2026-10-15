@@ -211,6 +211,65 @@ South's ordering API. It places no order.
 The first two appear in the **Error** field of a Sports South Distributor Order
 that failed to place.
 
+## Lipseys Settings
+
+`/app/lipseys-settings`, also opened by **Account & shipping** on the Lipsey's
+card of the [Distributors hub](../distributors/hub.md). Connects to Lipsey's
+ordering API. The catalog reaches the store through Data Service. The page has
+three tabs: Account, Ordering and Status.
+
+Lipsey's lets in only computers it has approved, so the API must be reached from
+the address you gave Lipsey's when you asked for API access.
+
+**Account tab.** **Allow live orders** is the master switch, off by default.
+While it is off nothing is sent to Lipsey's, and the catalog still syncs.
+**Customer number** is optional: filled in, a login that answers for another
+Lipsey's account is refused. **Dealer login** holds the **Email** and
+**Password** you sign in to Lipsey's with. Stocking and procure-to-store orders
+are placed with it and ship to the address on that Lipsey's account, so the POS
+sends no address. With **Allow live orders** on, the form will not save without
+them. **Drop-ship login** is Lipsey's separate drop-ship account. Until it is
+filled in, the hub and the planner offer no drop-ship for Lipsey's. The
+collapsed **Advanced** section holds **API base URL**.
+
+**Ordering tab.** **No confirmation email from Lipsey's** stops Lipsey's own
+order email for orders placed from the POS. Leave it off: that email is how you
+check an order whose answer never came back.
+
+**Status tab.** Lipsey's has no order status call. Once a day the POS reads the
+shipping list Lipsey's publishes for the day before: invoice number, Lipsey's
+order number, your PO and tracking. That list lands in the Invoices view with the
+hourly invoice pull, and the order poll then marks the order shipped.
+**Shipping polled through** is the last day read and **Last shipping poll** when.
+A day that fails is read again on the next pull. **Last error** holds the last
+failure.
+
+**Buttons.** **Test Connection** on the toolbar checks the catalog service. With
+**Allow live orders** on, it also signs in with each login that is filled in and
+makes one small read. It places no order.
+
+**Lipsey's orders in the POS.**
+
+- Lipsey's adds a new store order to an open order of the same kind, long guns
+  or handguns, when one exists. Several POS orders can then share one Lipsey's
+  order number. Each keeps its own PO, and a shipment is matched to every order on
+  that Lipsey's order that was placed by the invoice date.
+- The order's lines take the quantity and price Lipsey's confirmed when the order
+  was placed. A line Lipsey's could not fill is marked cancelled. Receive Goods can
+  match scanned units to the order straight away.
+- An order whose answer never came back, after a timeout for example, goes to
+  **Error** and is never re-sent by itself. Lipsey's offers no way to look an
+  order up by PO, so check the confirmation email or your Lipsey's account for
+  the PO first.
+
+| Message you see | What it means | Fix |
+|---|---|---|
+| … the order may or may not have been placed … | Lipsey's did not answer the order | Look for the PO at Lipsey's. If it is there, do not place it again |
+| Lipseys Settings: Allow live orders is off | Ordering is switched off | Turn **Allow live orders** on |
+| Lipsey's placed nothing: … | Lipsey's refused the order and gave its reason | Fix what the reason names, then place a new order |
+
+The first and last appear in the **Error** field of a Lipsey's Distributor Order.
+
 ## ShipStation Settings
 
 `/app/shipstation-settings`, also on the **POS & Sales** card of the

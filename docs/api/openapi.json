@@ -3424,6 +3424,72 @@
           }
         }
       },
+      "Lipseys_Settings": {
+        "type": "object",
+        "description": "Custom DocType (ffl_integrations); CRUD via /api/resource/Lipseys%20Settings — see docs/api/frappe-rest.md.",
+        "properties": {
+          "ordering_enabled": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "Allow live orders"
+          },
+          "customer_number": {
+            "type": "string",
+            "description": "Customer number"
+          },
+          "dealer_email": {
+            "type": "string",
+            "description": "Email"
+          },
+          "dealer_password": {
+            "type": "string",
+            "description": "Password"
+          },
+          "dropship_email": {
+            "type": "string",
+            "description": "Email"
+          },
+          "dropship_password": {
+            "type": "string",
+            "description": "Password"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "API base URL"
+          },
+          "disable_email": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "No confirmation email from Lipsey's"
+          },
+          "dropship_overnight": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "Accessory drop-ship orders ship overnight"
+          },
+          "shipping_polled_through": {
+            "type": "string",
+            "description": "Shipping polled through"
+          },
+          "last_shipping_poll_at": {
+            "type": "string",
+            "description": "Last shipping poll"
+          },
+          "last_error": {
+            "type": "string",
+            "description": "Last error"
+          }
+        }
+      },
       "Payroc_Charge": {
         "type": "object",
         "description": "Custom DocType (ffl_integrations); CRUD via /api/resource/Payroc%20Charge — see docs/api/frappe-rest.md.",
@@ -14584,6 +14650,36 @@
         "summary": "Settings toolbar: catalog health for every enabled house through the",
         "description": "site-wide service (or this site's own tables when the catalog source is\nLocal), recording the contract version on the Status tab.\n\n**Auth (derived from code):** Roles: System Manager\n\n**Permissions:** System Manager.\n\nSource: `apps/ffl_integrations/ffl_integrations/ffl_integrations/doctype/data_service_settings/data_service_settings.py:103`",
         "operationId": "ffl_integrations.ffl_integrations.doctype.data_service_settings.data_service_settings.test_connection",
+        "responses": {
+          "200": {
+            "description": "{checks: [{label, ok: bool|None, detail}]}",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        }
+      }
+    },
+    "/api/method/ffl_integrations.ffl_integrations.doctype.lipseys_settings.lipseys_settings.test_connection": {
+      "post": {
+        "tags": [
+          "ffl_integrations"
+        ],
+        "summary": "Settings toolbar: catalog service + a sign-in and one read per Lipsey's login.",
+        "description": "Read-only at Lipsey's: it places no order.\n\n**Auth (derived from code):** Roles: System Manager\n\n**Permissions:** System Manager.\n\nSource: `apps/ffl_integrations/ffl_integrations/ffl_integrations/doctype/lipseys_settings/lipseys_settings.py:18`",
+        "operationId": "ffl_integrations.ffl_integrations.doctype.lipseys_settings.lipseys_settings.test_connection",
         "responses": {
           "200": {
             "description": "{checks: [{label, ok: bool|None, detail}]}",

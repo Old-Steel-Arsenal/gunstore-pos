@@ -20,10 +20,11 @@ LEGAL_FIREARM_CLASSES = frozenset({"Handgun", "Long Gun", "Other Firearm", "NFA"
 NON_FIREARM_CLASSES = frozenset({"Gun Parts", "Accessory", "Ammunition"})
 
 # Houses whose own `ffl_required` is the law's answer row by row (Sports South sets
-# it from the item type: a lower parts kit 0, a receiver 1). RSR's is its shipping
-# rule by department — every barrel and upper says 1 — so its class decides. Only
-# the FALLBACK for a product the catalog master has no legal answer for.
-FFL_FLAG_IS_LEGAL = frozenset({"ss"})
+# it from the item type: a lower parts kit 0, a receiver 1; Lipsey's sets it on
+# exactly its firearm and NFA items, receivers and barreled actions included). RSR's
+# is its shipping rule by department — every barrel and upper says 1 — so its class
+# decides. Only the FALLBACK for a product the catalog master has no legal answer for.
+FFL_FLAG_IS_LEGAL = frozenset({"ss", "lipseys"})
 LEGAL_CACHE_SECONDS = 600
 
 

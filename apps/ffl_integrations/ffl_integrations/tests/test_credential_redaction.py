@@ -15,6 +15,7 @@ from ffl_core.tests.live_session import live_session
 
 from ffl_integrations.fastbound.client import FastBoundClient, FastBoundConfig
 from ffl_integrations.gunbroker.client import GunBrokerClient, GunBrokerConfig
+from ffl_integrations.lipseys.api_client import LipseysClient, LipseysConfig
 from ffl_integrations.rsr.api_client import RSRClient, RSRConfig
 from ffl_integrations.shipstation.client import ShipStationClient, ShipStationConfig
 from ffl_integrations.sports_south.api_client import SSConfig, SSOrdersClient
@@ -109,3 +110,28 @@ class RSR(FrappeTestCase):
 		tb = _traceback_of(lambda: c._post_raw("/api/rsrbridge/1.0/orders/status", {}, "dealer"))
 		self.assertIn("in _post_raw", tb)
 		self.assertNotIn(_mark("rsr-password"), tb)
+
+
+class Lipseys(FrappeTestCase):
+	def _client(self, canned):
+		cfg = LipseysConfig(email="dealer@example.com", password=_mark("lipseys-password"),
+			base_url="https://api.example.invalid/api/Integration")
+		return LipseysClient(cfg, session=live_session(canned))
+
+	def test_login_failure_keeps_password_out(self):
+		"""HTTP 500 on login raises inside _send, whose `body` local is the JSON
+		login body with Password."""
+		c = self._client({"/Authentication/Login": (500, b"<boom/>")})
+		tb = _traceback_of(c.login)
+		self.assertIn("in _send", tb)
+		self.assertNotIn(_mark("lipseys-password"), tb)
+
+	def test_call_failure_keeps_token_out(self):
+		"""The session token rides in the `headers` local of every later call."""
+		c = self._client({"/Authentication/Login": (200, {"token": _mark("lipseys-token"),
+			"econtact": {"success": True, "authorized": True, "data": {}}}),
+			"/Items/ValidateItem": (503, b"<boom/>")})
+		tb = _traceback_of(lambda: c.validate_item("ITEM-1"))
+		self.assertIn("in _send", tb)
+		self.assertNotIn(_mark("lipseys-token"), tb)
+		self.assertNotIn(_mark("lipseys-password"), tb)
