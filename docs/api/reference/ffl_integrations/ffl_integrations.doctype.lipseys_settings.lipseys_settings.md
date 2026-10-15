@@ -18,4 +18,4 @@ Read-only at Lipsey's: it places no order.
 
 **Permissions:** System Manager.
 
-<sub>`apps/ffl_integrations/ffl_integrations/ffl_integrations/doctype/lipseys_settings/lipseys_settings.py:18`</sub>
+<sub>`apps/ffl_integrations/ffl_integrations/ffl_integrations/doctype/lipseys_settings/lipseys_settings.py:24`</sub>

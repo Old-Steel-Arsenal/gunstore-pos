@@ -406,7 +406,8 @@ _STAGE = "_dc_stage"
 
 
 def load_catalog(rows, *, distributor: str, mode: str = "snapshot",
-		exclude_cols: tuple = (), insert_only_cols: tuple = (), min_rows: int = 0) -> dict:
+		exclude_cols: tuple = (), insert_only_cols: tuple = (), revive_flags: tuple = (),
+		min_rows: int = 0) -> dict:
 	"""Upsert a catalog feed for one house → ``{created, updated, unchanged, total}``
 	or ``LOCK_SKIPPED``.
 
@@ -421,6 +422,11 @@ def load_catalog(rows, *, distributor: str, mode: str = "snapshot",
 	``exclude_cols``: never written by this loader (another lane owns them).
 	``insert_only_cols``: seed new rows only; neither compared nor updated (a
 	daily file must not overwrite the 15-minute quantity lane's values).
+	``revive_flags``: a stored row whose status_flag is one of these (a row a
+	disappeared diff retired) and that the file carries again is re-seeded like a
+	new row: its insert-only columns take the file's values. A house whose
+	status_flag another lane owns (Lipsey's) still brings such a row back. Counted
+	as ``revived``.
 	"""
 	if mode not in ("snapshot", "delta"):
 		raise ValueError(f"unknown load mode: {mode!r}")
@@ -428,10 +434,11 @@ def load_catalog(rows, *, distributor: str, mode: str = "snapshot",
 	cmp_cols = tuple(c for c in active if c not in insert_only_cols)
 	priorities = priority_map()
 	return _guarded(distributor, (_STAGE,), lambda: _load_locked(
-		rows, distributor, mode, active, cmp_cols, min_rows, priorities))
+		rows, distributor, mode, active, cmp_cols, min_rows, priorities, tuple(revive_flags)))
 
 
-def _load_locked(rows, distributor, mode, active, cmp_cols, min_rows, priorities) -> dict:
+def _load_locked(rows, distributor, mode, active, cmp_cols, min_rows, priorities,
+		revive_flags=()) -> dict:
 	ddl = dict(OFFER_COLUMNS)
 	stage_cols = ("rn", "sku", *active, *(n for n, _d in DERIVED_COLUMNS))
 	_drop_temp(_STAGE)
@@ -521,9 +528,24 @@ def _load_locked(rows, distributor, mode, active, cmp_cols, min_rows, priorities
 		SELECT {", ".join(select_cols)} FROM `{_STAGE}` i
 		ON DUPLICATE KEY UPDATE {", ".join(sets)}""", (distributor, base))
 
+	# A retired row the file carries again: the upsert above wrote its compared
+	# columns (discontinued among them) but not its insert-only ones, so seed those.
+	revived = 0
+	seed_cols = tuple(c for c in active if c not in cmp_cols)
+	if revive_flags and seed_cols:
+		args = {"d": distributor, "flags": revive_flags, "base": base}
+		revive_join = f"""dc_offer o JOIN `{_STAGE}` i ON o.distributor = %(d)s AND o.sku = i.sku
+			WHERE TRIM(o.status_flag) IN %(flags)s"""
+		revived = int(frappe.db.sql(f"SELECT COUNT(*) FROM {revive_join}", args)[0][0])
+		if revived:
+			frappe.db.sql(f"""UPDATE dc_offer o JOIN `{_STAGE}` i ON o.distributor = %(d)s
+				AND o.sku = i.sku SET {", ".join(f"o.`{c}` = i.`{c}`" for c in seed_cols)},
+				o.change_seq = %(base)s + 2 * i.rn, o.updated_at = UTC_TIMESTAMP(6)
+				WHERE TRIM(o.status_flag) IN %(flags)s""", args)
+
 	# Every number handed out (offers base+2·rn, moves base+2·rn−1, rn <= staged_n)
 	# stays at or below the new counter, so none is ever handed out twice.
-	if created or updated or moved:
+	if created or updated or moved or revived:
 		frappe.db.sql("UPDATE dc_meta SET change_seq = %s WHERE distributor = %s",
 			(base + 2 * staged_n, distributor))
 	frappe.db.sql("UPDATE dc_meta SET upc_reject_count = %s WHERE distributor = %s",
@@ -535,8 +557,11 @@ def _load_locked(rows, distributor, mode, active, cmp_cols, min_rows, priorities
 		JOIN `{_STAGE}` i ON o.distributor = %s AND o.sku = i.sku WHERE o.upc IS NOT NULL""",
 		(distributor,))}
 	refresh_products(upc_scope, priorities)
-	return {"created": created, "updated": updated,
+	out = {"created": created, "updated": updated,
 		"unchanged": max(seen - updated, 0), "total": staged_n, "upc_rejected": counts["rejected"]}
+	if revive_flags:
+		out["revived"] = revived
+	return out
 
 
 _QTY = "_dc_qty"
