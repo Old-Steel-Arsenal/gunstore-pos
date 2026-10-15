@@ -29,6 +29,8 @@ from pathlib import Path
 # has to be maintained for the index.
 _H1 = re.compile(r"^#\s+(.+?)\s*$", re.MULTILINE)
 _FIGURE = re.compile(r"<figure markdown>.*?</figure>", re.DOTALL)
+_FIGCAPTION = re.compile(r"<figcaption>(.*?)</figcaption>", re.DOTALL)
+_IMAGE = re.compile(r"!\[([^\]]*)\]\([^)]*\)(?:\{[^}]*\})?")
 _ADMONITION_MARKER = re.compile(r"^!!!\s+\w+(?:\s+\"[^\"]*\")?\s*$", re.MULTILINE)
 
 _nav_pages: list = []
@@ -214,5 +216,24 @@ def _write_full(site_dir: Path, site_url: str, config, entries) -> None:
         # them in one file makes the outline lie about the structure.
         body = _H1.sub(lambda m: f"## {m.group(1)}", entry["markdown"], count=1)
         body = re.sub(r"^#(?=\s)", "##", body, flags=re.MULTILINE)
+        body = _screenshots_as_text(body)
         lines += [body.strip(), "", "---", ""]
     (site_dir / "llms-full.txt").write_text("\n".join(lines), encoding="utf-8")
+
+
+def _screenshots_as_text(markdown: str) -> str:
+    """One line of text per screenshot. llms-full.txt sits at the docs root, where
+    the pages' relative image paths point nowhere, and the figure HTML is noise;
+    the caption (or the alt text when there is none) is what a reader can use."""
+    def figure(m):
+        found = _FIGCAPTION.search(m.group(0)) or _IMAGE.search(m.group(0))
+        return f"*Screenshot: {found.group(1).strip()}*" if found else ""
+
+    body = _FIGURE.sub(figure, markdown)
+    return _IMAGE.sub(lambda m: f"*Screenshot: {m.group(1).strip()}*", body)
+
+
+assert _screenshots_as_text(
+    '<figure markdown>\n![Alt](../screenshots/a.webp){ .screenshot }\n'
+    "<figcaption>The caption.</figcaption>\n</figure>\n\n![Bare](../screenshots/b.webp)"
+) == "*Screenshot: The caption.*\n\n*Screenshot: Bare*"
