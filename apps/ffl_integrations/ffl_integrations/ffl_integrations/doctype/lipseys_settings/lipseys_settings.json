@@ -59,7 +59,7 @@
    "fieldname": "customer_number",
    "fieldtype": "Data",
    "label": "Customer number",
-   "description": "Optional: when set, a login that answers for another Lipsey's account is refused."
+   "description": "Optional: the dealer account's customer number; when set, a dealer login that answers for another account is refused."
   },
   {
    "fieldname": "section_dealer",
@@ -191,7 +191,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-10-15 12:00:00",
+ "modified": "2026-10-15 15:00:00",
  "modified_by": "Administrator",
  "module": "FFL Integrations",
  "name": "Lipseys Settings",
