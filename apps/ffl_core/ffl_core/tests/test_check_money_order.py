@@ -58,6 +58,48 @@ class CheckMoneyOrderMode(BuildOrderMixin, FrappeTestCase):
 			modes = {r.mode_of_payment for r in frappe.get_doc("POS Profile", name).payments}
 			self.assertIn(CHECK_MONEY_ORDER, modes, name)
 
+	def _profiles(self):
+		names = frappe.get_all("POS Profile",
+			filters={"disabled": 0, "company": self.company}, pluck="name")
+		self.assertTrue(names)
+		return names
+
+	def _tiles(self, profile):
+		return {r.mode_of_payment for r in frappe.get_doc("POS Profile", profile).payments}
+
+	def _drop_tiles(self, *modes):
+		# ensure_manual_modes_of_payment commits, so put the rows and tiles back after.
+		self.addCleanup(ensure_manual_modes_of_payment)
+		for name in self._profiles():
+			profile = frappe.get_doc("POS Profile", name)
+			profile.set("payments", [r for r in profile.payments
+				if r.mode_of_payment not in modes])
+			profile.flags.ignore_permissions = True
+			profile.save()
+
+	def test_unmapped_mode_gets_no_tile(self):
+		"""A fresh site migrates before store_setup makes the bank: the mode is
+		left unmapped, and a tile for it would fail at submit. ERPNext refuses to
+		save a profile carrying it, which took the mapped modes' tiles down with
+		it — so Zelle is dropped too and must come back."""
+		self._drop_tiles(CHECK_MONEY_ORDER, "Zelle")
+		frappe.db.delete("Mode of Payment Account",
+			{"parent": CHECK_MONEY_ORDER, "company": self.company})
+		with patch("ffl_core.cash_drawer.resolve_bank", return_value=None):
+			ensure_manual_modes_of_payment()
+		for name in self._profiles():
+			tiles = self._tiles(name)
+			self.assertNotIn(CHECK_MONEY_ORDER, tiles, name)
+			self.assertIn("Zelle", tiles, name)  # the mapped modes are still wired
+
+	def test_mapped_mode_gets_its_tile(self):
+		"""The migrate that maps the account adds the tile."""
+		self._drop_tiles(CHECK_MONEY_ORDER)
+		ensure_manual_modes_of_payment()
+		self.assertEqual(self._account(CHECK_MONEY_ORDER), self.bank)
+		for name in self._profiles():
+			self.assertIn(CHECK_MONEY_ORDER, self._tiles(name), name)
+
 	# ------------------------------------------------------------ Record Payment
 
 	def test_record_payment_requires_the_number(self):

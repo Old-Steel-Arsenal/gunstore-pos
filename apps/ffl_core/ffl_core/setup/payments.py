@@ -81,7 +81,11 @@ def _wire_into_pos_profiles() -> None:
 		existing = {row.mode_of_payment for row in (profile.payments or [])}
 		added = False
 		for name in MANUAL_MODES:
-			if name in existing:
+			# No account for this company yet (a fresh site migrates before
+			# store_setup makes the bank) → no tile: it would fail at submit. The
+			# migrate that maps the account adds it.
+			if name in existing or not frappe.db.get_value("Mode of Payment Account",
+					{"parent": name, "company": profile.company}, "default_account"):
 				continue
 			profile.append("payments", {"mode_of_payment": name, "default": 0})
 			added = True
