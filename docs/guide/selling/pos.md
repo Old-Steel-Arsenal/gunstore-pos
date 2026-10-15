@@ -4,6 +4,11 @@ The register. Counter staff use this for every walk-in sale. Open it from
 **Point of sale** in the sidebar, the **Open POS** button on the
 [Dashboard](../getting-started/dashboard.md), or at `/desk/point-of-sale`.
 
+<figure markdown>
+![The Point of Sale register](../screenshots/pos-terminal.webp){ .screenshot }
+<figcaption>Item search and product cards on the left, the cart on the right, with Trade-in and Customer Display in the toolbar.</figcaption>
+</figure>
+
 ## Before you start
 
 - You need **Sales User** or **Sales Manager**. The register is ERPNext's own
@@ -29,6 +34,11 @@ Entry** dialog appears.
 That creates a POS Opening Entry and the register opens. Everyone else working
 the counter joins the same shift rather than opening a second one. See
 [Opening and closing the day](day-end.md).
+
+<figure markdown>
+![A submitted POS Opening Entry](../screenshots/pos-shift-open.webp){ .screenshot }
+<figcaption>The entry the dialog creates: an opening amount for each mode of payment.</figcaption>
+</figure>
 
 ## Ringing up non-firearm items
 
@@ -177,9 +187,10 @@ To hand the gun over:
    [firearm sale](firearm-sale.md).
 3. Click **Checkout**, then **Complete Order**. If the order still owes money,
    the **Balance due on …** box opens first: pick a **Payment Method** (Cash,
-   Credit Card, Zelle or ACH), check the **Amount**, which defaults to the whole
-   balance, and click **Collect**. Credit Card runs the terminal; the other
-   methods are recorded as received. Zelle and ACH need the confirmation number
+   Credit Card, Zelle, ACH or Check/Money Order), check the **Amount**, which
+   defaults to the whole balance, and click **Collect**. Credit Card runs the
+   terminal; the other methods are recorded as received. Zelle and ACH need the
+   confirmation number, and Check/Money Order the check or money order number,
    in **Transaction Number / Approval Code**. If the card was already taken on
    the Payroc Virtual Terminal, tick **Already charged on Virtual Terminal** and
    type its approval code instead of running the terminal again. The payment
@@ -220,6 +231,11 @@ coupon or pricing rule. Put the discount on the item line instead. See
 
 If the trade-ins on a ticket come to more than what the customer buys, the store
 owes the customer the difference, and the payment screen changes:
+
+<figure markdown>
+![Store pays customer](../screenshots/pos-store-pays-customer.webp){ .screenshot }
+<figcaption>Trade-ins worth more than the sale: no tender, a payout method instead.</figcaption>
+</figure>
 
 1. Click **Checkout**. Instead of the payment modes the screen shows **Store
    pays customer** and the amount, and the totals read **Grand Total** (below

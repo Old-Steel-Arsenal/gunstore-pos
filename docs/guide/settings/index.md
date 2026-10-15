@@ -2,6 +2,11 @@
 
 The Settings workspace is where the store is configured. Managers and system administrators work here. Open it from **Settings**, the last row of the Gun Shop sidebar, or go to `/app/settings`.
 
+<figure markdown>
+![The Settings workspace](../screenshots/settings-workspace.webp){ .screenshot }
+<figcaption>Integrations on top, configuration cards below.</figcaption>
+</figure>
+
 !!! warning "A settings change applies to the whole store"
     Nothing here is personal. Turning a switch off closes a subsystem for every till and every user, and some changes take effect only after a till reloads. Several of these pages need System Manager. If you are not sure what a field does, ask a manager before saving.
 
@@ -21,7 +26,12 @@ The integration shortcuts are:
 | Data Service (FFL & Catalog) | Data Service Settings |
 | Extensions | The Extensions page at `/app/extensions` |
 
-The two hubs are pages, not settings forms. The **Payments** hub lists every card processor as a card showing whether it is enabled, whether it is ready, the mode of payment it is wired to, and when it last took money. Each card has **Test Connection** and **Credentials** buttons. The **Distributors** hub has one card per distributor, with its **Enabled**, **Drop-ship**, **Stocking** and **Poll** switches, feed and order health, and **Test Connection**, **Pricing & stock** and **Account & shipping** buttons. See [the Distributors hub](../distributors/hub.md).
+The two hubs are pages, not settings forms. The **Payments** hub lists every card processor as a card showing whether it is enabled, whether it is ready, the mode of payment it is wired to, and when it last took money. Each card has **Test Connection** and **Credentials** buttons. The **Distributors** hub has one card per distributor, with its **Enabled**, **Stocking** and **Poll** switches, feed and order health, and **Test Connection**, **Pricing & stock** and **Account & shipping** buttons. See [the Distributors hub](../distributors/hub.md).
+
+<figure markdown>
+![The Payments hub](../screenshots/page-payment-hub.webp){ .screenshot }
+<figcaption>One card per card processor, with its readiness state. This one is enabled and ready, with its last token refresh and last charge.</figcaption>
+</figure>
 
 The three configuration cards are:
 

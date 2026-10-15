@@ -1,6 +1,11 @@
 # Items and serials
 
-The Item form describes a model. The Serial No form describes one physical gun. Managers use both to price stock and to record what a particular firearm actually is. Open them from **Inventory → Items** and **Inventory → Serial numbers** in the sidebar.
+The Item form describes a model. The Serial No form describes one physical gun. For how the two fit together and where a gun's price lives, read [Models, serials and prices](../getting-started/models-and-serials.md) first. Managers use both to price stock and to record what a particular firearm actually is. Open them from **Inventory → Items** and **Inventory → Serial numbers** in the sidebar.
+
+<figure markdown>
+![The Item form for a firearm](../screenshots/item-firearm-form.webp){ .screenshot }
+<figcaption>The model-level record. Everything on it is true of every unit filed underneath.</figcaption>
+</figure>
 
 ## The Item form
 
@@ -77,6 +82,11 @@ MAP and MSRP are reference figures. Neither is charged.
 
 The **Channels** tab holds everything about publishing this model.
 
+<figure markdown>
+![The Channels tab](../screenshots/item-firearm-channels.webp){ .screenshot }
+<figcaption>The Channels tab. The collapsed WooCommerce section holds the web store's product id, listed flag, last sync and last error. GunBroker is open below.</figcaption>
+</figure>
+
 - **Listing Status** is read-only and reads Draft, Listed, Reserved or Sold.
 - The WooCommerce and GunBroker sections carry the per-channel product IDs, sync timestamps and any sync error. See [WooCommerce](../channels/woocommerce.md) and [GunBroker](../channels/gunbroker.md).
 - **GunBroker Category ID** picks the GunBroker category for this model. It is also set by the **Category** choice in **Send to GunBroker**, which is saved on the model, so every gun of the item lists in the same category.
@@ -102,6 +112,16 @@ By default the tab shows in-stock guns only. **Show disposed / inactive** widens
 On a brand-new item the same lookup appears as a banner at the top of the form and fills everything: code, name, group, manufacturer and model, prices, description, image and the UPC barcode row. On a saved item it only fills fields that are still empty, so it never overwrites what you typed. Use it to backfill a sparse record.
 
 ## The Serial No form
+
+<figure markdown>
+![The Serial No list](../screenshots/list-serial-no.webp){ .screenshot }
+<figcaption>Every gun in the system. The filters are the status flags and price fields described below.</figcaption>
+</figure>
+
+<figure markdown>
+![The Serial No form](../screenshots/serial-no-form.webp){ .screenshot }
+<figcaption>The per-gun record, opened on the item it belongs to and this gun's own prices. The bound-book fields sit under Firearm Details further down.</figcaption>
+</figure>
 
 ### Firearm Details
 

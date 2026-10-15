@@ -2,6 +2,11 @@
 
 This is the single page for booking stock in: distributor shipments, guns bought from a private party and customers' guns arriving for a transfer. Open it from **Purchasing → Receive goods** in the sidebar, or use the **Receive goods** button on the [Dashboard](../getting-started/dashboard.md). The address is `/app/receive-goods`.
 
+<figure markdown>
+![The Receive Goods page](../screenshots/page-receive-goods.webp){ .screenshot }
+<figcaption>Where the goods came from at the top, the scanner below it, and the running line count and total underneath. Submit & Receive stays in the footer.</figcaption>
+</figure>
+
 The page shows where the goods came from at the top, the scanner below it, and the running line count and total underneath. **Submit & Receive** stays in the footer.
 
 ## Before you start
@@ -15,7 +20,12 @@ The page shows where the goods came from at the top, the scanner below it, and t
 
 A parcel from a distributor is usually somebody's order: a customer's ship-to-store line from the counter, or a restock. The page knows about it before it arrives. **Incoming shipments (_n_)** at the top right opens the list. It shows one group per customer order, with each distributor order under it, its status, the distributor's tracking number (or "not shipped yet") and _n of m_ outstanding.
 
-The list also shows parcels that were ordered **outside the POS**, on the distributor's website or by phone. Each one appears as **Invoice** and the invoice number, with an orange **Outside POS** pill. The POS learns about these from the distributor's invoices, so nobody types them in. A drop-ship invoice never appears here, because nothing arrives at the store.
+The list also shows parcels that were ordered **outside the POS**, on the distributor's website or by phone. Each one appears as **Invoice** and the invoice number, with an orange **Outside POS** pill. The POS learns about these from the distributor's invoices, so nobody types them in.
+
+<figure markdown>
+![Incoming shipments](../screenshots/page-receive-goods-incoming.webp){ .screenshot }
+<figcaption>A customer's distributor order with its tracking, and a parcel ordered outside the POS with its orange pill.</figcaption>
+</figure>
 
 There are four ways to work a parcel:
 
@@ -109,6 +119,11 @@ The Purchase Receipt is booked against a placeholder supplier named `Individual 
 
 When the store buys from a private party, **Submit & Receive** first opens **Pay the seller**. It reads "Pay" with the seller's name and the amount, "for these goods." The amount covers every line on the receipt, the guns included.
 
+<figure markdown>
+![Pay the seller](../screenshots/page-receive-goods-private-seller.webp){ .screenshot }
+<figcaption>The seller payment is asked for before anything is received. Here Zelle is picked, so its confirmation number is required.</figcaption>
+</figure>
+
 1. Pick **Paid by**: Cash, Zelle, Check or ACH. Cash is preselected. The note reads "Cash comes out of the drawer; Zelle, Check and ACH out of the bank."
 2. For Zelle, Check or ACH, type the **Check number, Zelle confirmation or ACH reference**. It is required.
 3. Click **Pay & Receive**.
@@ -166,6 +181,16 @@ Submitting is one transaction. Either everything below happens or nothing does.
 7. **Pays the seller.** On a purchase from a private party, the payment you chose in **Pay the seller** is booked.
 8. **Pushes to FastBound.** The push runs last, inside the same transaction. If FastBound rejects the firearm, the Purchase Receipt, the Serial No records, the stock movement, the locations, the seller payment and the acquisitions are all rolled back together, and you see the reason. The gun enters FastBound and your stock, or it enters neither.
 9. **Fills the waiting order.** A gun received against a distributor order is hung on the order it was bought for, as that order's held serial. For a counter pickup with a shift open on the register, the $0 pickup ticket opens at the same time. See [Pickup tickets](../selling/pos.md).
+
+<figure markdown>
+![The Purchase Receipt list](../screenshots/list-purchase-receipt.webp){ .screenshot }
+<figcaption>Past receives, filtered by Source or Transfer For (Customer). A private-party buy shows the Individual Seller placeholder.</figcaption>
+</figure>
+
+<figure markdown>
+![The Purchase Receipt the page creates](../screenshots/purchase-receipt-form.webp){ .screenshot }
+<figcaption>The submitted receipt behind a receive. It is the source document for everything else.</figcaption>
+</figure>
 
 If a manager cancels a receipt that paid a private seller, the seller payment stays recorded, because the money already left. Amending the receipt carries the payment over. If the seller gave the money back, undo the payment on the [Cash Drawer](../selling/cash-drawer.md) page.
 

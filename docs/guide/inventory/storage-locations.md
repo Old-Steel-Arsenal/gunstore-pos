@@ -2,6 +2,8 @@
 
 The **Storage Locations** page shows where every gun and product sits in the shop: which rack slot, display case or safe. Counter staff use it to find a gun and to put stock away. Stock managers use it to set up the racks and draw the store map.
 
+![The Map tab: the floor plan with each rack's slots, and a search lighting up one gun](../screenshots/page-storage-map.webp){ .screenshot }
+
 The Map tab shows the floor plan with each rack's slots. A search lights up one gun.
 
 !!! note "A location is only a note"
@@ -53,6 +55,8 @@ If a product sits in more than one place, a **Where is it coming from?** window 
 
 The tab shows a number when something needs a place or a word. It has three lists.
 
+![The Not placed tab](../screenshots/page-storage-map-not-placed.webp){ .screenshot }
+
 | List | What is on it | What to do |
 |---|---|---|
 | **Sold or shipped without a location** | Products that left the shop, but nobody said which location they came from. **Units to confirm** shows how many. | Click **Say where from**, pick the location in **Location they were taken from**, check **Units**, and click **Confirm**. |
@@ -64,6 +68,8 @@ A sale or a shipment is never held up by a missing location. The units show on *
 ## Zones and slots
 
 A **Stock Manager** or **System Manager** sets up zones on the **Zones** tab. A zone is a bank of numbered slots, or one open location such as a display case.
+
+![The Zones tab](../screenshots/page-storage-map-zones.webp){ .screenshot }
 
 ### Create a zone
 
@@ -79,6 +85,8 @@ A **Stock Manager** or **System Manager** sets up zones on the **Zones** tab. A 
     - **In order**: 1, 2, 3 … down the first side, then the second.
 7. Check the preview line under the fields. It shows the labels the zone will get, side by side.
 8. Click **Create**.
+
+![The New Zone window with its label preview](../screenshots/dialog-new-zone.webp){ .screenshot }
 
 ### Change a zone
 
@@ -112,6 +120,8 @@ A **Stock Manager** or **System Manager** draws one floor plan per room. Everyon
 9. Click **Save**. **Cancel** throws away your changes.
 
 To start drawing an existing plan, pick it on the **Map** tab and click **Edit layout**. **Plan settings** changes the plan's name and size, and has **Delete this plan**. Deleting a plan leaves its zones as they are, on no plan.
+
+![Drawing a floor plan](../screenshots/page-storage-map-edit.webp){ .screenshot }
 
 ## Where else a location is asked
 

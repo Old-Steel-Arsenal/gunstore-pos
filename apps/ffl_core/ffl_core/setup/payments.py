@@ -1,7 +1,9 @@
-"""Manual (no-integration) Modes of Payment: Zelle + ACH.
+"""Manual (no-integration) Modes of Payment: Zelle, ACH and Check/Money Order.
 
-Both settle to the bank, like a wire — they carry no external API (unlike
+All three settle to the bank, like a wire — they carry no external API (unlike
 Payroc card processing), so they're pure-manual tender that lives in ffl_core.
+A check or money order is handed over at the counter but is deposited, not
+counted: it posts to the bank, never to the cash drawer.
 ensure_manual_modes_of_payment creates each Mode of Payment, wires a per-company
 GL (bank, falling back to cash) account so an ``is_pos`` Sales Invoice can clear
 its payment, and adds the tile to every enabled POS Profile.
@@ -16,7 +18,8 @@ import frappe
 from ffl_core.utils import commit
 
 ZELLE = "Zelle"
-MANUAL_MODES = (ZELLE, "ACH")
+CHECK_MONEY_ORDER = "Check/Money Order"
+MANUAL_MODES = (ZELLE, "ACH", CHECK_MONEY_ORDER)
 
 
 def ensure_manual_modes_of_payment() -> None:
@@ -46,7 +49,7 @@ def _ensure_mode_with_accounts(name: str) -> None:
 	existing = {row.company: row for row in (mop.accounts or [])}
 	changed = False
 	for company in frappe.get_all("Company", pluck="name"):
-		account = _company_bank_account(company)
+		account = _mode_account(name, company)
 		row = existing.get(company)
 		if row is None:
 			if account:
@@ -78,13 +81,28 @@ def _wire_into_pos_profiles() -> None:
 		existing = {row.mode_of_payment for row in (profile.payments or [])}
 		added = False
 		for name in MANUAL_MODES:
-			if name in existing:
+			# No account for this company yet (a fresh site migrates before
+			# store_setup makes the bank) → no tile: it would fail at submit. The
+			# migrate that maps the account adds it.
+			if name in existing or not frappe.db.get_value("Mode of Payment Account",
+					{"parent": name, "company": profile.company}, "default_account"):
 				continue
 			profile.append("payments", {"mode_of_payment": name, "default": 0})
 			added = True
 		if added:
 			profile.flags.ignore_permissions = True
 			profile.save()
+
+
+def _mode_account(name: str, company: str) -> str | None:
+	"""Where a manual mode posts for a company. A check is never the drawer's
+	cash, so it takes only a real bank account (the one Zelle/ACH use) and
+	is left unmapped rather than falling back to Cash — Record Payment then
+	says the account is missing instead of the drawer coming up long."""
+	if name == CHECK_MONEY_ORDER:
+		from ffl_core.cash_drawer import resolve_bank
+		return resolve_bank(company)
+	return _company_bank_account(company)
 
 
 def _company_bank_account(company: str) -> str | None:

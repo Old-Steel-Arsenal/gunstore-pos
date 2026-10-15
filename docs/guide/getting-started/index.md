@@ -4,6 +4,10 @@ Read this on your first day. It covers signing in, the Dashboard and the sidebar
 you will find your way around with, how to find anything, and how to switch the
 screen to dark.
 
+Anyone who receives, prices or lists guns should also read
+[Models, serials and prices](models-and-serials.md): one Item per model, one
+Serial No per gun, and the two ways a gun can be priced.
+
 ## Signing in
 
 Open the store's system address in a browser and sign in with the email address
@@ -20,6 +24,11 @@ The addresses in your browser start with `/desk/`. Older links that start with
 `/app/` still work: the system turns them into `/desk/` on its own.
 
 ## The Dashboard and the sidebar
+
+<figure markdown>
+![The Dashboard](../screenshots/page-dashboard.webp){ .screenshot }
+<figcaption>The Dashboard: what is waiting today, with the sidebar on the left.</figcaption>
+</figure>
 
 The Dashboard shows today's sales, the firearm orders waiting on a 4473, the
 transfer guns waiting for their owners, the cash drawer, the bound book and
@@ -50,6 +59,11 @@ shows in the app only and nothing is emailed. See
 [Notifications](dashboard.md#notifications) for who gets which.
 
 ## The Settings workspace
+
+<figure markdown>
+![The Settings workspace](../screenshots/settings-workspace.webp){ .screenshot }
+<figcaption>Integrations on top, configuration lists below.</figcaption>
+</figure>
 
 Settings is the manager's workspace. Open it from **Settings** at the bottom of
 the sidebar. Under **Integrations** it holds shortcuts to **Payments (Credit

@@ -129,6 +129,11 @@ and System Manager: Proceed, Delayed or Denied, and again when a delayed check
 clears. Click the notification to open the order. See
 [Notifications](../getting-started/dashboard.md#notifications).
 
+<figure markdown>
+![Pending 4473 Orders](../screenshots/report-pending-4473.webp){ .screenshot }
+<figcaption>The morning queue: who to ring, and what to clear.</figcaption>
+</figure>
+
 Work it every morning. [Daily checks](../compliance/daily-checks.md) covers what
 each column means.
 

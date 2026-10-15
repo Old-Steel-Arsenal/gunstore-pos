@@ -10,7 +10,7 @@ plain SQL (``schema``), not DocTypes: a feed is tens of thousands of rows writte
 in bulk.
 
 Distributor drivers live in ``drivers/`` and register in ``sync.DRIVERS`` when
-imported (``sync.load_drivers``): RSR and Sports South.
+imported (``sync.load_drivers``): RSR, Sports South and Lipsey's.
 """
 from __future__ import annotations
 

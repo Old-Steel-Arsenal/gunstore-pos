@@ -182,6 +182,16 @@ def mark_attempt(code: str, lane: str) -> None:
 	frappe.db.commit()
 
 
+def clear_attempt(code: str, lane: str) -> None:
+	"""Drop the lane's attempt stamp: the attempt ended without a verdict (a write
+	lock skip records no run), so a gate that reads attempts must not take it for
+	a run that died."""
+	frappe.db.sql("""UPDATE dc_meta SET lane_attempts = JSON_REMOVE(lane_attempts,
+			CONCAT('$."', %s, '"'))
+		WHERE distributor = %s AND COALESCE(lane_attempts, '') != ''""", (lane, code))
+	frappe.db.commit()
+
+
 def lane_attempts() -> dict:
 	"""``{house: {lane: naive UTC datetime}}`` from dc_meta."""
 	out = {}

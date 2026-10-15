@@ -33,6 +33,8 @@ See [The cash drawer](../selling/cash-drawer.md).
 
 **Charge exactly.** A box under the total on the register and on Create Order. Type the total the customer pays, tax included, and the line prices are worked back from it.
 
+**Check/Money Order.** The mode of payment for a paper check or money order a customer hands over. It is booked to the bank, the same account as Zelle and ACH, and is never part of the cash drawer count. Its number is required wherever it is recorded. See [Taking payment](../selling/payments.md).
+
 **Commission.** The store's cut of a consigned gun's sale price before tax. The consignor is owed the rest. A gun carries its own rate, which starts from the store default. See [Selling guns on consignment](../inventory/consignment.md).
 
 **Connector Audit Log.** The permanent record of every call made through the store's remote MCP connectors: who, which tool, with what, and whether it worked. See [The MCP server](../../ai/mcp.md).
@@ -52,8 +54,6 @@ See [The cash drawer](../selling/cash-drawer.md).
 **Distributor invoice.** A read-only copy of an invoice on a distributor account, pulled every hour, matched to the POS order it belongs to. One with no POS order behind it is marked **Outside POS**. See [Distributor orders](../distributors/restock.md).
 
 **Distributor order.** One purchase from one wholesale house, numbered like `DO-2609-0001` (year, month, running number). It waits in Draft until a person confirms it. See [Distributor orders](../distributors/restock.md).
-
-**Drop-ship.** A distributor ships a product straight to the customer or to the receiving dealer without it passing through your building. The order and the paperwork are yours. The box never touches your shelf. See [Drop-shipping](../distributors/dropship.md).
 
 **Extension.** An add-on that brings its own pages and records, installed and switched on or off under Settings → Extensions. See [Extensions](../../extensions/README.md).
 

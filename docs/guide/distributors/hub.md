@@ -8,12 +8,11 @@ Each card is one wholesale house: its switches, a summary of its settings page, 
 
 Across the top of a card sit the priority number, the house name and its provider code, plus the linked Supplier when the record names one. A house whose provider code has no integration behind it is marked **not registered** in red, and its **Test Connection** button is disabled.
 
-### The four switches
+### The switches
 
 | Switch | What turning it on means |
 |---|---|
 | **Enabled** | The house is in use. Off, it is not searched, quoted or ordered from |
-| **Drop-ship** | Orders may ship from this house straight to a buyer or their FFL |
 | **Stocking** | You may raise stocking and procure-to-store orders |
 | **Poll** | Every 30 minutes, the system pulls status, tracking and serials for this house's live orders |
 
@@ -21,7 +20,7 @@ A card with **Enabled** off is greyed. The switches save the moment you click th
 
 ### The summary line
 
-For RSR and Sports South, a read-only line under the switches sums up the house's own settings page.
+For RSR, Sports South and Lipsey's, a read-only line under the switches sums up the house's own settings page. Lipsey's shows only **Ordering**.
 
 | Item | Reads | What it means |
 |---|---|---|
@@ -72,27 +71,8 @@ Priority orders the cards, lowest number first, and that order is the order the 
 
 | Tab | What it holds |
 |---|---|
-| **General** | **Code**, **Name**, **Provider**, **Supplier**, the four switches (the last one is labelled **Poll orders** here) and **Priority** |
-| **Pricing** and **Stock publishing** | Website pricing and published-quantity settings. They only matter when an extension that lists distributor products on a website is installed |
+| **General** | **Code**, **Name**, **Provider**, **Supplier**, the switches (the last one is labelled **Poll orders** here) and **Priority** |
 | **Catalog service** | **Endpoint**, **Client ID** and **Secret**, for a house read from its own catalog service. Blank uses the site-wide connection on Data Service Settings |
 | **Status** | **Last order poll** |
 
 **Supplier** is the vendor on receipts and cost invoices for this house. A house with no Supplier set cannot be received from a distributor order.
-
-## Dropship Brand Policy
-
-Some brands will not be drop-shipped to a consumer. A **Dropship Brand Policy** record says how one brand is fulfilled.
-
-| Field | What it means |
-|---|---|
-| **Brand** | The brand this policy covers |
-| **Distributor** | Blank applies to every distributor. Set, it applies only to this house's catalog and beats a blank policy for the same brand |
-| **Policy** | **To Store** or **Direct OK**. See below |
-| **Reason shown to staff** | Shown on the counter fulfillment panel when the policy sends a line to the store |
-
-| Policy | Meaning |
-|---|---|
-| **Direct OK** | The distributor accepts direct orders for this brand, despite its feed flags |
-| **To Store** | Never drop-ship this brand to the buyer. Procure it into the shop first |
-
-**To Store** is the default for a new policy record. A brand can carry one policy for every house and one more per house. The point is that a restricted brand stays sellable. It is bought in and passed to the customer rather than being taken off the store.

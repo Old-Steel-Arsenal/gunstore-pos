@@ -17,6 +17,11 @@ last-error fields live.
 `/app/fastbound-settings`. Connects to FastBound, the electronic bound book
 and the place 4473s are completed. See [FastBound](../compliance/fastbound.md).
 
+<figure markdown>
+![FastBound Settings](../screenshots/settings-fastbound.webp){ .screenshot }
+<figcaption>Three tabs: Connection, Status, Advanced.</figcaption>
+</figure>
+
 **Connection tab.** **Enable FastBound** is the master switch. Turn it off and
 A&D records are kept locally only, and firearm sales then need Paper 4473 Mode
 in [FFL Settings](ffl-settings.md), with open tills reloaded. **Account number**
@@ -44,6 +49,11 @@ pulls items in.
 
 `/app/payroc-settings`. Connects to the Payroc card gateway and the physical
 terminal at the counter. See [Taking payment](../selling/payments.md).
+
+<figure markdown>
+![Payroc Settings](../screenshots/settings-payroc.webp){ .screenshot }
+<figcaption>Credentials at the top, Advanced below it. The two read-only Status fields follow further down the form.</figcaption>
+</figure>
 
 **Credentials.** **Enable Payroc Terminal Integration** is the master switch.
 Untick it to run without the integrated terminal, in which case cards are swiped
@@ -84,10 +94,8 @@ chosen on Data Service Settings, not through the ordering fields. See
 
 **Account tab.** **Allow live orders** is the master switch for ordering, off by
 default. While it is off nothing is sent to RSR, and the catalog still syncs.
-There are two separate credential pairs: **Dealer account #** with **Dealer API
-password** for stocking and procure-to-store orders, and
-**Fulfillment account #** with **Fulfillment API password** for drop-ship.
-Leave the fulfillment account blank and drop-ship is unavailable. The collapsed **Advanced** section
+**Dealer account #** with **Dealer API password** is the login for stocking and
+procure-to-store orders. The collapsed **Advanced** section
 holds **API base URL**, RSR's production server by default. RSR's testing
 environment is test.rsrgroup.com.
 
@@ -105,12 +113,17 @@ indicator** and **Order email**.
 **Freight tab.** The rates the Create Order fulfillment plan estimates RSR
 freight with. The freight RSR invoices always replaces the estimate.
 
+<figure markdown>
+![RSR Settings, Freight tab](../screenshots/settings-rsr-freight.webp){ .screenshot }
+<figcaption>The Freight tab: the ship-to-store rule on the left, the rates and the signature fee on the right.</figcaption>
+</figure>
+
 Tick **Free freight on ship-to-store orders** when your RSR account ships to the
 store at no charge, and orders to the store then estimate at nothing. Otherwise
 an order to the store ships free when its merchandise is above **Store orders
 ship free above**, 500.00 by default, and pays the rate when it is not. The rate
 is **Ground**, 10.00 by default, or **2Day (handguns)**, 15.00, when the order
-holds a handgun. A drop-ship order always pays the rate. A firearm order adds
+holds a handgun. A firearm order adds
 **Adult signature (firearm orders)**, 5.00, except on a store order with free
 freight ticked. The RSR card on the hub reads the store rule back as **Ship to
 store: free** or **free over** the threshold. **Alert when invoiced freight
@@ -131,6 +144,11 @@ South's ordering services. It holds the account, what goes out with each order,
 where orders to the store ship, and the freight rates. The catalog reaches the
 store through Data Service. The page has four tabs: Account, Ordering, Freight
 and Status.
+
+<figure markdown>
+![Sports South Settings](../screenshots/settings-sports-south.webp){ .screenshot }
+<figcaption>The Account tab, with Advanced collapsed under the account fields.</figcaption>
+</figure>
 
 **Account tab.** **Allow live orders** is the master switch, off by default.
 While it is off nothing is sent to Sports South's ordering API, and the catalog
@@ -175,11 +193,16 @@ needs at least **Address line 1**, **City**, **State** as two letters, and
 **ZIP**. If the address in use is incomplete, placing the order fails with an
 error rather than shipping somewhere unverified.
 
+<figure markdown>
+![Sports South ship-to address override](../screenshots/settings-sports-south-ship-to.webp){ .screenshot }
+<figcaption>On the Ordering tab. Left blank, as here, store orders ship to the company address.</figcaption>
+</figure>
+
 **Freight tab.** Estimates only. The freight on Sports South's invoice replaces
 them once the parcel ships. The first section holds one flat rate per service,
 from **Handgun, 2-Day Air** to **Next-Day Air**. **Per-order fees** holds
 **Signature**, **Adult signature**, **Insurance, % of order** and **Insurance
-minimum**, added to a drop-ship estimate when the matching delivery option on the
+minimum**, added to the freight estimate when the matching delivery option on the
 Ordering tab is ticked. **Shipped to the store** holds the rule for orders to the
 shop:
 
@@ -213,12 +236,84 @@ South's ordering API. It places no order.
 The first two appear in the **Error** field of a Sports South Distributor Order
 that failed to place.
 
+## Lipseys Settings
+
+`/app/lipseys-settings`, also opened by **Account & shipping** on the Lipsey's
+card of the [Distributors hub](../distributors/hub.md). Connects to Lipsey's
+ordering API. The catalog reaches the store through Data Service, or, with a
+[Local catalog](../../data-service.md#local-catalog), from Lipsey's own feeds
+with the dealer login. The page has three tabs: Account, Ordering and Status.
+
+Lipsey's lets in only computers it has approved, so the API must be reached from
+the address you gave Lipsey's when you asked for API access.
+
+**Account tab.** **Allow live orders** is the master switch, off by default.
+While it is off nothing is sent to Lipsey's, and the catalog still syncs.
+**Customer number** is optional: it is the dealer account's number, and filled
+in, a dealer login that answers for another Lipsey's account is refused. The
+drop-ship login is a separate Lipsey's account with its own number and is not
+checked against it. **Dealer login** holds the **Email** and
+**Password** you sign in to Lipsey's with. Stocking and procure-to-store orders
+are placed with it and ship to the address on that Lipsey's account, so the POS
+sends no address. With **Allow live orders** on, the form will not save without
+them. **Drop-ship login** is Lipsey's separate drop-ship account. Until it is
+filled in, the hub and the planner offer no drop-ship for Lipsey's. With a
+Local catalog, saving this page is also the retry after Lipsey's refused the
+dealer login: the catalog stops dialing until then. The
+collapsed **Advanced** section holds **API base URL**.
+
+**Ordering tab.** **No confirmation email from Lipsey's** stops Lipsey's own
+order email for orders placed from the POS. Leave it off: that email is how you
+check an order whose answer never came back.
+
+**Status tab.** Lipsey's has no order status call. Once a day the POS reads the
+shipping list Lipsey's publishes for the day before: invoice number, Lipsey's
+order number, your PO and tracking. That list lands in the Invoices view with the
+hourly invoice pull, and the order poll then marks the order shipped.
+**Shipping polled through** shows the last day read for each login (dealer and
+drop-ship), and **Last shipping poll** when. A day that fails is read again on the
+next pull. A login that keeps failing does not hold up the other one. **Last
+error** holds the last failure.
+
+**Buttons.** **Test Connection** on the toolbar checks the catalog service. With
+**Allow live orders** on, it also signs in with each login that is filled in and
+makes one small read. It places no order.
+
+**Lipsey's orders in the POS.**
+
+- Lipsey's adds a new store order to an open order of the same kind, long guns
+  or handguns, when one exists. Several POS orders can then share one Lipsey's
+  order number. Each keeps its own PO, and a shipment is matched to every order on
+  that Lipsey's order that was placed by the invoice date.
+- The order's lines take the quantity and price Lipsey's confirmed when the order
+  was placed. A line Lipsey's could not fill is marked cancelled. A line Lipsey's
+  answer does not name, while it did answer for an order, is counted as ordered,
+  marked **UNCONFIRMED**, and the admins are told to check it at Lipsey's. Receive
+  Goods can match scanned units to the order straight away.
+- An order whose answer never came back, after a timeout for example, goes to
+  **Error** and is never re-sent by itself. Lipsey's offers no way to look an
+  order up by PO, so check the confirmation email or your Lipsey's account for
+  the PO first.
+
+| Message you see | What it means | Fix |
+|---|---|---|
+| … the order may or may not have been placed … | Lipsey's did not answer the order | Look for the PO at Lipsey's. If it is there, do not place it again |
+| Lipseys Settings: Allow live orders is off | Ordering is switched off | Turn **Allow live orders** on |
+| Lipsey's placed nothing: … | Lipsey's refused the order and gave its reason | Fix what the reason names, then place a new order |
+
+The first and last appear in the **Error** field of a Lipsey's Distributor Order.
+
 ## ShipStation Settings
 
 `/app/shipstation-settings`, also on the **POS & Sales** card of the
 [Settings workspace](index.md). Connects to ShipStation for outbound labels and
 tracking. See [Web orders](../channels/web-orders.md) and
 [The Pending Order queue](../selling/pending-orders.md).
+
+<figure markdown>
+![ShipStation Settings](../screenshots/settings-shipstation.webp){ .screenshot }
+<figcaption>Status, credentials and shipping defaults.</figcaption>
+</figure>
 
 **Status.** **Enabled** is the master switch for the Pending Order page's Ship
 button. Leave it off until the credentials pass Test Connection. **Sandbox
@@ -241,6 +336,11 @@ alert email.
 
 `/app/gunbroker-settings`. Connects to the GunBroker marketplace for listings
 and orders. See [GunBroker](../channels/gunbroker.md).
+
+<figure markdown>
+![GunBroker Settings](../screenshots/settings-gunbroker.webp){ .screenshot }
+<figcaption>Four tabs: Connection, Listings, Accounting and Advanced. Status is a section on the Connection tab.</figcaption>
+</figure>
 
 **Connection.** **Enable GunBroker** is the master switch and is off by default,
 so nothing is sent or read while it is off, and the **GunBroker orders** row
@@ -289,6 +389,11 @@ switched off".
 
 `/app/woocommerce-settings`. Connects to the retail online store. See
 [WooCommerce](../channels/woocommerce.md).
+
+<figure markdown>
+![WooCommerce Settings](../screenshots/settings-woocommerce.webp){ .screenshot }
+<figcaption>Connection, Sync and Status tabs.</figcaption>
+</figure>
 
 **Connection tab.** **Store URL** must be secure and carry no trailing slash.
 **Consumer key** and **Consumer secret** come from the store's own Settings,
@@ -361,3 +466,8 @@ linked, an orange banner at the top of the form says how many.
 enabled distributor and shows one line per house. Under **Categories**, **Run
 category mirror** runs the mirror now in its current mode. Its report lands on
 the Categories tab.
+
+<figure markdown>
+![Data Service Settings, Categories tab](../screenshots/settings-data-service-categories.webp){ .screenshot }
+<figcaption>The Categories tab: the mirror's mode, its last run and its report.</figcaption>
+</figure>

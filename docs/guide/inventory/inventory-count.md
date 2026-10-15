@@ -2,6 +2,8 @@
 
 Stock staff use the **Inventory Count** page to walk the shop with a scanner and compare what is on the shelves with what the system says. A stock manager then finishes the count. Quantities of ammo and accessories are corrected in one step, and any firearm that is missing or out of place is reported for a person to look into.
 
+![An open count: the scan box, the Firearms and Items tabs, and what has been counted so far](../screenshots/page-inventory-count.webp){ .screenshot }
+
 ## Before you start
 
 - Open the page from the Gun Shop sidebar: **Inventory** → **Inventory count**. The page title is **Inventory Count**.
@@ -53,6 +55,8 @@ A **Stock Manager** or **System Manager** does this.
 4. Check **Never scanned**. These items are on the books but nobody scanned them. They are left alone unless you tick them, which sets them to 0. **Set all to 0** ticks them all.
 5. Read **Cannot be adjusted here**, if it appears. Fix those items, then adjust them by hand.
 6. Click **Adjust N items and finish**. When nothing is ticked, the button reads **Finish count**.
+
+![The Finalize dialog: the firearm report, then the items to adjust](../screenshots/page-inventory-count-finish.webp){ .screenshot }
 
 A count that only scanned firearms finishes with the firearm report alone. No quantities change.
 

@@ -102,6 +102,7 @@ nav:
       - guide/index.md
       - Getting started:
           - guide/getting-started/index.md
+          - Models, serials and prices: guide/getting-started/models-and-serials.md
           - The Dashboard: guide/getting-started/dashboard.md
           - Roles and permissions: guide/getting-started/roles.md
       - Selling:
@@ -142,7 +143,6 @@ nav:
           - guide/distributors/index.md
           - Distributors hub: guide/distributors/hub.md
           - Distributor orders: guide/distributors/restock.md
-          - Drop-shipping: guide/distributors/dropship.md
       - Reports:
           - guide/reports/index.md
           - Sales Report: guide/reports/sales-report.md

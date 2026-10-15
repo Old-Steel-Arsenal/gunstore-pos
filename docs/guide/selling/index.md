@@ -25,7 +25,7 @@ front of you wants.
 | Pay the customer when their trade-ins are worth more than the sale | [Point of Sale](pos.md#when-the-store-pays-the-customer) |
 | Build an order away from the register | [Create Order](create-order.md) |
 | See every order still waiting on something | [The Pending Order queue](pending-orders.md) |
-| Take a card, cash, Zelle or a split payment | [Taking payment](payments.md) |
+| Take a card, cash, Zelle, a check or a split payment | [Taking payment](payments.md) |
 | Record a card already run on the Virtual Terminal | [Taking payment](payments.md#card-payments-on-a-counter-order) |
 | See a card payment's terminal record | [Taking payment](payments.md#card-payments-on-a-counter-order) |
 | Void a card charge or refund one | [Taking payment](payments.md) |

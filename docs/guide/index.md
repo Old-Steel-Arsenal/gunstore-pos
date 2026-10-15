@@ -2,16 +2,21 @@
 
 This guide is for the people who run an FFL gun shop on OpenGunstore: counter staff, inventory staff, managers and the bookkeeper. It assumes retail experience and no knowledge of ERPNext or Frappe.
 
+<figure markdown>
+![The Dashboard](screenshots/page-dashboard.webp){ .screenshot }
+<figcaption>The Dashboard is where every day starts.</figcaption>
+</figure>
+
 Pick the section that matches your job.
 
 | Section | For | What it covers |
 |---|---|---|
-| [Getting started](getting-started/index.md) | Everyone | Signing in, the Dashboard and sidebar, and which roles open which pages |
+| [Getting started](getting-started/index.md) | Everyone | Signing in, the Dashboard and sidebar, which roles open which pages, and how models, serials and prices fit together |
 | [Selling](selling/index.md) | Counter staff | The register, firearm sales, customer transfers, payments, the cash drawer and closing the day |
 | [Inventory](inventory/index.md) | Inventory staff, managers | Receiving goods, trade-ins, consignment, items and serial numbers, photos, the store map, counts and corrections |
 | [Compliance](compliance/index.md) | Counter staff, managers | The bound book, Form 4473 and NICS, FastBound, verifying an FFL and the daily checks |
 | [Online channels](channels/index.md) | Inventory staff, counter staff | Your WooCommerce store, GunBroker and the orders that come back |
-| [Distributors](distributors/index.md) | Purchasing staff, managers | Ordering from wholesale houses, tracking orders and drop-shipping |
+| [Distributors](distributors/index.md) | Purchasing staff, managers | Ordering from wholesale houses and tracking orders |
 | [Reports](reports/index.md) | Managers, bookkeeper | Every report, the Sales Report and the month-end checklist |
 | [Settings](settings/index.md) | Managers, administrators | FFL Settings and the connection pages for each integration |
 | [Reference](reference/glossary.md) | Everyone | The [glossary](reference/glossary.md), [troubleshooting](reference/troubleshooting.md) and [what the system does on its own](reference/background-jobs.md) |

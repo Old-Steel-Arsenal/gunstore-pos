@@ -23,6 +23,11 @@ and **Track Orders** for everything already ordered.
 
 ## New Order
 
+<figure markdown>
+![The New Order tab of Distributor Orders](../screenshots/page-distributor-orders.webp){ .screenshot }
+<figcaption>One search across every enabled house. Each cart line shows the house it will be ordered from.</figcaption>
+</figure>
+
 The tab runs down the screen: **Search Catalog**, then **Cart**. A third
 section, **Created Orders**, appears once you have made some.
 
@@ -77,8 +82,13 @@ them and try again.
 
 ### Orders
 
-Every distributor order is here: stocking orders, ship-to-store orders for a
-customer, and drop-ship orders. Filter by house, by type, and by status. The
+<figure markdown>
+![The Track Orders tab of Distributor Orders](../screenshots/page-distributor-orders-track.webp){ .screenshot }
+<figcaption>Every open distributor order, whatever it is for, with what has shipped and arrived.</figcaption>
+</figure>
+
+Every distributor order is here: stocking orders and ship-to-store orders for a
+customer. Filter by house, by type, and by status. The
 status box starts on **Open**.
 
 | Column | What it shows |
@@ -106,6 +116,11 @@ status.
 
 ### Invoices
 
+<figure markdown>
+![The Invoices view of Track Orders](../screenshots/page-distributor-orders-invoices.webp){ .screenshot }
+<figcaption>Every invoice on each distributor account, matched to a POS order or marked Outside POS.</figcaption>
+</figure>
+
 Every invoice on each distributor account from the last 30 days, whoever placed
 the order. The invoices are pulled from each house every hour. **Pull invoices
 now** asks at once. The pull runs in the background, so press **Refresh** a
@@ -116,7 +131,7 @@ order matches.
 |---|---|
 | **Invoice** | The house's invoice number and date |
 | **Distributor** | The house, and the account it was billed on |
-| **Goods went to** | **Store**, **Drop-ship** or **Unknown** |
+| **Goods went to** | **Store** or **Unknown** |
 | **POS Order** | The matching distributor order, or an **Outside POS** pill |
 | **Lines**, **Tracking**, **Freight**, **Total** | As billed. Fees show under the freight |
 
@@ -142,7 +157,7 @@ Distributor Order list.
 
 | Field | What it shows |
 |---|---|
-| **Distributor**, **Order Type** | The house and the lane: **Stocking**, **Procure To Store**, **Dropship Accessory** or **Dropship Firearm** |
+| **Distributor**, **Order Type** | The house and the lane: **Stocking** or **Procure To Store** |
 | **Account** | The account at the house this order is placed on, as the distributor knows it |
 | **Distributor Order No.** | The house's own number for the order. Status polls and holds are keyed by it |
 | **Fill or Kill** | RSR orders only. Ticked, a line RSR cannot fill is dropped instead of back-ordered. Decided when the order is placed |
@@ -161,12 +176,11 @@ serial numbers the house reported.
 |---|---|---|
 | **Confirm & Queue** | Status is Draft | Asks you to confirm, then moves the order to Queued and hands it to the placement worker |
 | **Shipping service…** | Status is Draft, and the house offers a choice | Picks the carrier service. The amount is an estimate until the invoice replaces it |
-| **Receive** | A Stocking or Procure To Store order has a line invoiced by the house and not yet received here. Never on a drop-ship order | See [Receiving what arrives](#receiving-what-arrives) |
+| **Receive** | A Stocking or Procure To Store order has a line invoiced by the house and not yet received here | See [Receiving what arrives](#receiving-what-arrives) |
 | **Check status now** | The order is live at the house | Pulls the invoice, tracking and serials now, instead of waiting for the half-hourly poll |
-| **Update Transfer FFL** | A Dropship Firearm order at Placed, Acknowledged or Hold, once the house has returned a reference | Replaces the receiving license to release a hold. The new license is checked again before the house is called |
 | **Cancel Order** | Status is not Complete or Cancelled | Asks for a reason and marks the order Cancelled |
 
-**Update Transfer FFL** and **Cancel Order** sit under an **Actions** menu.
+**Cancel Order** sits under an **Actions** menu.
 
 ### Confirm and queue
 
@@ -175,10 +189,9 @@ asks "Confirm and queue ... for placement?" because placement is not reversible
 on your side. The placement worker is idempotent, so a retry cannot place the
 same order twice.
 
-An order raised from a counter sale may need the sale paid first. A drop-ship
-leg is refused until the counter order is paid in full. A ship-to-store leg may
-be placed on a deposit, because the goods land on your own shelf. The customer
-still pays the balance before taking the goods.
+An order raised from a counter sale may be placed on a deposit, because the
+goods land on your own shelf. The customer still pays the balance before taking
+the goods.
 
 !!! warning "Cancelling after placement"
     Cancelling an order that is live at the house sets the status to Cancelled
@@ -195,7 +208,7 @@ still pays the balance before taking the goods.
 | **Queued** | Confirmed, waiting for the placement worker |
 | **Placed** | The house has the order |
 | **Acknowledged** | The house has accepted it and said what it will ship |
-| **Hold** | The house is holding it. For a firearm order this is usually the receiving license. Use **Update Transfer FFL** |
+| **Hold** | The house is holding it. The hold reason is shown on the order |
 | **Partially Shipped** | Some lines have shipped. More may follow |
 | **Complete** | Finished |
 | **Cancelled** | Ended without completing |
@@ -206,7 +219,7 @@ order, with an alert once an order has sat unchanged for fourteen days. RSR
 orders stay open until RSR has really shipped them, and the real tracking
 number appears when it does.
 
-When the house ships a Stocking or Procure To Store order, the counter's
+When the house ships an order, the counter's
 notification bell rings:
 "_House_ shipped _DO-…_", or "_House_ shipped part of _DO-…_", followed by the
 customer's name when the order is for one. The house gives no arrival date, so
@@ -253,10 +266,8 @@ are attached to that sale automatically, which clears it to be disposed.
 | Cart is empty. | Nothing to order | Search and add lines first |
 | Can't order from _House_: distributor _House_ is not enabled. | The house is switched off | Turn **Enabled** on in the hub, or order from another house |
 | Can't order from _House_: ship to store is switched off for this distributor. | **Stocking** is off for the house | Turn **Stocking** on in the hub, or order from another house |
-| Counter order _…_ is not paid in full — record the balance from Pending Order before placing it with the distributor. | A drop-ship leg's sale still has a balance | Record the balance on [Pending Order](../selling/pending-orders.md), then confirm |
 | SKU _X_: firearm receive needs _N_ serial number(s) from the distributor, got _M_. Receive it on the Receive Goods page and scan the serial off each gun. | The house did not send a serial for every gun | Receive on Receive Goods and scan each serial |
 | No unit cost on _N_ line(s) of this order: … | A line has no **Unit Cost** | Enter it on the order line from the house's invoice, then receive again |
 | Distributor _House_ has no Supplier set, so _DO-…_ cannot be received. … | The house's record names no supplier | A manager sets **Supplier** on the Distributor record |
 | Nothing new to receive. | Everything invoiced has already been booked | No action. Check **Receive Status** on the order |
-| _DO-…_ is a drop-ship order: the distributor shipped it to the buyer, so nothing arrives at the store to receive. | Drop-ship goods never enter your stock or bound book | No action. Nothing is booked |
-| Distributor order short-shipped: _DO-…_ (alert email) | The house shipped fewer units than you ordered | The cost invoice bills only what shipped. Refund the customer for the difference by hand. See [Drop-shipping](dropship.md) |
+| Distributor order short-shipped: _DO-…_ (alert email) | The house shipped fewer units than you ordered | The cost invoice bills only what shipped. If the order was for a customer, deal with the short units by hand |

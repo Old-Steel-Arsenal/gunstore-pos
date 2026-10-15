@@ -386,7 +386,7 @@ def _tenders(c: dict, a: dict) -> None:
 
 	set_mop("Cash", cash_account(c["COMPANY_NAME"]))  # the cash drawer posts here, so the tender must agree (checked in _preflight)
 	set_mop("Credit Card", a["clearing"])
-	for m in ("Zelle", "ACH", "Check", "Wire Transfer", "Bank Draft"):
+	for m in ("Zelle", "ACH", "Check/Money Order", "Check", "Wire Transfer", "Bank Draft"):
 		set_mop(m, a["bank"])
 
 
@@ -567,7 +567,7 @@ def _pos_profile(c: dict, stc: str, letter_head: str, address: str) -> str:
 	want = {"taxes_and_charges": stc, "letter_head": letter_head,
 		"print_format": print_format, "company_address": address}
 	if not frappe.db.exists("POS Profile", name):
-		payments = [m for m in ("Credit Card", "Cash", "Zelle", "ACH", "Check")
+		payments = [m for m in ("Credit Card", "Cash", "Zelle", "ACH", "Check/Money Order")
 			if frappe.db.exists("Mode of Payment", m)]
 		# The owner login is created by the setup wizard; on a site where it is
 		# not (yet) there, do not fail the whole setup over a profile-user row.

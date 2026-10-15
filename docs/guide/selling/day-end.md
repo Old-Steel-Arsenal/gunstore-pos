@@ -21,6 +21,11 @@ The drawer's own opening figure does not come from this dialog. The
 [Cash Drawer](cash-drawer.md) page carries the last count forward as the next
 day's opening.
 
+<figure markdown>
+![POS Opening Entry list](../screenshots/list-pos-opening.webp){ .screenshot }
+<figcaption>Every shift the register has run, most recently created first. Yesterday's should all read Closed.</figcaption>
+</figure>
+
 ## Several clerks, one shift
 
 Only one shift runs on the register at a time, and everyone shares it. The
@@ -56,13 +61,20 @@ At 23:00 store time, every shift still marked Open is closed automatically, and
 submitting each closing posts that shift's register sales. By the time anyone
 arrives the next morning the books are done.
 
+<figure markdown>
+![POS Closing Entry list](../screenshots/list-pos-closing.webp){ .screenshot }
+<figcaption>The POS Closing Entry list, shown here before any shift has closed. Once a day is closed it holds one closing per shift, newest first, with last night's at the top.</figcaption>
+</figure>
+
 Three details worth knowing:
 
 - The nightly close does not count the drawer. Its closing carries the cash the
   books expect and is marked as not counted. If nobody closed the day, the
   Cash Drawer page shows the day as not counted and books nothing for it. The
   next real count covers every day since the last one.
-- Card, Zelle and the other modes are taken as the system recorded them.
+- Card, Zelle and the other modes are taken as the system recorded them. A
+  customer's check or money order is booked to the bank, so it is not part of
+  the drawer count.
 - A shift opened in the last hour before the job runs is left alone, and the
   next night's run takes it.
 

@@ -58,7 +58,7 @@ from ffl_core.reservations import (
 	si_firearm_serial_state,
 	si_pending_firearm_serials,
 )
-from ffl_core.setup.payments import ZELLE
+from ffl_core.setup.payments import CHECK_MONEY_ORDER, ZELLE
 
 from ffl_core import storage
 from ffl_core.roles import COUNTER_ROLES
@@ -71,7 +71,7 @@ _ROLES = COUNTER_ROLES  # canonical tuple moved to ffl_core.roles (endpoint-gate
 # payment's reference_no and enforced server-side in compliance.payment_mode.
 # ZELLE is the canonical mode name from ffl_core.setup.payments, shared with that
 # gate so a rename can't silently desync them.
-_MODES_OF_PAYMENT = ("Cash", "Credit Card", ZELLE, "ACH")
+_MODES_OF_PAYMENT = ("Cash", "Credit Card", ZELLE, "ACH", CHECK_MONEY_ORDER)
 # Buyer type drives the shipping gate (an individual must pay before its guns
 # ship; a business — an FFL buying for its own license — may ship on account).
 _BUYER_INDIVIDUAL = "Individual"
@@ -555,8 +555,8 @@ def _create_order(payload, *, shipping_tax_inclusive: int | None = None) -> dict
 		if mode_of_payment not in _MODES_OF_PAYMENT:
 			frappe.throw(_("Pick a valid payment method to mark this order paid."))
 		if mode_of_payment in _REFERENCED_BANK_MODES and not transaction_number:
-			frappe.throw(_("Enter the {0} Transaction Number to mark this order "
-				"paid by {0}.").format(mode_of_payment))
+			frappe.throw(_("Enter the {0} to mark this order paid by {1}.").format(
+				_reference_name(mode_of_payment), mode_of_payment))
 		# The deposit leg books a Payment Entry, not an invoice payment row, so
 		# the Sales Invoice submit gate never sees it — this early check is the
 		# ONLY gate a card deposit meets (the deposit leg had none).
@@ -1306,9 +1306,17 @@ def _card_reference_required_for(mode_of_payment: str, *, off_terminal: bool = F
 
 # Zelle and ACH are the same shape of tender — a manual bank transfer whose only
 # machine record lives in the OTHER system — so they carry the same reference
-# requirement. Listing them together keeps "we added ACH to the mode list but
-# not to the gate" from happening again.
-_REFERENCED_BANK_MODES = (ZELLE, "ACH")
+# requirement. A check or money order joins them: its number is the only thing
+# tying the deposit slip back to this sale. Listing them together keeps "we
+# added ACH to the mode list but not to the gate" from happening again.
+_REFERENCED_BANK_MODES = (ZELLE, "ACH", CHECK_MONEY_ORDER)
+
+
+def _reference_name(mode_of_payment: str) -> str:
+	"""What a referenced bank mode asks the operator to type."""
+	if mode_of_payment == CHECK_MONEY_ORDER:
+		return _("check or money order number")
+	return _("{0} Transaction Number").format(mode_of_payment)
 
 
 def _reject_pan_reference(reference: str) -> None:
@@ -1333,14 +1341,17 @@ def record_payment(sales_invoice: str, mode_of_payment: str, amount=None,
 
 	Args:
 	    sales_invoice: Submitted, not-fully-paid Sales Invoice name.
-	    mode_of_payment: One of the configured POS payment modes; Zelle
-	        additionally requires transaction_number.
+	    mode_of_payment: Cash, Credit Card, Zelle, ACH or Check/Money
+	        Order; Zelle, ACH and Check/Money Order also require
+	        transaction_number.
 	    amount: Optional partial amount (> 0, at most the outstanding
 	        balance); blank pays the full outstanding.
-	    transaction_number: Processor reference. Required for Zelle, and for the
-	        card tender on a store running the standalone terminal with
-	        approval codes required — or with the Payroc terminal live (a card
-	        typed in here was run on the Virtual Terminal).
+	    transaction_number: Processor reference — the check or money order
+	        number for Check/Money Order. Required for Zelle, ACH and
+	        Check/Money Order, and for the card tender on a store running the
+	        standalone terminal with approval codes required — or with the
+	        Payroc terminal live (a card typed in here was run on the Virtual
+	        Terminal).
 	    received_on: The day the money arrived (blank → today): it dates
 	        the Payment Entry, so a collection typed in late still books in
 	        the period the deposit really landed in. See
@@ -1358,8 +1369,8 @@ def record_payment(sales_invoice: str, mode_of_payment: str, amount=None,
 		frappe.throw(_("Pick a valid payment method."))
 	transaction_number = (str(transaction_number or "")).strip()
 	if mode_of_payment in _REFERENCED_BANK_MODES and not transaction_number:
-		frappe.throw(_("Enter the {0} Transaction Number to record a {0} "
-			"payment.").format(mode_of_payment))
+		frappe.throw(_("Enter the {0} to record a {1} payment.").format(
+			_reference_name(mode_of_payment), mode_of_payment))
 	# The THIRD way card money enters the system: deferred collection on an
 	# on-account order, booked as a Payment Entry rather than an invoice payment
 	# row — so neither the POS gate nor the Sales Invoice one sees it. On a store
@@ -2792,7 +2803,8 @@ def cancel_order(sales_invoice: str, reason: str, refund_mode: str | None = None
 	    reason: Required free-text cancellation reason.
 	    refund_mode: Payment mode for the refund entry (required when
 	        anything was paid).
-	    refund_reference: Processor reference (required for Zelle refunds).
+	    refund_reference: Processor reference (required for Zelle, ACH and
+	        Check/Money Order refunds).
 
 	Returns:
 	    {ok, dispositions_cancelled, delivery_notes_cancelled,
@@ -2833,8 +2845,8 @@ def cancel_order(sales_invoice: str, reason: str, refund_mode: str | None = None
 			frappe.throw(_("Pick a valid refund method."))
 		refund_reference = (str(refund_reference or "")).strip()
 		if refund_mode in _REFERENCED_BANK_MODES and not refund_reference:
-			frappe.throw(_("Enter the {0} Transaction Number for the refund."
-				).format(refund_mode))
+			frappe.throw(_("Enter the {0} for the refund.").format(
+				_reference_name(refund_mode)))
 		# Cards refunded on the standalone terminal need their approval code
 		# here too. THIS is the path the store actually refunds through — it
 		# has never raised a POS return document — so a control that lived only
@@ -2990,7 +3002,8 @@ def update_order(sales_invoice: str, payload, refund_mode: str | None = None,
 	        applies).
 	    payload: Edited create_order-shaped payload (dict or JSON string).
 	    refund_mode: Refund payment mode when the edit produces an overpay.
-	    refund_reference: Processor reference (required for Zelle refunds).
+	    refund_reference: Processor reference (required for Zelle, ACH and
+	        Check/Money Order refunds).
 
 	Returns:
 	    {ok, sales_invoice: <new SI>, replaced: <old SI>,
@@ -3019,8 +3032,8 @@ def update_order(sales_invoice: str, payload, refund_mode: str | None = None,
 			frappe.throw(_("Pick a valid refund method."))
 		refund_reference = (str(refund_reference or "")).strip()
 		if refund_mode in _REFERENCED_BANK_MODES and not refund_reference:
-			frappe.throw(_("Enter the {0} Transaction Number for the refund."
-				).format(refund_mode))
+			frappe.throw(_("Enter the {0} for the refund.").format(
+				_reference_name(refund_mode)))
 		# Cards refunded on the standalone terminal need their approval code
 		# here too. THIS is the path the store actually refunds through — it
 		# has never raised a POS return document — so a control that lived only
