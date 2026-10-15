@@ -163,7 +163,11 @@ def credentials_saved_at(code: str = CODE):
 def note_credentials_saved(code: str = CODE) -> None:
 	"""Lipseys Settings was saved: lift an auth hold (``attempt_due``). Called from the
 	form's on_update only; the shipping poll's own writes to the document do not
-	call it."""
+	call it. A fresh install saves every Single before after_migrate creates the
+	dc_* tables: with no dc_meta yet there is no hold to lift."""
+	if not frappe.db.sql("""SELECT 1 FROM information_schema.tables
+			WHERE table_schema = DATABASE() AND table_name = 'dc_meta'"""):
+		return
 	frappe.db.sql("""INSERT INTO dc_meta (distributor, creds_saved_at) VALUES (%s, %s)
 		ON DUPLICATE KEY UPDATE creds_saved_at = VALUES(creds_saved_at)""", (code, store.utc_now()))
 
