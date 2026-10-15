@@ -27,6 +27,7 @@ fixtures = [
 distributor_providers = [
 	"ffl_integrations.distributor.rsr_provider.get_provider",
 	"ffl_integrations.distributor.ss_provider.get_provider",
+	"ffl_integrations.distributor.lipseys_provider.get_provider",
 ]
 
 # Where the Extensions page's Update button gets newer extension versions
@@ -184,6 +185,8 @@ after_migrate = [
 	# Sports South Distributor row (disabled) + the Overview's manufacturer
 	# restrictions as To-Store brand policies. Create-once, Brand-tolerant.
 	"ffl_integrations.sports_south.seed.run",
+	# Lipsey's Distributor row (disabled). Create-once.
+	"ffl_integrations.lipseys.seed.run",
 	"ffl_integrations.setup.gunbroker_seed.run",
 	# The GunBroker liability, accrual and loss accounts, and the two payment
 	# modes. Idempotent, and it re-points each mode at whatever account Settings

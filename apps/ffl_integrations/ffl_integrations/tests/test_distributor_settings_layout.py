@@ -1,5 +1,8 @@
-"""RSR Settings / Sports South Settings: one tab layout (Account / Ordering /
-Freight, and Sports South's Status), same fields as before.
+"""RSR Settings / Sports South Settings / Lipseys Settings: one tab layout
+(Account / Ordering / Freight, and Sports South's Status), same fields as before.
+Lipseys Settings has no Freight tab (Lipsey's publishes no freight table; a
+drop-ship order's answer carries its freight) and a Status tab for its shipping
+poll.
 
 Read off disk, no site. It pins what the re-layout may and may not change:
 
@@ -33,7 +36,9 @@ _LAYOUT = frozenset({"Tab Break", "Section Break", "Column Break"})
 _SHARED_TABS = [("tab_account", "Account"), ("tab_ordering", "Ordering"),
 	("tab_freight", "Freight")]
 TABS = {"rsr_settings": _SHARED_TABS,
-	"sports_south_settings": [*_SHARED_TABS, ("tab_status", "Status")]}
+	"sports_south_settings": [*_SHARED_TABS, ("tab_status", "Status")],
+	"lipseys_settings": [("tab_account", "Account"), ("tab_ordering", "Ordering"),
+		("tab_status", "Status")]}
 
 # Tab label -> the develop data fields that belong on it.
 EXPECTED = {
@@ -64,9 +69,18 @@ EXPECTED = {
 			"store_free_other_amount", "store_other_rate", "freight_variance_alert"},
 		"Status": {"credits_polled_through", "last_credits_poll_at", "last_error"},
 	},
+	"lipseys_settings": {
+		"Account": {"ordering_enabled", "customer_number", "dealer_email", "dealer_password",
+			"dropship_email", "dropship_password", "base_url"},
+		"Ordering": {"disable_email", "dropship_overnight"},
+		"Status": {"shipping_polled_through", "dropship_shipping_polled_through",
+			"last_shipping_poll_at", "last_error"},
+	},
 }
-MASTER_SWITCH = {"rsr_settings": "api_enabled", "sports_south_settings": "ordering_enabled"}
-ENDPOINT = {"rsr_settings": "api_base_url", "sports_south_settings": "base_url"}
+MASTER_SWITCH = {"rsr_settings": "api_enabled", "sports_south_settings": "ordering_enabled",
+	"lipseys_settings": "ordering_enabled"}
+ENDPOINT = {"rsr_settings": "api_base_url", "sports_south_settings": "base_url",
+	"lipseys_settings": "base_url"}
 
 
 def _schema(slug: str) -> dict:

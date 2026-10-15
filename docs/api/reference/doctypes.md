@@ -936,6 +936,26 @@ app: `ffl_integrations` · module: FFL Integrations · single · roles: System M
 | `last_webhook_event` | Data | Last webhook event |  |  |
 | `order_sync_nudge` | Data | Order sync nudge |  |  |
 
+## Lipseys Settings
+
+app: `ffl_integrations` · module: FFL Integrations · single · roles: System Manager
+
+| field | type | label | reqd | options |
+|---|---|---|---|---|
+| `ordering_enabled` | Check | Allow live orders |  |  |
+| `customer_number` | Data | Customer number |  |  |
+| `dealer_email` | Data | Email |  | Email |
+| `dealer_password` | Password | Password |  |  |
+| `dropship_email` | Data | Email |  | Email |
+| `dropship_password` | Password | Password |  |  |
+| `base_url` | Data | API base URL |  |  |
+| `disable_email` | Check | No confirmation email from Lipsey's |  |  |
+| `dropship_overnight` | Check | Accessory drop-ship orders ship overnight |  |  |
+| `shipping_polled_through` | Date | Shipping polled through (dealer) |  |  |
+| `dropship_shipping_polled_through` | Date | Shipping polled through (drop-ship) |  |  |
+| `last_shipping_poll_at` | Datetime | Last shipping poll |  |  |
+| `last_error` | Long Text | Last error |  |  |
+
 ## Payroc Charge
 
 app: `ffl_integrations` · module: FFL Integrations · child table

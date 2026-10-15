@@ -20,7 +20,7 @@ A card with **Enabled** off is greyed. The switches save the moment you click th
 
 ### The summary line
 
-For RSR and Sports South, a read-only line under the switches sums up the house's own settings page.
+For RSR, Sports South and Lipsey's, a read-only line under the switches sums up the house's own settings page. Lipsey's shows only **Ordering**.
 
 | Item | Reads | What it means |
 |---|---|---|
