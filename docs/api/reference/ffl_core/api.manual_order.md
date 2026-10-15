@@ -28,7 +28,7 @@ honours ignore_invoice for the order being edited.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3495`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3508`</sub>
 
 ## `cancel_order`
 
@@ -54,13 +54,13 @@ disposition are refused.
 | `sales_invoice` | string | yes | — | Submitted counter-order Sales Invoice name. |
 | `reason` | string | yes | — | Required free-text cancellation reason. |
 | `refund_mode` | string \| null | no | `None` | Payment mode for the refund entry (required when anything was paid). |
-| `refund_reference` | string \| null | no | `None` | Processor reference (required for Zelle refunds). |
+| `refund_reference` | string \| null | no | `None` | Processor reference (required for Zelle, ACH and Check/Money Order refunds). |
 
 **Returns:** {ok, dispositions_cancelled, delivery_notes_cancelled, sales_orders_cancelled, refund_entry, refunded_amount, shipstation_voided, warning, ...}.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:2775`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:2786`</sub>
 
 ## `check_serials_available`
 
@@ -82,7 +82,7 @@ stock, so a gun may have sold in the meantime).
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3361`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3374`</sub>
 
 ## `create_order`
 
@@ -126,7 +126,7 @@ Also the consumed-draft cleanup create_order calls after success.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3474`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3487`</sub>
 
 ## `dispose_order`
 
@@ -149,7 +149,7 @@ rule (ship_payment_block) and a valid destination FFL.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:1503`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:1514`</sub>
 
 ## `find_serial_for_order`
 
@@ -174,7 +174,7 @@ dropdown uses, so both entry paths always quote identically.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3333`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3346`</sub>
 
 ## `fulfill_from_stock`
 
@@ -206,7 +206,7 @@ unit of the item, or for an accessory the shelf cannot cover.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:2189`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:2200`</sub>
 
 ## `get_customer_tax_status`
 
@@ -227,7 +227,7 @@ exemption.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:4675`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:4688`</sub>
 
 ## `get_order_draft`
 
@@ -245,7 +245,7 @@ Load one Create Order Draft for resume.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3455`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3468`</sub>
 
 ## `get_order_for_edit`
 
@@ -268,7 +268,7 @@ standing flag, so an edit can never silently re-toggle the exemption.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:2410`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:2421`</sub>
 
 ## `item_tax_rates`
 
@@ -295,7 +295,7 @@ server, no tax on or inside its shipping.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:4629`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:4642`</sub>
 
 ## `list_order_drafts`
 
@@ -309,7 +309,7 @@ Shared draft list, newest first — shown in the page's Drafts dialog.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3438`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3451`</sub>
 
 ## `list_pending_dispositions`
 
@@ -365,7 +365,7 @@ this path really moves the non-firearm goods.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:1742`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:1753`</sub>
 
 ## `order_line_costs`
 
@@ -391,7 +391,7 @@ without a serial, has no cost to show.
 
 **Returns:** One unit cost per line, in input order — a float, or None when it is not known (never 0).
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3521`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3534`</sub>
 
 ## `pending_orders_digest`
 
@@ -432,7 +432,7 @@ The Contact carries the receipt email.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3647`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3660`</sub>
 
 ## `quote_config`
 
@@ -455,7 +455,7 @@ shipping address.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:4592`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:4605`</sub>
 
 ## `record_payment`
 
@@ -473,16 +473,16 @@ account, and returns the updated balance.
 | arg | type | required | default | description |
 |---|---|---|---|---|
 | `sales_invoice` | string | yes | — | Submitted, not-fully-paid Sales Invoice name. |
-| `mode_of_payment` | string | yes | — | One of the configured POS payment modes; Zelle additionally requires transaction_number. |
+| `mode_of_payment` | string | yes | — | Cash, Credit Card, Zelle, ACH or Check/Money Order; Zelle, ACH and Check/Money Order also require transaction_number. |
 | `amount` | — | no | `None` | Optional partial amount (> 0, at most the outstanding balance); blank pays the full outstanding. |
-| `transaction_number` | — | no | `None` | Processor reference. Required for Zelle, and for the card tender on a store running the standalone terminal with approval codes required — or with the Payroc terminal live (a card typed in here was run on the Virtual Terminal). |
+| `transaction_number` | — | no | `None` | Processor reference — the check or money order number for Check/Money Order. Required for Zelle, ACH and Check/Money Order, and for the card tender on a store running the standalone terminal with approval codes required — or with the Payroc terminal live (a card typed in here was run on the Virtual Terminal). |
 | `received_on` | — | no | `None` | The day the money arrived (blank → today): it dates the Payment Entry, so a collection typed in late still books in the period the deposit really landed in. See _received_on_posting_date for the window. |
 
 **Returns:** {ok, payment_entry, paid_amount, outstanding, paid}.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:1326`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:1334`</sub>
 
 ## `release_order_legs`
 
@@ -511,7 +511,7 @@ their own queue buttons.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:1411`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:1422`</sub>
 
 ## `rename_customer`
 
@@ -536,7 +536,7 @@ primary Contact is NOT renamed (out of scope).
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3700`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3713`</sub>
 
 ## `resource_line`
 
@@ -563,7 +563,7 @@ and quotes the web reference.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:2050`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:2061`</sub>
 
 ## `save_cr_ffl`
 
@@ -593,7 +593,7 @@ all read it the way they read any other.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3596`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3609`</sub>
 
 ## `save_order_draft`
 
@@ -619,7 +619,7 @@ re-validated on resume.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3395`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3408`</sub>
 
 ## `set_customer_tax_exempt`
 
@@ -643,7 +643,7 @@ and reused.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:4699`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:4712`</sub>
 
 ## `update_order`
 
@@ -677,13 +677,13 @@ item to an order already placed buys just that item.
 | `sales_invoice` | string | yes | — | Submitted counter-order Sales Invoice (editable gate applies). |
 | `payload` | — | yes | — | Edited create_order-shaped payload (dict or JSON string). |
 | `refund_mode` | string \| null | no | `None` | Refund payment mode when the edit produces an overpay. |
-| `refund_reference` | string \| null | no | `None` | Processor reference (required for Zelle refunds). |
+| `refund_reference` | string \| null | no | `None` | Processor reference (required for Zelle, ACH and Check/Money Order refunds). |
 
 **Returns:** {ok, sales_invoice: <new SI>, replaced: <old SI>, sales_orders_cancelled, grand_total, carried_amount, refund_entry, refunded_amount, outstanding, ...}.
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:2966`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:2978`</sub>
 
 ## `verify_ffl`
 
@@ -703,4 +703,4 @@ Delegates to the eZ Check integration (online verify + address).
 
 **Permissions:** Sales User / Sales Manager / Stock Manager / System Manager.
 
-<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3575`</sub>
+<sub>`apps/ffl_core/ffl_core/api/manual_order.py:3588`</sub>

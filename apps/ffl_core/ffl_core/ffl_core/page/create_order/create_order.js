@@ -7,7 +7,7 @@
 //   2. Destination FFL (when firearms are on the order): where the guns ship.
 //   3. Recipient & Ship-To: locked to the FFL address for firearm orders.
 //   4. Items: scan/search; firearms pick an in-stock serial (price-first).
-//   5. Payment: Cash / Credit Card / Zelle / ACH + a "received" toggle.
+//   5. Payment: Cash / Credit Card / Zelle / ACH / Check/Money Order + a "received" toggle.
 //   6. Fulfillment: dispose & ship now, or queue for Pending Dispositions.
 //
 // "Create Order" → ffl_core.api.manual_order.create_order builds a submitted
@@ -445,7 +445,7 @@ class CreateOrderApp {
 			mode: this._f('#f-mode', {
 				label: __('Payment Method'), fieldtype: 'Select', fieldname: 'mode',
 				change: () => this._syncPaymentFields(),
-				options: 'Cash\nCredit Card\nZelle\nACH', default: 'Cash',
+				options: 'Cash\nCredit Card\nZelle\nACH\nCheck/Money Order', default: 'Cash',
 			}),
 			amount: this._f('#f-amount', { label: __('Amount'), fieldtype: 'Currency', fieldname: 'amount', change: () => {
 				// Frappe's Currency change fires async, so a synchronous flag can't tell
@@ -498,10 +498,17 @@ class CreateOrderApp {
 		// Nothing is collected now, or the terminal returns the approval itself.
 		if (this._payLater() || this._terminalPath()) return null;
 		const mode = this.fields.mode.get_value();
-		if (mode === 'Zelle') {
+		// The server's _REFERENCED_BANK_MODES: each always needs its number.
+		if (mode === 'Zelle' || mode === 'ACH') {
 			return {
-				label: __('Zelle Transaction Number'),
-				missing: __('Zelle Transaction Number'),
+				label: __('{0} Transaction Number', [mode]),
+				missing: __('{0} Transaction Number', [mode]),
+			};
+		}
+		if (mode === 'Check/Money Order') {
+			return {
+				label: __('Check / money order number'),
+				missing: __('Check / money order number'),
 			};
 		}
 		// Credit Card needs one on a store running the standalone terminal with the
@@ -2425,13 +2432,14 @@ class CreateOrderApp {
 			</div>`);
 		this._refundModeCtl = this._f('#edit-refund-controls', {
 			label: __('Refund Method'), fieldtype: 'Select', fieldname: 'refund_mode',
-			options: ['Cash', 'Credit Card', 'Zelle', 'ACH'].join('\n'),
+			options: ['Cash', 'Credit Card', 'Zelle', 'ACH', 'Check/Money Order'].join('\n'),
 			change: () => this._syncEditDelta(),
 		});
 		this._refundModeCtl.set_value(ctx.last_payment_mode || 'Cash');
 		this._refundRefCtl = this._f('#edit-refund-controls', {
-			label: __('Zelle Transaction Number (refund)'), fieldtype: 'Data',
+			label: __('Refund Reference'), fieldtype: 'Data',
 			fieldname: 'refund_reference', change: () => this._reflectReadiness(),
+			description: __('Zelle / ACH: the confirmation number. Check/Money Order: the number of the check you wrote. Credit Card: the terminal approval code.'),
 		});
 		// Surface the staff Order Note (normally in the edit-hidden Fulfillment
 		// section) right under the money summary, so an edit can read and change
@@ -2476,7 +2484,15 @@ class CreateOrderApp {
 		$d.html(html);
 		this.$body.find('#edit-refund-controls').toggle(refund > 0.01);
 		this._refundRefCtl?.$wrapper.toggle(
-			refund > 0.01 && this._refundModeCtl?.get_value() === 'Zelle');
+			refund > 0.01 && this._refundNeedsReference());
+	}
+
+	// Mirrors update_order's refund gate: Zelle / ACH / Check/Money Order always,
+	// the card on a standalone terminal with approval codes required.
+	_refundNeedsReference() {
+		const tr = window.ffl && window.ffl.tenderReference;
+		const modes = tr ? tr.modes() : ['Zelle', 'ACH', 'Check/Money Order'];
+		return modes.includes(this._refundModeCtl?.get_value());
 	}
 
 	_submitEdit() {
@@ -2489,8 +2505,8 @@ class CreateOrderApp {
 		if (refund > 0.01) {
 			args.refund_mode = this._refundModeCtl.get_value();
 			args.refund_reference = (this._refundRefCtl.get_value() || '').trim();
-			if (args.refund_mode === 'Zelle' && !args.refund_reference) {
-				frappe.msgprint(__('Enter the Zelle Transaction Number for the refund.'));
+			if (this._refundNeedsReference() && !args.refund_reference) {
+				frappe.msgprint(__('Enter the {0} reference for the refund.', [args.refund_mode]));
 				return;
 			}
 		}

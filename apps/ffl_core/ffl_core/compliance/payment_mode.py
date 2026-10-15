@@ -1,11 +1,13 @@
 """Submit-time gates for manually-settled tenders: the money moved somewhere this
 system cannot see, so the operator has to record the OTHER system's confirmation.
 
-Two tenders need this, for the same reason:
+Three tenders need this, for the same reason:
 
 * **Zelle** — the customer sends money in the Zelle app and the cashier marks it
   received. Without the bank/app confirmation number the deposit cannot be
   reconciled against the sale.
+* **Check/Money Order** — the paper goes to the bank later; its number is what
+  ties the deposit back to the sale.
 * **Credit Card with the Payroc integration switched off** — the card is swiped on
   a standalone terminal, so nothing comes back from a gateway and the only link
   between the sale and that terminal's batch report is what the cashier types.
@@ -14,7 +16,8 @@ Both store it in the standard ``Sales Invoice Payment.reference_no`` (surfaced t
 staff as the "Transaction Number"), and both go through ``require_tender_reference``
 so the document-level rules cannot drift apart between them.
 
-Wired into POS Invoice + Sales Invoice validate: Zelle from ffl_core's hooks, the
+Wired into POS Invoice + Sales Invoice validate: Zelle and Check/Money Order
+from ffl_core's hooks, the
 card one from ffl_integrations' — the Credit Card mode of payment and the switch
 that governs it both belong to that app, so only the tender-agnostic half lives
 here.
@@ -28,7 +31,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from ffl_core.setup.payments import ZELLE
+from ffl_core.setup.payments import CHECK_MONEY_ORDER, ZELLE
 
 _PAN_SEPARATORS = re.compile(r"[ \-]")
 
@@ -114,5 +117,18 @@ def require_zelle_transaction_no(doc, method: str | None = None) -> None:
 		message=lambda amount: _(
 			"Enter the Zelle Transaction Number for the Zelle payment of {0} "
 			"before completing the sale."
+		).format(frappe.format_value(amount, {"fieldtype": "Currency"})),
+	)
+
+
+def require_check_money_order_number(doc, method: str | None = None) -> None:
+	"""Every positive Check/Money Order tender must carry its check or money
+	order number. Returns are not gated, for Zelle's reason above."""
+	require_tender_reference(
+		doc,
+		mode_of_payment=CHECK_MONEY_ORDER,
+		message=lambda amount: _(
+			"Enter the check or money order number for the Check/Money Order "
+			"payment of {0} before completing the sale."
 		).format(frappe.format_value(amount, {"fieldtype": "Currency"})),
 	)

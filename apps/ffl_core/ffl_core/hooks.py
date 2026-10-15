@@ -299,8 +299,10 @@ doc_events = {
 			# "Actual" row THIS validate cycle — clear_tax_keep_freight's keep logic
 			# only has a row to preserve if apply_shipping_charge already ran.
 			"ffl_core.compliance.customer_tax_exempt.enforce_customer_tax_exemption",
-			# Zelle tenders must carry their bank/app Transaction Number (reference_no).
+			# Zelle tenders must carry their bank/app Transaction Number (reference_no),
+			# Check/Money Order tenders their check or money order number.
 			"ffl_core.compliance.payment_mode.require_zelle_transaction_no",
+			"ffl_core.compliance.payment_mode.require_check_money_order_number",
 			# A merged negative trade-in ticket gives no change: ERPNext's paid - total
 			# would pay its payout out a second time (compliance/trade_in_settlement).
 			"ffl_core.compliance.trade_in_settlement.keep_merged_change",
@@ -431,8 +433,10 @@ doc_events = {
 			# Below zero: no tender, no change, how the store paid the customer.
 			"ffl_core.compliance.negative_trade_in.guard_negative_ticket",
 			"ffl_core.compliance.interstate_tax.guard_pos_exemption",
-			# Zelle tenders must carry their bank/app Transaction Number (reference_no).
+			# Zelle tenders must carry their bank/app Transaction Number (reference_no),
+			# Check/Money Order tenders their check or money order number.
 			"ffl_core.compliance.payment_mode.require_zelle_transaction_no",
+			"ffl_core.compliance.payment_mode.require_check_money_order_number",
 			# Alert (never block) when the register's open shift belongs to another
 			# account: the owner-scoped nightly close will skip this sale (8/25,
 			# 8/26 incidents); the sweep posts it later.

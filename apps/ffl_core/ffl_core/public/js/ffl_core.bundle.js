@@ -2514,13 +2514,14 @@ frappe.provide('frappe.ui.form');
 	// One definition for the desk dialogs that collect a manually-settled
 	// tender's reference, so their rules can't drift (earlier, two dialogs
 	// shipped with a Zelle-only field while the server demanded a card code —
-	// a gate nothing on screen could satisfy): which modes need one (Zelle/ACH
-	// always; the card tender when the standalone-terminal rule is on), and
+	// a gate nothing on screen could satisfy): which modes need one (Zelle, ACH
+	// and Check/Money Order always; the card tender when the standalone-terminal
+	// rule is on), and
 	// clear-on-hide — a Zelle number typed then mode-switched must not ride
 	// along as a Cash reference or a card "approval code".
 	window.ffl.tenderReference = {
 		modes: function () {
-			var m = ['Zelle', 'ACH'];
+			var m = ['Zelle', 'ACH', 'Check/Money Order'];
 			var sw = window.ffl.switches;
 			if (sw && sw.requireCardReference()) m.push(sw.payrocMop());
 			return m;
@@ -2545,7 +2546,7 @@ frappe.provide('frappe.ui.form');
 				fieldtype: 'Data', fieldname: 'transaction_number',
 				label: __('Transaction Number / Approval Code'),
 				depends_on: needs, mandatory_depends_on: needs,
-				description: __('Zelle / ACH: the bank or app confirmation number. Credit Card: the approval code from the terminal or Virtual Terminal receipt — never the card number.'),
+				description: __('Zelle / ACH: the bank or app confirmation number. Check/Money Order: the check or money order number. Credit Card: the approval code from the terminal or Virtual Terminal receipt — never the card number.'),
 			};
 			if (!terminal) return [ref];
 			return [{
@@ -3143,7 +3144,7 @@ frappe.provide('frappe.ui.form');
 
 	// COUNTER PICKUP TICKET: the ticket is $0 — the money is on the counter order
 	// (Sales Invoice) it hands the gun over for. Complete Order collects whatever
-	// that order still owes right here (terminal / cash / Zelle / ACH), booking it
+	// that order still owes right here (terminal / cash / Zelle / ACH / check), booking it
 	// on the order exactly as Pending Order → Record Payment would, then goes on
 	// to hand over. The server refuses the submit while the order owes
 	// (counter_pickup.require_settled_counter_order), so this is the counter's
@@ -3151,7 +3152,7 @@ frappe.provide('frappe.ui.form');
 	function promptCounterBalance(si, owed) {
 		return new Promise((resolve) => {
 			let settled = false;
-			const modes = ['Cash', payrocMop(), 'Zelle', 'ACH'];
+			const modes = ['Cash', payrocMop(), 'Zelle', 'ACH', 'Check/Money Order'];
 			const refFields = (window.ffl && window.ffl.tenderReference)
 				? window.ffl.tenderReference.fields({ terminal: true })
 				: [{ fieldtype: 'Data', fieldname: 'transaction_number', label: __('Zelle Transaction Number'),
@@ -3347,8 +3348,9 @@ frappe.provide('frappe.ui.form');
 	// Manually-settled tender reference capture. A tender with no gateway behind it
 	// leaves no machine record of the money moving, so the cashier records the
 	// confirmation the OTHER system gave them and we store it on the payment row's
-	// reference_no. Two tenders need this, for the same reason:
+	// reference_no. Three tenders need this, for the same reason:
 	//   - Zelle: a bank transfer the customer made in an app;
+	//   - Check/Money Order: paper deposited at the bank later;
 	//   - Credit Card with Payroc switched off: a swipe on a standalone terminal.
 	// Backend gates enforce both at submit (ffl_core.compliance.payment_mode and
 	// ffl_integrations.payroc.api respectively), so these prompts are the friendly
@@ -3421,6 +3423,15 @@ frappe.provide('frappe.ui.form');
 			title: __('Zelle Transaction Number'),
 			label: __('Transaction Number'),
 			description: __('Enter the Zelle confirmation / transaction number to complete this sale.'),
+		});
+	}
+
+	function ensureCheckReference(frm) {
+		return ensureTenderReference(frm, {
+			mode: 'Check/Money Order',
+			title: __('Check or Money Order Number'),
+			label: __('Check / money order number'),
+			description: __('Enter the number printed on the check or money order to complete this sale.'),
 		});
 	}
 
@@ -3522,6 +3533,8 @@ frappe.provide('frappe.ui.form');
 			// card portion or complete the order. Prompt now; cancel aborts checkout.
 			const zelle = await ensureZelleReference(controller.frm);
 			if (!zelle.ok) return;
+			const check = await ensureCheckReference(controller.frm);
+			if (!check.ok) return;
 			// Standalone-terminal card reference, same rule and same moment: taken
 			// before any money moves, cancelling aborts checkout.
 			const cardRef = await ensureCardReference(controller.frm);

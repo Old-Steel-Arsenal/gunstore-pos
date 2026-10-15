@@ -1014,10 +1014,10 @@ class PendingDispositionsApp {
 			fields: [
 				{
 					fieldtype: 'Select', fieldname: 'mode', label: __('Payment Method'),
-					options: 'Cash\nCredit Card\nZelle\nACH', default: 'Cash', reqd: 1,
+					options: 'Cash\nCredit Card\nZelle\nACH\nCheck/Money Order', default: 'Cash', reqd: 1,
 				},
 				// Shared desk definition (ffl_core.bundle window.ffl.tenderReference):
-				// Zelle/ACH always need their confirmation number; the card tender
+				// Zelle/ACH/Check/Money Order always need their reference; the card tender
 				// needs its approval code on a standalone terminal with the rule on,
 				// or once "Already charged on Virtual Terminal" is ticked. Fallbacks =
 				// older bundles (single field / the Zelle-only field).
@@ -1520,13 +1520,18 @@ class PendingDispositionsApp {
 		if (paid) {
 			fields.push({
 				fieldtype: 'Select', fieldname: 'refund_mode', label: __('Refund Method'),
-				options: 'Cash\nCredit Card\nZelle\nACH',
+				options: 'Cash\nCredit Card\nZelle\nACH\nCheck/Money Order',
 				default: row.last_payment_mode || 'Cash', reqd: 1,
 			});
+			// Same modes the server's cancel_order demands a reference for — the
+			// Zelle/ACH confirmation, or the number of the check written back.
+			const needsRef = 'eval:' + JSON.stringify(window.ffl && window.ffl.tenderReference
+				? window.ffl.tenderReference.modes() : ['Zelle', 'ACH', 'Check/Money Order'])
+				+ '.includes(doc.refund_mode)';
 			fields.push({
-				fieldtype: 'Data', fieldname: 'refund_reference', label: __('Zelle Transaction Number'),
-				depends_on: "eval:doc.refund_mode=='Zelle'",
-				mandatory_depends_on: "eval:doc.refund_mode=='Zelle'",
+				fieldtype: 'Data', fieldname: 'refund_reference', label: __('Refund Reference'),
+				description: __('Zelle / ACH: the confirmation number. Check/Money Order: the number of the check you wrote. Credit Card: the terminal approval code.'),
+				depends_on: needsRef, mandatory_depends_on: needsRef,
 			});
 		}
 		let $primary = null;
