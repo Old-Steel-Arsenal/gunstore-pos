@@ -12,6 +12,7 @@ payment goes wrong. Counter staff need the first half. The rest is for managers.
 | **Credit Card** | A standalone terminal, when the integration is off | The approval code from the terminal receipt, if the store requires it |
 | **Zelle** | The bank | The Zelle confirmation number, always |
 | **ACH** | The bank | Nothing at the register. On a counter order, the ACH reference |
+| **Check/Money Order** | The bank, when you deposit it. It is not counted in the drawer | The check or money order number, always |
 
 A sale can be split across several modes. Enter an amount against each one on
 the payment screen before clicking **Complete Order**.
@@ -28,6 +29,17 @@ On a counter order — [Create Order](create-order.md), **Record Payment** on th
 [Pending Order queue](pending-orders.md), or the **Balance due** box on a pickup
 ticket — Zelle and ACH both need their reference in **Transaction Number /
 Approval Code**.
+
+### Check or money order
+
+Every positive **Check/Money Order** amount needs the number printed on the
+check or money order. At **Complete Order** the **Check or Money Order Number**
+dialog asks for it; dismissing it cancels the checkout. On a counter order the
+number goes in **Transaction Number / Approval Code**.
+
+The payment is booked to the bank, the same account as Zelle and ACH. Keep the
+paper somewhere other than the cash count: the drawer's expected cash does not
+include it.
 
 ### Card approval codes on a standalone terminal
 

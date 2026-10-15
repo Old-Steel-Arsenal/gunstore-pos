@@ -187,9 +187,10 @@ To hand the gun over:
    [firearm sale](firearm-sale.md).
 3. Click **Checkout**, then **Complete Order**. If the order still owes money,
    the **Balance due on …** box opens first: pick a **Payment Method** (Cash,
-   Credit Card, Zelle or ACH), check the **Amount**, which defaults to the whole
-   balance, and click **Collect**. Credit Card runs the terminal; the other
-   methods are recorded as received. Zelle and ACH need the confirmation number
+   Credit Card, Zelle, ACH or Check/Money Order), check the **Amount**, which
+   defaults to the whole balance, and click **Collect**. Credit Card runs the
+   terminal; the other methods are recorded as received. Zelle and ACH need the
+   confirmation number, and Check/Money Order the check or money order number,
    in **Transaction Number / Approval Code**. If the card was already taken on
    the Payroc Virtual Terminal, tick **Already charged on Virtual Terminal** and
    type its approval code instead of running the terminal again. The payment

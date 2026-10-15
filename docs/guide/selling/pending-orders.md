@@ -244,9 +244,9 @@ Books a later payment against an on-account counter order. The dialog asks for:
 
 | Field | Notes |
 |---|---|
-| **Payment Method** | Cash, Credit Card, Zelle, or ACH. |
+| **Payment Method** | Cash, Credit Card, Zelle, ACH, or Check/Money Order. |
 | **Already charged on Virtual Terminal** | Appears for Credit Card on a store with the card terminal. See below. |
-| **Transaction Number / Approval Code** | Zelle or ACH: the bank or app confirmation number. A card: the approval code, never the card number. Shown only when needed. |
+| **Transaction Number / Approval Code** | Zelle or ACH: the bank or app confirmation number. Check/Money Order: the number printed on it. A card: the approval code, never the card number. Shown only when needed. |
 | **Amount** | Defaults to the outstanding balance. |
 | **Payment received on** | The day the money arrived. |
 
@@ -368,7 +368,9 @@ will happen before you agree to it:
 - cancel the invoice, which is kept as the audit trail.
 
 **Cancellation Reason** is required. When money was taken you also pick a
-**Refund Method**, and Zelle asks for its transaction number. A confirmation
+**Refund Method**. Zelle and ACH ask for the confirmation number, and
+Check/Money Order for the number of the check you write back, in **Refund
+Reference**. A confirmation
 checkbox arms the red **Cancel Order** button.
 
 A counter pickup cannot be cancelled here once its gun was handed over on a

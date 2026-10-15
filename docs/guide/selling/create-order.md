@@ -428,14 +428,15 @@ Payment is collected now, with the method you pick, unless you tick
 
 | Control | Notes |
 |---|---|
-| **Payment Method** | Cash, Credit Card, Zelle, or ACH. |
+| **Payment Method** | Cash, Credit Card, Zelle, ACH, or Check/Money Order. |
 | **Amount** | Defaults to the grand total. Type less for a deposit. Hidden while **Pay later** is ticked. |
 | **Charge via Terminal** | Appears for **Credit Card** on a store with the card terminal integration switched on. Ticked by default. |
 | **Pay later** | No payment now. The order books on account and you collect it from Pending Order. |
-| **Zelle Transaction Number** | Appears for Zelle. Required. |
+| **Zelle / ACH Transaction Number** | Appears for Zelle and ACH. Required. |
+| **Check / money order number** | Appears for Check/Money Order. Required. |
 | **Card Approval Code** | Appears for a card that is recorded rather than run on the terminal. Required. |
 
-### Cash, Zelle and ACH
+### Cash, Zelle, ACH and Check/Money Order
 
 The amount is recorded as received when the order is created. Entering less than
 the total shows a deposit note with the balance still due. If the buyer is an
@@ -507,7 +508,7 @@ list, and turns green with "Ready to create." when nothing is. Click
 1. Builds and submits a Sales Order, then a Sales Invoice derived from it.
 2. Applies destination-based sales tax, or none when the buyer is exempt, and
    the shipping charge with any tax it carries.
-3. Books the payment. A full cash, Zelle or ACH payment rides on the invoice as
+3. Books the payment. A full cash, Zelle, ACH or check payment rides on the invoice as
    a counter tender. A deposit, and every card charged on the terminal, books as
    a separate Payment Entry — the terminal payment carries the gateway's
    reference as its transaction number.
@@ -574,8 +575,9 @@ summary showing what has been paid so far and what happens on save:
 - changing the buyer refunds the whole amount to the original buyer and starts
   the new order unpaid.
 
-When a refund is due, pick a **Refund Method**. Zelle also asks for the
-transaction number. The staff order note moves up under the Money block so you
+When a refund is due, pick a **Refund Method**. Zelle and ACH also ask for the
+confirmation number, and Check/Money Order for the number of the check you
+write back, in **Refund Reference**. The staff order note moves up under the Money block so you
 can read and change it. The submit button reads **Save Changes**. Saving shows
 an **Order Updated** message naming the replacement invoice, any payment carried
 over, any refund, and any balance still to collect, then returns you to the queue.
@@ -628,7 +630,6 @@ gun over on a completed pickup ticket. Use **Cancel Order** and rebuild instead.
 | Destination FFL Address Incomplete | No street or no valid state on the record. | Open the ATF FFL Record and complete it, or verify it again. |
 | Shipping Tax Setting Changed | Someone changed **Shipping Price Includes Sales Tax** while this page was open. | Reload the page to see the correct total, then create the order. |
 | Individual orders must be paid IN FULL before shipping | You chose **Dispose & ship now** with a deposit, or with **Pay later**. | Collect the balance, or switch to **Create only — dispose later**. |
-| Enter the ACH Transaction Number to mark this order paid by ACH | The page hides the reference box for ACH, but the server requires it. | Switch **Payment Method** to Zelle to expose the box, or tick **Pay later** and collect through **Record Payment**. |
 | Required: Card approval code | A recorded card payment needs its approval code. | Type the code from the terminal or Virtual Terminal receipt. |
 | Card not charged — on account, … outstanding | The terminal declined, timed out, or the charge was cancelled. The order exists. | Click **Retry card**, or collect from Pending Order. |
 | On account — outstanding …. Terminal not configured | The card integration is switched on but no terminal device is set up. | Run the card on the Virtual Terminal, then on Pending Order use **Record Payment** with **Already charged on Virtual Terminal** ticked and the approval code. |
