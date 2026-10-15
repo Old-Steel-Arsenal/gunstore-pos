@@ -73,7 +73,8 @@ EXPECTED = {
 		"Account": {"ordering_enabled", "customer_number", "dealer_email", "dealer_password",
 			"dropship_email", "dropship_password", "base_url"},
 		"Ordering": {"disable_email", "dropship_overnight"},
-		"Status": {"shipping_polled_through", "last_shipping_poll_at", "last_error"},
+		"Status": {"shipping_polled_through", "dropship_shipping_polled_through",
+			"last_shipping_poll_at", "last_error"},
 	},
 }
 MASTER_SWITCH = {"rsr_settings": "api_enabled", "sports_south_settings": "ordering_enabled",

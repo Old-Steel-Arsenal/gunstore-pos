@@ -173,10 +173,12 @@ class TestPlacementAnswer(unittest.TestCase):
 			(2, 98.0, ""))
 		self.assertEqual((by[syn.sku(2)]["ack_qty"], by[syn.sku(2)]["item_status"]), (1, "SHORT"))
 		self.assertEqual((by[syn.sku(3)]["ack_qty"], by[syn.sku(3)]["item_status"]), (0, "CANCELLED"))
-		self.assertEqual((by[syn.sku(4)]["ack_qty"], by[syn.sku(4)]["item_status"]), (0, "CANCELLED"))
+		# not named, but Lipsey's answered for an order: counted as ordered, flagged
+		self.assertEqual((by[syn.sku(4)]["ack_qty"], by[syn.sku(4)]["item_status"]), (1, "UNCONFIRMED"))
+		self.assertTrue(any(syn.sku(4) in n and "check Lipsey's order" in n for n in res["notes"]))
 		self.assertEqual(res["freight"], 0.0)
 		self.assertEqual(res["hold_status"], "")
-		self.assertEqual(res["totals"]["subtotal"], 206.0)
+		self.assertEqual(res["totals"]["subtotal"], 306.0)
 		self.assertTrue(any("Item blocked" in n for n in res["notes"]))
 
 	def test_dropship_answer_carries_hold_and_freight(self):
@@ -335,7 +337,7 @@ if FrappeTestCase:
 			s.update({"ordering_enabled": 1, "dealer_email": "dealer@example.com",
 				"dealer_password": "pw-dealer", "dropship_email": "dropship@example.com",
 				"dropship_password": "pw-dropship", "customer_number": "",
-				"shipping_polled_through": None})
+				"shipping_polled_through": None, "dropship_shipping_polled_through": None})
 			s.save(ignore_permissions=True)
 			frappe.clear_document_cache("Lipseys Settings", "Lipseys Settings")
 			self.session = syn.FakeSession({"Authentication/Login": syn.login_ok()})
@@ -526,6 +528,27 @@ if FrappeTestCase:
 			self.assertEqual(str(frappe.db.get_single_value("Lipseys Settings",
 				"shipping_polled_through")), "2026-10-12")
 			self.assertIn("2026-10-13", frappe.db.get_single_value("Lipseys Settings", "last_error"))
+
+		def test_a_failing_dropship_login_never_stops_dealer_tracking(self):
+			refused = syn.FakeSession({"Authentication/Login": {"token": None, "econtact": syn.envelope(
+				None, success=False, authorized=False, errors=["Not authorized: dropship@example.com"])}})
+			good = self.session
+
+			def client(account="dealer"):
+				return LipseysClient(LipseysConfig(email=f"{account}@example.com", password="pw",
+					account=account, base_url="https://api.example.invalid/api/Integration"),
+					session=refused if account == "fulfillment" else good)
+
+			frappe.db.set_single_value("Lipseys Settings", "dropship_shipping_polled_through", "2026-10-12")
+			with mock.patch.object(LipseysClient, "from_settings", staticmethod(client)):
+				self._sync_day([syn.shipment("8000031", po="WEB-ORDER-2", order="7999990")])
+			get = lambda f: frappe.db.get_single_value("Lipseys Settings", f)  # noqa: E731
+			self.assertEqual(str(get("shipping_polled_through")), "2026-10-13")
+			self.assertEqual(str(get("dropship_shipping_polled_through")), "2026-10-12")
+			self.assertTrue(frappe.db.exists("Distributor Invoice", {"distributor": self.dist,
+				"invoice_number": "8000031"}))
+			self.assertIn("fulfillment login, 2026-10-13", get("last_error"))
+			self.assertNotIn("@", get("last_error"))
 
 		def test_connection_test_signs_in_with_both_logins(self):
 			self.session.routes["Items/ValidateItem"] = syn.envelope(None, success=False)

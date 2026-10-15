@@ -243,9 +243,10 @@ check an order whose answer never came back.
 shipping list Lipsey's publishes for the day before: invoice number, Lipsey's
 order number, your PO and tracking. That list lands in the Invoices view with the
 hourly invoice pull, and the order poll then marks the order shipped.
-**Shipping polled through** is the last day read and **Last shipping poll** when.
-A day that fails is read again on the next pull. **Last error** holds the last
-failure.
+**Shipping polled through** shows the last day read for each login (dealer and
+drop-ship), and **Last shipping poll** when. A day that fails is read again on the
+next pull. A login that keeps failing does not hold up the other one. **Last
+error** holds the last failure.
 
 **Buttons.** **Test Connection** on the toolbar checks the catalog service. With
 **Allow live orders** on, it also signs in with each login that is filled in and
@@ -258,8 +259,10 @@ makes one small read. It places no order.
   order number. Each keeps its own PO, and a shipment is matched to every order on
   that Lipsey's order that was placed by the invoice date.
 - The order's lines take the quantity and price Lipsey's confirmed when the order
-  was placed. A line Lipsey's could not fill is marked cancelled. Receive Goods can
-  match scanned units to the order straight away.
+  was placed. A line Lipsey's could not fill is marked cancelled. A line Lipsey's
+  answer does not name, while it did answer for an order, is counted as ordered,
+  marked **UNCONFIRMED**, and the admins are told to check it at Lipsey's. Receive
+  Goods can match scanned units to the order straight away.
 - An order whose answer never came back, after a timeout for example, goes to
   **Error** and is never re-sent by itself. Lipsey's offers no way to look an
   order up by PO, so check the confirmation email or your Lipsey's account for
