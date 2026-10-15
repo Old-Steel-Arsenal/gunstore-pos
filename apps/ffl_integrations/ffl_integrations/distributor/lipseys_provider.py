@@ -63,6 +63,10 @@ FIREARM_DROPSHIP_BLOCKED_STATES = ("CA",)
 # Line item_status values (tasks.KILLED_ITEM_STATUSES reads CANCELLED as killed).
 STATUS_CANCELLED = "CANCELLED"
 STATUS_SHORT = "SHORT"
+# A line the answer does not name although Lipsey's answered for an order: it was
+# most likely taken under another spelling of the item number, so it counts as
+# ordered (never killed while the order may ship it) and a person is told to check.
+STATUS_UNCONFIRMED = "UNCONFIRMED"
 
 HOLD_ACCOUNT = "Account hold"
 
@@ -73,6 +77,8 @@ HOLD_ACCOUNT = "Account hold"
 # earlier day is never read. Upgrade path: re-read the last day once more.
 SETTLE_HOUR = 6
 MAX_CATCHUP_DAYS = 7
+# One cursor per login: a login that keeps failing never stops the other's tracking.
+CURSOR_FIELDS = {DEALER: "shipping_polled_through", FULFILLMENT: "dropship_shipping_polled_through"}
 
 
 class LipseysProvider(RemoteCatalogMixin, DistributorProvider):
@@ -204,14 +210,14 @@ class LipseysProvider(RemoteCatalogMixin, DistributorProvider):
 	# ---------------------------------------------------------- invoices / shipping
 
 	def list_invoices(self, since: str, known=()) -> list:
-		"""The shipping rows of every settled day not read yet (OneDay, both
-		logins), one invoice each, for ``distributor.invoices``. ``since`` is not
-		used: OneDay answers per day and is asked once per day, so a cursor on
-		Lipseys Settings (*Shipping polled through*) remembers the last day read;
-		a gap is caught up for at most MAX_CATCHUP_DAYS. A failed day stops the run
-		and is asked again next run. Lines come from the matched order's placement
-		answer (Lipsey's sends no invoice lines); an invoice no POS order matches
-		has none."""
+		"""The shipping rows of every settled day not read yet (OneDay, each login
+		on its own), one invoice each, for ``distributor.invoices``. ``since`` is not
+		used: OneDay answers per day and is asked once per day, so a cursor per login
+		on Lipseys Settings (*Shipping polled through*) remembers the last day read;
+		a gap is caught up for at most MAX_CATCHUP_DAYS. A failed day stops that
+		login's run (the other login still reads) and is asked again next run. Lines
+		come from the matched order's placement answer (Lipsey's sends no invoice
+		lines); an invoice no POS order matches has none."""
 		import frappe
 		from frappe.utils import getdate, now_datetime
 
@@ -221,31 +227,35 @@ class LipseysProvider(RemoteCatalogMixin, DistributorProvider):
 		accounts = [a for a in (DEALER, FULFILLMENT) if login_configured(settings, a)]
 		if not accounts:
 			return []
-		# The DB, not the cached document: this run's cursor must be what the last
-		# run wrote.
-		polled = frappe.db.get_single_value(SETTINGS_DOCTYPE, "shipping_polled_through")
-		days = due_days(getdate(polled) if polled else None, now_datetime())
-		out, read_through = [], None
-		for day in days:
-			try:
-				rows = [(account, r) for account in accounts
-					for r in self._client(account).one_day(day)]
-			except Exception as exc:  # noqa: BLE001 — retried next run
-				_log_error(f"Lipsey's OneDay {day.isoformat()} failed")
-				frappe.db.set_single_value(SETTINGS_DOCTYPE, "last_error",
-					f"{day.isoformat()}: {exc}")
-				break
-			out.extend(group_shipments(rows, day))
-			read_through = day
+		now = now_datetime()
+		out, cursors, errors = [], {}, []
+		for account in accounts:
+			field = CURSOR_FIELDS[account]
+			# The DB, not the cached document: this run's cursor must be what the last
+			# run wrote.
+			polled = frappe.db.get_single_value(SETTINGS_DOCTYPE, field)
+			for day in due_days(getdate(polled) if polled else None, now):
+				try:
+					rows = [(account, r) for r in self._client(account).one_day(day)]
+				except Exception as exc:  # noqa: BLE001 — retried next run
+					_log_error(f"Lipsey's OneDay {day.isoformat()} failed ({account} login)")
+					errors.append(f"{account} login, {day.isoformat()}: {_mask(exc)}")
+					break
+				out.extend(group_shipments(rows, day))
+				cursors[field] = day
 		known = set(known or ())
-		# Everything that can fail is done before the cursor moves: the caller commits
-		# the cursor together with the invoices it inserts from this answer.
+		# Everything that can fail is done before a cursor moves: the caller commits
+		# the cursors together with the invoices it inserts from this answer.
 		# lazy: an invoice the caller then fails to insert (logged per row) is not read
 		# again. Upgrade path: a "re-read this day" action that rewinds the cursor.
 		invoices = [with_order_lines(inv) for inv in out if inv["invoice_number"] not in known]
-		if read_through:
-			frappe.db.set_single_value(SETTINGS_DOCTYPE, {
-				"shipping_polled_through": read_through, "last_shipping_poll_at": now_datetime()})
+		values = dict(cursors)
+		if cursors:
+			values["last_shipping_poll_at"] = now
+		if errors:
+			values["last_error"] = "; ".join(errors)
+		if values:
+			frappe.db.set_single_value(SETTINGS_DOCTYPE, values)
 		return invoices
 
 	# ---------------------------------------------------------- hub / account
@@ -286,6 +296,11 @@ def get_provider() -> LipseysProvider:
 def _log_error(title: str) -> None:
 	import frappe
 	frappe.log_error(title=title, message=frappe.get_traceback())
+
+
+def _mask(value) -> str:
+	"""Lipsey's error text lands in a Settings field: no email address in it."""
+	return re.sub(r"\S+@\S+", "<email>", str(value))
 
 
 def _unknown_outcome(po: str, exc: Exception) -> LipseysPlacementUnknown:
@@ -413,7 +428,9 @@ def normalize_placement(env: dict, lines: list, *, consumer_order: bool) -> dict
 
 	Per line, ``fulfilledQuantity`` is the acknowledged quantity and ``price`` the
 	unit cost; a line filled 0, refused (``orderError``) or missing from the
-	answer is CANCELLED, a partial fill SHORT. APIOrder answers a list of lines
+	answer is CANCELLED, a partial fill SHORT — except a line the answer does not
+	name while Lipsey's did answer for an order, which counts as ordered at the
+	wished quantity, UNCONFIRMED, for a person to check. APIOrder answers a list of lines
 	(each naming the order it joined); the drop-ship calls answer one order with
 	``lineItems``, ``accountHold`` and the freight.
 
@@ -443,6 +460,13 @@ def normalize_placement(env: dict, lines: list, *, consumer_order: bool) -> dict
 	ack, notes, subtotal = [], [], 0.0
 	for ln in lines:
 		r = by_sku.get(_key(ln["sku"]))
+		if r is None and order_numbers:
+			ack.append({"sku": ln["sku"], "ack_qty": ln["wish_qty"], "unit_cost": ln["unit_cost"],
+				"item_status": STATUS_UNCONFIRMED, "fully_filled": "Y"})
+			subtotal += ln["wish_qty"] * ln["unit_cost"]
+			notes.append(f"{ln['sku']}: not named in Lipsey's answer — counted as ordered; "
+				f"check Lipsey's order {', '.join(order_numbers)}")
+			continue
 		if r is None:
 			ack.append({"sku": ln["sku"], "ack_qty": 0, "unit_cost": ln["unit_cost"],
 				"item_status": STATUS_CANCELLED, "fully_filled": "N"})

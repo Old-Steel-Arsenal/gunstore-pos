@@ -3478,7 +3478,11 @@
           },
           "shipping_polled_through": {
             "type": "string",
-            "description": "Shipping polled through"
+            "description": "Shipping polled through (dealer)"
+          },
+          "dropship_shipping_polled_through": {
+            "type": "string",
+            "description": "Shipping polled through (drop-ship)"
           },
           "last_shipping_poll_at": {
             "type": "string",

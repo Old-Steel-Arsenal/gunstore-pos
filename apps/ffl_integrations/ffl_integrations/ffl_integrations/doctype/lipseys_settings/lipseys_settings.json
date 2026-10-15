@@ -27,6 +27,7 @@
   "tab_status",
   "section_status",
   "shipping_polled_through",
+  "dropship_shipping_polled_through",
   "column_status",
   "last_shipping_poll_at",
   "section_error",
@@ -157,7 +158,13 @@
   {
    "fieldname": "shipping_polled_through",
    "fieldtype": "Date",
-   "label": "Shipping polled through",
+   "label": "Shipping polled through (dealer)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dropship_shipping_polled_through",
+   "fieldtype": "Date",
+   "label": "Shipping polled through (drop-ship)",
    "read_only": 1
   },
   {
@@ -184,7 +191,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-10-14 12:00:00",
+ "modified": "2026-10-15 12:00:00",
  "modified_by": "Administrator",
  "module": "FFL Integrations",
  "name": "Lipseys Settings",
