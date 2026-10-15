@@ -21,6 +21,11 @@ The drawer's own opening figure does not come from this dialog. The
 [Cash Drawer](cash-drawer.md) page carries the last count forward as the next
 day's opening.
 
+<figure markdown>
+![POS Opening Entry list](../screenshots/list-pos-opening.webp){ .screenshot }
+<figcaption>Every shift the register has run, most recently created first. Yesterday's should all read Closed.</figcaption>
+</figure>
+
 ## Several clerks, one shift
 
 Only one shift runs on the register at a time, and everyone shares it. The
@@ -55,6 +60,11 @@ system counts it.
 At 23:00 store time, every shift still marked Open is closed automatically, and
 submitting each closing posts that shift's register sales. By the time anyone
 arrives the next morning the books are done.
+
+<figure markdown>
+![POS Closing Entry list](../screenshots/list-pos-closing.webp){ .screenshot }
+<figcaption>The POS Closing Entry list, shown here before any shift has closed. Once a day is closed it holds one closing per shift, newest first, with last night's at the top.</figcaption>
+</figure>
 
 Three details worth knowing:
 

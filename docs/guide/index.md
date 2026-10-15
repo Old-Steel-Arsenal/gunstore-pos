@@ -2,6 +2,11 @@
 
 This guide is for the people who run an FFL gun shop on OpenGunstore: counter staff, inventory staff, managers and the bookkeeper. It assumes retail experience and no knowledge of ERPNext or Frappe.
 
+<figure markdown>
+![The Dashboard](screenshots/page-dashboard.webp){ .screenshot }
+<figcaption>The Dashboard is where every day starts.</figcaption>
+</figure>
+
 Pick the section that matches your job.
 
 | Section | For | What it covers |

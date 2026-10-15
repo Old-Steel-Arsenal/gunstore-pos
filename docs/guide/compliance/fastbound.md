@@ -4,6 +4,11 @@ FastBound holds the electronic bound book. This system writes to it whenever a
 gun is received or leaves, and reads back from it when a Form 4473 completes. A
 manager owns the settings; counter staff meet it through failure messages.
 
+<figure markdown>
+![FastBound Settings](../screenshots/settings-fastbound.webp){ .screenshot }
+<figcaption>The connection form. Test Connection sits on the toolbar, the other two buttons under the FastBound menu beside it. All three depend on Enable FastBound.</figcaption>
+</figure>
+
 ## What syncs
 
 **Out of this system, automatically:**
@@ -238,6 +243,11 @@ Both calls are written to the Connector Audit Log with your user.
 Both tools live on the [Firearms In Stock](daily-checks.md#4-firearms-in-stock-against-fastbound)
 report, under **Compliance → Firearms in stock** in the sidebar. It opens for
 Stock User, Stock Manager and System Manager.
+
+<figure markdown>
+![Firearms In Stock](../screenshots/report-firearms-in-stock.webp){ .screenshot }
+<figcaption>Both comparison tools sit on this report toolbar, not on a settings page. Location shows where each gun sits in the store.</figcaption>
+</figure>
 
 ### Check FastBound differences
 

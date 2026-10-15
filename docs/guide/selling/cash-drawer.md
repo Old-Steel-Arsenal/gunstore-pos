@@ -5,6 +5,11 @@ day, records cash taken to or from the bank, and pays small expenses out of the
 till. Counter staff use it every day. Managers use it to undo a mistake and to
 settle what private sellers are owed.
 
+<figure markdown>
+![The Cash Drawer page](../screenshots/page-cash-drawer.webp){ .screenshot }
+<figcaption>What the drawer should hold, the four buttons, and every cash movement since the last count.</figcaption>
+</figure>
+
 ## Before you start
 
 - Open it from **Cash drawer** in the sidebar's **Sales** group, or from the
@@ -160,6 +165,11 @@ accountant.
 
 ## The Log tab
 
+<figure markdown>
+![The Cash Drawer log](../screenshots/page-cash-drawer-log.webp){ .screenshot }
+<figcaption>Every cash movement for the dates chosen, with who did it and the balance after each line.</figcaption>
+</figure>
+
 The **Log** tab lists every cash movement between **From** and **To**, oldest
 first: **When**, **What**, **Details**, **By**, **In**, **Out** and the running
 **Balance**. It starts from the books' **Opening balance (books)** and ends with
@@ -181,6 +191,11 @@ count, the difference and its reason. A day whose difference needed a reason
 shows red. Open it from [All records](../getting-started/dashboard.md#all-records)
 on the Dashboard. It needs **Sales Manager**, **Accounts User**, **Accounts
 Manager** or **System Manager**.
+
+<figure markdown>
+![Cash Drawer Weekly](../screenshots/report-cash-drawer-weekly.webp){ .screenshot }
+<figcaption>One line per day. The lines at the foot prove the days add up to the cash account.</figcaption>
+</figure>
 
 The lines at the foot are the check. **Daily lines add up to** must equal **Cash
 ledger movement**, and the **Difference** under them must read 0.00.

@@ -2,6 +2,11 @@
 
 This form holds the store's own compliance configuration: who you are, how 4473s are handled, how customer ID numbers are kept, and how other FFLs get verified. System Manager only. Open it from the **FFL & Compliance** card on the [Settings workspace](index.md), or at `/app/ffl-settings`.
 
+<figure markdown>
+![FFL Settings](../screenshots/settings-ffl.webp){ .screenshot }
+<figcaption>Four tabs: Store, Compliance, FFL Verification, Subsystems.</figcaption>
+</figure>
+
 The form has three tabs: Store, Compliance and FFL Verification.
 
 !!! warning "These fields change how the counter behaves"

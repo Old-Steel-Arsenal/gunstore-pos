@@ -62,6 +62,11 @@ Both values live in [FFL Settings](../settings/ffl-settings.md), on the
 | **Transfer Fee Item** | The service item charged for a customer transfer-in 4473. It is a non-stock, non-firearm service item, created automatically the first time the transfer dialog is used. |
 | **Default Transfer Fee** | The per-firearm amount put on a transfer ticket. Editable on each sale. |
 
+<figure markdown>
+![FFL Settings, Compliance tab](../screenshots/settings-ffl-compliance.webp){ .screenshot }
+<figcaption>The Compliance tab holds the transfer fee item and the default amount.</figcaption>
+</figure>
+
 ## Pending Transfer Pickups
 
 Guns received for a customer sit in the safe until somebody comes for them.

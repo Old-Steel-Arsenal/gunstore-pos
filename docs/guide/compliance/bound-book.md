@@ -39,9 +39,19 @@ Dispositions open for Stock User, Stock Manager and System Manager only.
 Creating one by hand is for the rare case a routine path cannot reach, and the
 forms refuse several shapes outright to keep that honest.
 
+<figure markdown>
+![The FFL Acquisition list](../screenshots/list-ffl-acquisition.webp){ .screenshot }
+<figcaption>Every gun the store has received. One row is one physical firearm.</figcaption>
+</figure>
+
 ## FFL Acquisition
 
 The A side. One record per physical gun received, named `ACQ-<year>-<number>`.
+
+<figure markdown>
+![An FFL Acquisition](../screenshots/ffl-acquisition-form.webp){ .screenshot }
+<figcaption>One acquisition: when the gun arrived, who it came from, and which serial it names.</figcaption>
+</figure>
 
 ### Acquisition
 
@@ -94,6 +104,11 @@ and creating a replacement that names the original.
 ## FFL Disposition
 
 The D side. One record per gun leaving, named `DISP-<year>-<number>`.
+
+<figure markdown>
+![An FFL Disposition](../screenshots/ffl-disposition-form.webp){ .screenshot }
+<figcaption>One disposition: the type, the destination FFL and the serial that left. The 4473 and NICS fields sit below on a retail sale.</figcaption>
+</figure>
 
 ### Disposition Type
 
@@ -190,6 +205,11 @@ dealer up with **Lookup FFL via ATF** before submitting.
 | `Destination FFL number is required for <type> disposition.` | Pick or look up the receiving dealer. |
 | `<type> disposition requires both destruction witnesses` | Fill in Witness 1 and Witness 2. |
 | `A manual-override disposition requires an Override Reason.` | Say why. |
+
+<figure markdown>
+![The FFL Disposition list](../screenshots/list-ffl-disposition.webp){ .screenshot }
+<figcaption>Every gun booked out, with the disposition type that took it out.</figcaption>
+</figure>
 
 ## Antique firearms
 

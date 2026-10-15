@@ -130,6 +130,11 @@ reference and the Payment Entry it booked. Nothing in it is typed by hand. The
 list opens from **Card payments** in the sidebar's **Sales** group, which shows
 only while the Payroc terminal is switched on.
 
+<figure markdown>
+![Card payments](../screenshots/list-card-payments.webp){ .screenshot }
+<figcaption>Every terminal attempt on a counter order: the invoice, the amount, the status and the Payroc reference.</figcaption>
+</figure>
+
 A refund of a card payment taken this way is issued in the Payroc portal, and
 the accounting side is reversed with **Cancel Order** or an order edit on
 Pending Order.
@@ -230,6 +235,11 @@ range, counter and web alike and matched to the POS, comes through the
 
 ## The Payments hub
 
+<figure markdown>
+![The Payments hub](../screenshots/page-payment-hub.webp){ .screenshot }
+<figcaption>One card per card processor. This one is switched on and holds its key, so it reads ready, with when its token was refreshed and its last charge.</figcaption>
+</figure>
+
 Open **Payments (Credit Card)** from the Settings workspace, or go to
 `/desk/payment-hub`. It is **System Manager** only, because the switch on it arms
 live money movement.
@@ -246,6 +256,11 @@ Each processor card shows:
   found, including how many terminals the key is allowed to use and which
   terminal is set as the default.
 - A link into the processor's own settings, where the credentials live.
+
+<figure markdown>
+![Payroc Settings](../screenshots/settings-payroc.webp){ .screenshot }
+<figcaption>Credentials stay in Payroc Settings, not in the hub.</figcaption>
+</figure>
 
 Switching a processor off is always allowed. Switching one on goes through the
 normal settings save, so a store cannot arm a processor it has no key for. With

@@ -26,6 +26,11 @@ This page covers taking a customer's gun in part-exchange at the register, or bu
 11. If you unticked it, pick **Seller is paid by** (Cash, Zelle, Check or ACH; Cash is the default). For anything but Cash, type the **Payment reference**: the check number, Zelle confirmation or ACH reference.
 12. Click **Submit Trade-in**.
 
+<figure markdown>
+![The Trade-in dialog](../screenshots/dialog-trade-in.webp){ .screenshot }
+<figcaption>Seller, ID and firearm details, the storage location, and the choice between a credit and paying the seller now.</figcaption>
+</figure>
+
 ## Apply as credit, or pay the seller now
 
 **Apply as credit to this sale** ticked is the ordinary counter case. The allowance comes off this ticket, reducing both the total and the tax base.
@@ -46,6 +51,11 @@ Running the dialog again for a serial that already has a pending credit draft re
 ## Trade-ins worth more than the sale
 
 When the trade-in credits come to more than what the customer is buying, the whole deal stays on one ticket and the store pays the customer the difference.
+
+<figure markdown>
+![Store pays customer](../screenshots/pos-store-pays-customer.webp){ .screenshot }
+<figcaption>The payment screen of a ticket the store pays out on. There is nothing to tender.</figcaption>
+</figure>
 
 1. Add the goods and run **Trade-in** with **Apply as credit to this sale** ticked, as usual.
 2. Go to payment. Instead of the tender tiles, the screen shows **Store pays customer** and the amount. There is nothing to tender.

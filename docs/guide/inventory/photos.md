@@ -2,6 +2,11 @@
 
 Photos live in two places: the Item, for shots of the model, and each Serial No, for shots of that particular gun. Whoever prices and lists stock usually does this.
 
+<figure markdown>
+![Upload Photos by Serial](../screenshots/page-serial-photos.webp){ .screenshot }
+<figcaption>The page opens empty. Pick an Item and every serial under it gets its own card and drop zone.</figcaption>
+</figure>
+
 ## Before you start
 
 - Save the form first. Photo actions write to the document directly, so the buttons are disabled while a form is new or has unsaved edits. The hint under the drop zone says which one it is.

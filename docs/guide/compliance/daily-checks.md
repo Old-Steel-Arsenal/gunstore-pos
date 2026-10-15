@@ -53,6 +53,11 @@ The morning call list. Every draft order carrying a regulated firearm, oldest
 first. It is not in the sidebar: open it from the Dashboard under **All records
 → Compliance → Pending 4473 orders**.
 
+<figure markdown>
+![Pending 4473 Orders](../screenshots/report-pending-4473.webp){ .screenshot }
+<figcaption>The morning call list. The NICS cell carries the color: red for Denied, orange for Delayed, green for Proceed.</figcaption>
+</figure>
+
 Work it in three passes:
 
 1. **Denied.** The NICS cell is red. The sale cannot go ahead. A manager refunds
@@ -83,6 +88,11 @@ Customers' guns sitting in the safe, oldest first. Every row is somebody else's
 property that the store is holding. Open it from the sidebar under **Compliance
 → Transfer pickups**. Counter accounts with the Sales User role can open it.
 
+<figure markdown>
+![Pending Transfer Pickups](../screenshots/report-pending-transfer-pickups.webp){ .screenshot }
+<figcaption>Somebody else's property, oldest first. Start at the top.</figcaption>
+</figure>
+
 | Column | Use |
 |---|---|
 | **Acquisition** | The bound-book record. |
@@ -108,6 +118,11 @@ Filter by **Customer** when somebody rings you.
 Every bound-book disposition somebody asserted rather than one FastBound
 committed. Two things land here: a manager's 4473 override, and a paper 4473
 recorded at the counter.
+
+<figure markdown>
+![Hand-Asserted 4473 Dispositions](../screenshots/report-hand-asserted-4473.webp){ .screenshot }
+<figcaption>Newest first, no filters. The Reason column carries the whole story, and FastBound ID sits at the far right.</figcaption>
+</figure>
 
 The columns are Asserted On, Disposition, Serial, Type, Invoice, Asserted By,
 Reason and FastBound ID. Newest first, capped at 500 rows. There are no filters.
@@ -139,6 +154,11 @@ Read each new row and ask three questions:
 ## 4. Firearms In Stock against FastBound
 
 The two books have to agree about what is on the rack and what each gun is.
+
+<figure markdown>
+![Firearms In Stock](../screenshots/report-firearms-in-stock.webp){ .screenshot }
+<figcaption>The report opened on its filter bar, with Location before Acquired and the FastBound link as the last column. A dash in that column is itself a finding.</figcaption>
+</figure>
 
 Open it from the sidebar under **Compliance → Firearms in stock**. It opens for
 Stock User, Stock Manager and System Manager.
