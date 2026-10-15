@@ -2,6 +2,11 @@
 
 The Sales Report shows revenue and profit for a date range, across every channel. Managers read it daily, and the bookkeeper reads it at [month end](month-end.md). Open it at `/app/query-report/Sales Report`.
 
+<figure markdown>
+![The Sales Report](../screenshots/report-sales.webp){ .screenshot }
+<figcaption>Orders view: the filter bar, five summary cards, then one row per sale.</figcaption>
+</figure>
+
 The Orders view opens with the filter bar, five summary cards, then one row per sale.
 
 ## What it counts

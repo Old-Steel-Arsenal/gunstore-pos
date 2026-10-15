@@ -23,6 +23,11 @@ and **Track Orders** for everything already ordered.
 
 ## New Order
 
+<figure markdown>
+![The New Order tab of Distributor Orders](../screenshots/page-distributor-orders.webp){ .screenshot }
+<figcaption>One search across every enabled house. Each cart line shows the house it will be ordered from.</figcaption>
+</figure>
+
 The tab runs down the screen: **Search Catalog**, then **Cart**. A third
 section, **Created Orders**, appears once you have made some.
 
@@ -77,6 +82,11 @@ them and try again.
 
 ### Orders
 
+<figure markdown>
+![The Track Orders tab of Distributor Orders](../screenshots/page-distributor-orders-track.webp){ .screenshot }
+<figcaption>Every open distributor order, whatever it is for, with what has shipped and arrived.</figcaption>
+</figure>
+
 Every distributor order is here: stocking orders and ship-to-store orders for a
 customer. Filter by house, by type, and by status. The
 status box starts on **Open**.
@@ -105,6 +115,11 @@ website or a phone call. Only a house that can list its orders appears here
 status.
 
 ### Invoices
+
+<figure markdown>
+![The Invoices view of Track Orders](../screenshots/page-distributor-orders-invoices.webp){ .screenshot }
+<figcaption>Every invoice on each distributor account, matched to a POS order or marked Outside POS.</figcaption>
+</figure>
 
 Every invoice on each distributor account from the last 30 days, whoever placed
 the order. The invoices are pulled from each house every hour. **Pull invoices

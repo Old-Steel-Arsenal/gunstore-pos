@@ -17,6 +17,11 @@ last-error fields live.
 `/app/fastbound-settings`. Connects to FastBound, the electronic bound book
 and the place 4473s are completed. See [FastBound](../compliance/fastbound.md).
 
+<figure markdown>
+![FastBound Settings](../screenshots/settings-fastbound.webp){ .screenshot }
+<figcaption>Three tabs: Connection, Status, Advanced.</figcaption>
+</figure>
+
 **Connection tab.** **Enable FastBound** is the master switch. Turn it off and
 A&D records are kept locally only, and firearm sales then need Paper 4473 Mode
 in [FFL Settings](ffl-settings.md), with open tills reloaded. **Account number**
@@ -44,6 +49,11 @@ pulls items in.
 
 `/app/payroc-settings`. Connects to the Payroc card gateway and the physical
 terminal at the counter. See [Taking payment](../selling/payments.md).
+
+<figure markdown>
+![Payroc Settings](../screenshots/settings-payroc.webp){ .screenshot }
+<figcaption>Credentials at the top, Advanced below it. The two read-only Status fields follow further down the form.</figcaption>
+</figure>
 
 **Credentials.** **Enable Payroc Terminal Integration** is the master switch.
 Untick it to run without the integrated terminal, in which case cards are swiped
@@ -103,6 +113,11 @@ indicator** and **Order email**.
 **Freight tab.** The rates the Create Order fulfillment plan estimates RSR
 freight with. The freight RSR invoices always replaces the estimate.
 
+<figure markdown>
+![RSR Settings, Freight tab](../screenshots/settings-rsr-freight.webp){ .screenshot }
+<figcaption>The Freight tab: the ship-to-store rule on the left, the rates and the signature fee on the right.</figcaption>
+</figure>
+
 Tick **Free freight on ship-to-store orders** when your RSR account ships to the
 store at no charge, and orders to the store then estimate at nothing. Otherwise
 an order to the store ships free when its merchandise is above **Store orders
@@ -129,6 +144,11 @@ South's ordering services. It holds the account, what goes out with each order,
 where orders to the store ship, and the freight rates. The catalog reaches the
 store through Data Service. The page has four tabs: Account, Ordering, Freight
 and Status.
+
+<figure markdown>
+![Sports South Settings](../screenshots/settings-sports-south.webp){ .screenshot }
+<figcaption>The Account tab, with Advanced collapsed under the account fields.</figcaption>
+</figure>
 
 **Account tab.** **Allow live orders** is the master switch, off by default.
 While it is off nothing is sent to Sports South's ordering API, and the catalog
@@ -172,6 +192,11 @@ destination instead. It is never mixed with the company address, so an override
 needs at least **Address line 1**, **City**, **State** as two letters, and
 **ZIP**. If the address in use is incomplete, placing the order fails with an
 error rather than shipping somewhere unverified.
+
+<figure markdown>
+![Sports South ship-to address override](../screenshots/settings-sports-south-ship-to.webp){ .screenshot }
+<figcaption>On the Ordering tab. Left blank, as here, store orders ship to the company address.</figcaption>
+</figure>
 
 **Freight tab.** Estimates only. The freight on Sports South's invoice replaces
 them once the parcel ships. The first section holds one flat rate per service,
@@ -280,6 +305,11 @@ The first and last appear in the **Error** field of a Lipsey's Distributor Order
 tracking. See [Web orders](../channels/web-orders.md) and
 [The Pending Order queue](../selling/pending-orders.md).
 
+<figure markdown>
+![ShipStation Settings](../screenshots/settings-shipstation.webp){ .screenshot }
+<figcaption>Status, credentials and shipping defaults.</figcaption>
+</figure>
+
 **Status.** **Enabled** is the master switch for the Pending Order page's Ship
 button. Leave it off until the credentials pass Test Connection. **Sandbox
 Mode** points at the test host.
@@ -301,6 +331,11 @@ alert email.
 
 `/app/gunbroker-settings`. Connects to the GunBroker marketplace for listings
 and orders. See [GunBroker](../channels/gunbroker.md).
+
+<figure markdown>
+![GunBroker Settings](../screenshots/settings-gunbroker.webp){ .screenshot }
+<figcaption>Four tabs: Connection, Listings, Accounting and Advanced. Status is a section on the Connection tab.</figcaption>
+</figure>
 
 **Connection.** **Enable GunBroker** is the master switch and is off by default,
 so nothing is sent or read while it is off, and the **GunBroker orders** row
@@ -349,6 +384,11 @@ switched off".
 
 `/app/woocommerce-settings`. Connects to the retail online store. See
 [WooCommerce](../channels/woocommerce.md).
+
+<figure markdown>
+![WooCommerce Settings](../screenshots/settings-woocommerce.webp){ .screenshot }
+<figcaption>Connection, Sync and Status tabs.</figcaption>
+</figure>
 
 **Connection tab.** **Store URL** must be secure and carry no trailing slash.
 **Consumer key** and **Consumer secret** come from the store's own Settings,
@@ -421,3 +461,8 @@ linked, an orange banner at the top of the form says how many.
 enabled distributor and shows one line per house. Under **Categories**, **Run
 category mirror** runs the mirror now in its current mode. Its report lands on
 the Categories tab.
+
+<figure markdown>
+![Data Service Settings, Categories tab](../screenshots/settings-data-service-categories.webp){ .screenshot }
+<figcaption>The Categories tab: the mirror's mode, its last run and its report.</figcaption>
+</figure>

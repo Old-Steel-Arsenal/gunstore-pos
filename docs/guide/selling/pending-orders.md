@@ -7,6 +7,11 @@ from **Orders** under **Sales** in the
 [sidebar](../getting-started/dashboard.md#the-sidebar); the page itself is titled
 **Pending Order**. The address is `/desk/pending-dispositions`.
 
+<figure markdown>
+![The Pending Order queue](../screenshots/page-pending-order.webp){ .screenshot }
+<figcaption>Filter chips and search on top, then the orders grouped by what has to happen next. Each card carries only the buttons that order is allowed.</figcaption>
+</figure>
+
 ## Before you start
 
 - You need one of these roles: Sales User, Sales Manager, Stock Manager, or

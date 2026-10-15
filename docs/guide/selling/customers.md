@@ -38,6 +38,11 @@ Documents** on the customer's Profile tab.
 
 ## The Profile tab
 
+<figure markdown>
+![A customer's Profile tab](../screenshots/customer-profile.webp){ .screenshot }
+<figcaption>Status, alerts, identification and family on one tab.</figcaption>
+</figure>
+
 Open a customer and click **Profile**, the tab after the first one.
 
 | Section | What it holds |
@@ -101,6 +106,11 @@ manager sets it with **Store Customer ID Numbers** in
 
 When one person has two customer records, a manager merges the duplicate into
 the one to keep.
+
+<figure markdown>
+![Merge into dialog](../screenshots/dialog-customer-merge.webp){ .screenshot }
+<figcaption>Pick the customer to keep. The record you started from is the one that goes away.</figcaption>
+</figure>
 
 1. Open the **duplicate**, the record that should go away.
 2. Click **Actions**, then **Merge into…**.

@@ -37,3 +37,8 @@ Non-firearm stock works the ordinary way. Ammunition, holsters, cleaning kits an
 ## Item groups
 
 The item group decides whether an item is a firearm. Firearms are filed under **Firearm**: Pistol, Revolver, Rifle, Shotgun, Other Firearm and Receiver, plus the **NFA** group for suppressors, SBRs, SBSs and the other NFA classes. Gun parts such as uppers, barrels and triggers go under **Parts** and are not firearms. Accessories and ammunition have their own groups. New and used guns share the same groups: the **Used** tick on the item marks a used model. The full list is on [Items and serials](items-and-serials.md#item-groups).
+
+<figure markdown>
+![The Item list](../screenshots/list-item.webp){ .screenshot }
+<figcaption>One row per model. The Firearm tick box at the top filters the list down to guns.</figcaption>
+</figure>

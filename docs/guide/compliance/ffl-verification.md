@@ -5,6 +5,11 @@ license is on file, verified and unexpired. This is how you get it there. A C&R
 (Type 03) collector is the one exception to the live check, because the ATF
 directory lists no collectors. See [C&R (Type 03) collectors](#cr-type-03-collectors).
 
+<figure markdown>
+![The ATF FFL Record list](../screenshots/list-atf-ffl-record.webp){ .screenshot }
+<figcaption>Every license the store has looked up, cached locally and searchable by number.</figcaption>
+</figure>
+
 ## The ATF FFL Record library
 
 Every license the store has looked up is cached locally as an **ATF FFL Record**.
@@ -15,6 +20,11 @@ The record is named by the FFL number itself, and carries **License Type**,
 A **Provenance** section records where it came from: **Loaded From**,
 **Loaded At** and **Live-Verified At**. A record loaded in bulk from the ATF's
 published list has never been checked live, and its Live-Verified At is empty.
+
+<figure markdown>
+![An ATF FFL Record](../screenshots/atf-ffl-record-form.webp){ .screenshot }
+<figcaption>One cached license. Provenance records where it was loaded from and when. Live-Verified At shows only once the record has been checked live.</figcaption>
+</figure>
 
 The library is the destination side of a transfer. A
 [disposition](bound-book.md) picks its **Destination FFL** from here.
@@ -52,10 +62,20 @@ already carries that FFL number the button opens that one instead and says so:
 A dealer customer is also created for you when you pick **Business (FFL)** as
 the buyer on [Create Order](../selling/create-order.md) and enter their license.
 
+<figure markdown>
+![The Customer list](../screenshots/list-customer.webp){ .screenshot }
+<figcaption>The Customer list. Its own ATF FFL Record box filters it down to the dealers created from a license. A Banned, Inactive or Prospect customer carries a colored status.</figcaption>
+</figure>
+
 ## Search ATF and Verify FFL
 
 Both the Customer form and the Supplier form carry an **FFL** button group. It
 appears only when **Is FFL Dealer** is ticked, so tick it and save first.
+
+<figure markdown>
+![The Customer form](../screenshots/customer-form.webp){ .screenshot }
+<figcaption>A new Customer, before Is FFL Dealer is ticked. Tick it inside the FFL Dealer section and save, and the FFL button group appears on the toolbar. The Profile tab is covered on Customers.</figcaption>
+</figure>
 
 ### Search ATF
 

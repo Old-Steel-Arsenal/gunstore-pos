@@ -70,3 +70,8 @@ Stock User, Stock Manager and System Manager only.
 | Run a customer transfer-in | [Transfers](../selling/transfers.md) |
 | Change compliance settings | [FFL Settings](../settings/ffl-settings.md) |
 
+<figure markdown>
+![FFL Settings, Compliance tab](../screenshots/settings-ffl-compliance.webp){ .screenshot }
+<figcaption>Compliance behavior starts here: Paper 4473 Mode, the customer transfer fee, and whether customer ID numbers are kept.</figcaption>
+</figure>
+

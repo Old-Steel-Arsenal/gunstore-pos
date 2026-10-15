@@ -25,6 +25,11 @@ The addresses in your browser start with `/desk/`. Older links that start with
 
 ## The Dashboard and the sidebar
 
+<figure markdown>
+![The Dashboard](../screenshots/page-dashboard.webp){ .screenshot }
+<figcaption>The Dashboard: what is waiting today, with the sidebar on the left.</figcaption>
+</figure>
+
 The Dashboard shows today's sales, the firearm orders waiting on a 4473, the
 transfer guns waiting for their owners, the cash drawer, the bound book and
 distributor orders on the way. Its buttons open the register, a new order,
@@ -54,6 +59,11 @@ shows in the app only and nothing is emailed. See
 [Notifications](dashboard.md#notifications) for who gets which.
 
 ## The Settings workspace
+
+<figure markdown>
+![The Settings workspace](../screenshots/settings-workspace.webp){ .screenshot }
+<figcaption>Integrations on top, configuration lists below.</figcaption>
+</figure>
 
 Settings is the manager's workspace. Open it from **Settings** at the bottom of
 the sidebar. Under **Integrations** it holds shortcuts to **Payments (Credit

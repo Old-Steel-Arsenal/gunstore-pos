@@ -24,6 +24,11 @@ to pull the signed PDF.
 3. Narrow it with the filters: **From Date**, **To Date**, **Customer**,
    **Serial** (part of a serial is enough), **NICS Status** and **Source**.
 
+<figure markdown>
+![Form 4473 Records](../screenshots/report-4473-records.webp){ .screenshot }
+<figcaption>Every completed 4473, newest first. Order Status says what became of the sale since; View PDF opens the signed form.</figcaption>
+</figure>
+
 | Column | What it shows |
 |---|---|
 | **Completed On** | When the 4473 was completed. |

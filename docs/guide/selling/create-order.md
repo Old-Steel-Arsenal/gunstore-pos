@@ -13,6 +13,11 @@ Open it from **Create order** under **Sales** in the
 at the top of the [Dashboard](../getting-started/dashboard.md). The address is
 `/desk/create-order`.
 
+<figure markdown>
+![The Create Order page](../screenshots/page-create-order.webp){ .screenshot }
+<figcaption>Create Order runs top to bottom. Buyer type first, then the buyer, the ship-to and the items, with payment and fulfillment below the fold.</figcaption>
+</figure>
+
 ## Before you start
 
 - You need one of these roles: Sales User, Sales Manager, Stock Manager, or
@@ -101,6 +106,11 @@ a street and a valid state, because the state is what decides sales tax.
 A licensed collector may receive a curio or relic at the premises on their own
 C&R license. The ATF directory holds no Type 03 licenses, so **Verify FFL** and
 **Lookup by FFL #** can never find one. You read the license copy and type it in.
+
+<figure markdown>
+![The C&R block in Destination FFL](../screenshots/page-create-order-cnr.webp){ .screenshot }
+<figcaption>With the C&R box ticked, the lookup buttons give way to the fields read off the license copy.</figcaption>
+</figure>
 
 1. Tick **C&R (Type 03) — ships to the collector's own license** at the top of
    the section. The lookup buttons hide and the C&R fields appear.
@@ -411,6 +421,11 @@ deposit, or before anything is paid, because the goods come to your own shelf.
 Payment is collected now, with the method you pick, unless you tick
 **Pay later**.
 
+<figure markdown>
+![The Payment section with Charge exactly above it](../screenshots/page-create-order-payment.webp){ .screenshot }
+<figcaption>Charge exactly sits under the total. On a store with the card terminal, Credit Card adds Charge via Terminal.</figcaption>
+</figure>
+
 | Control | Notes |
 |---|---|
 | **Payment Method** | Cash, Credit Card, Zelle, or ACH. |
@@ -515,6 +530,11 @@ The **Order Created** dialog then links the Sales Order and the Sales Invoice,
 states what was paid or left outstanding, and says whether the order was disposed
 or queued. **Print Invoice** opens the invoice print view in a new tab. After a
 terminal charge that did not go through, **Retry card** sits beside it.
+
+<figure markdown>
+![The Sales Invoice list](../screenshots/list-sales-invoice.webp){ .screenshot }
+<figcaption>Orders built here land as Sales Invoices. The list filters on Destination FFL and FFL Buyer Type.</figcaption>
+</figure>
 
 !!! danger "Dispose is a bound book entry"
     Disposing books the transfer in the bound book and sends it to FastBound.

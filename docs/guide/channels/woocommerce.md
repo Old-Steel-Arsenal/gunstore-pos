@@ -8,6 +8,11 @@ Inventory staff put stock on the web store from the POS. The buttons belong to S
 - The record needs a price. A gun with no sell price and a model with no selling price are both refused.
 - Photos belong on the record before you push. See [Photos](../inventory/photos.md).
 
+<figure markdown>
+![WooCommerce Settings](../screenshots/settings-woocommerce.webp){ .screenshot }
+<figcaption>The Connection tab: the store address, the REST API pair, the webhook secret and the outbound status webhook secret. Enable sync, the category switch and the status fields sit on the two tabs beside it.</figcaption>
+</figure>
+
 The WooCommerce Settings form has three tabs. The Connection tab holds the store address, the REST API pair, the webhook secret and the outbound status webhook secret. Enable sync, the category switch and the reconcile frequency sit on the Sync tab. See [Integration settings](../settings/integrations.md#woocommerce-settings).
 
 ## A model, or one specific gun
@@ -36,6 +41,11 @@ Gun parts (uppers, barrels, triggers, lower parts and the like) are regular item
 Delisting is not a deletion. The product stays in WordPress as a draft at stock 0, and the POS records the take-down so no automatic job puts it back. A delisted record shows an orange **Delisted from WooCommerce** indicator at the top of the form. Only a person pressing **Send to WooCommerce** again puts that record back on sale.
 
 ## What the store pulls
+
+<figure markdown>
+![Channel fields on the Item form](../screenshots/item-firearm-channels.webp){ .screenshot }
+<figcaption>The Item form's Channels tab. The WooCommerce section, collapsed here, records the product id, the listed flag, the last sync and the last error.</figcaption>
+</figure>
 
 The Item form's Channels tab has a collapsed WooCommerce section. It records the product id, the listed flag, the last sync and the last error.
 

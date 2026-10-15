@@ -8,11 +8,21 @@ GunBroker is the third sales channel, alongside the [web store](woocommerce.md) 
 - **Sandbox mode** decides which market you are on. With it off, a listing is a real offer to a real buyer, and a seller cannot cancel a completed sale.
 - Every listing needs a category, and a gun needs a shipping rate unless you list it with free shipping. A missing one is refused rather than guessed.
 
+<figure markdown>
+![GunBroker Settings](../screenshots/settings-gunbroker.webp){ .screenshot }
+<figcaption>GunBroker Settings has four tabs: Connection, Listings, Accounting and Advanced.</figcaption>
+</figure>
+
 GunBroker Settings has four tabs: Connection, Listings, Accounting and Advanced. See [Integration settings](../settings/integrations.md#gunbroker-settings).
 
 ## Listing one gun
 
 Open the Serial No and use the **GunBroker** button group. The buttons appear only on a per-serial firearm. A uniform-priced firearm cannot be listed here at all. Per-gun channel actions live on the Serial No form's toolbar, to the right of Sync with FastBound. The GunBroker group joins them once GunBroker is enabled.
+
+<figure markdown>
+![The Serial No form](../screenshots/serial-no-form.webp){ .screenshot }
+<figcaption>Per-gun channel actions live on this form's toolbar, to the right of Sync with FastBound. The GunBroker group joins them once GunBroker is enabled.</figcaption>
+</figure>
 
 ### Send to GunBroker
 
@@ -33,6 +43,11 @@ Pressing **Send to GunBroker** opens a dialog. Everything about the listing is d
 | **Shipping cost (buyer pays)** | The gun's own rate, or the store default for its type | Required unless free shipping is ticked. A different figure is saved on this gun and used from then on |
 
 **Category** is read-only when there is only one choice. An antique, and a gun of a type the category map files under Curios & Relics by age, always list under their mapped category, so the dialog offers no other. A modern gun is never offered an antique or C&R category. When the gun does not list, the model's category is put back as it was. When it does, the change is noted on the Item, because it moves every gun of that model.
+
+<figure markdown>
+![The Send to GunBroker dialog](../screenshots/dialog-send-to-gunbroker.webp){ .screenshot }
+<figcaption>Send to GunBroker on a fixed-price gun: title, listing type, category, price, and the free shipping box above the shipping cost.</figcaption>
+</figure>
 
 Press **Send**. On success you see the GunBroker item number. If the gun was already listed there, the message says so and links the existing listing rather than creating a second one.
 

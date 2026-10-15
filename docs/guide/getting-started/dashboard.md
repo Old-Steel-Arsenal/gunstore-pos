@@ -5,6 +5,11 @@ someone today: open 4473s, transfer guns waiting for their owner, the cash
 drawer, the bound book and distributor orders on the way. The sidebar on the
 left and **All records** at the foot of the page reach everything else.
 
+<figure markdown>
+![The Dashboard](../screenshots/page-dashboard.webp){ .screenshot }
+<figcaption>Today's figures across the top, the 4473 and pickup lists on the left, the drawer, the bound book and arriving orders on the right.</figcaption>
+</figure>
+
 ## Getting here
 
 The Dashboard opens by itself when you sign in. Its address is
@@ -130,6 +135,11 @@ come. Once part of an order has come in, the row shows a bar of units received.
 
 ## All records
 
+<figure markdown>
+![All records on the Dashboard](../screenshots/page-dashboard-all-records.webp){ .screenshot }
+<figcaption>Every list, report and setting, grouped. Type in Filter… to narrow it.</figcaption>
+</figure>
+
 At the foot of the page, **All records** lists every list, report and setting
 your login can open, in groups: **Sales**, **Compliance**, **Purchasing**,
 **Inventory**, **Customers**, **Online** (while a web store or GunBroker is
@@ -141,6 +151,11 @@ Reports and lists that have no place in the sidebar live here, for example
 **POS opening entries** and **FFL settings**.
 
 ## The sidebar
+
+<figure markdown>
+![The Gun Shop sidebar](../screenshots/sidebar-gun-shop.webp){ .screenshot }
+<figcaption>The sidebar every Gun Shop page shares.</figcaption>
+</figure>
 
 The sidebar on the left is the way around. It is the same on every Gun Shop
 page.
@@ -172,6 +187,11 @@ foot of the sidebar opens your own menu. See
 [Getting started](index.md#finding-anything).
 
 ## Notifications
+
+<figure markdown>
+![The notifications list](../screenshots/notifications-bell.webp){ .screenshot }
+<figcaption>A NICS result, a new web order and a distributor shipment, each linked to its record.</figcaption>
+</figure>
 
 **Notification**, the bell near the top of the sidebar, shows a count when
 something new has arrived. Click it to open the list, and click an entry to open

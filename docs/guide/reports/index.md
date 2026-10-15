@@ -2,6 +2,11 @@
 
 This page lists every report in the system, who it is for and the question it answers. Managers and the bookkeeper live here. Counter staff mostly see the queues through the [Dashboard](../getting-started/dashboard.md), whose cards are cut from these same reports. Every report is also listed under **All records** at the foot of the Dashboard.
 
+<figure markdown>
+![The Sales Report](../screenshots/report-sales.webp){ .screenshot }
+<figcaption>Reports open as a filter bar, a summary strip and a table. Here the Sales Report over a custom date range, one row per sale.</figcaption>
+</figure>
+
 Reports open as a filter bar, a summary strip and a table.
 
 ## Every report
@@ -25,11 +30,26 @@ Stock Balance and Stock Ledger are stock ERPNext reports. The sidebar links to S
 
 Terminal card attempts on counter orders are a list rather than a report: **Card payments** in the sidebar's **Sales** group. See [Taking payment](../selling/payments.md).
 
+<figure markdown>
+![The Stock Balance report](../screenshots/report-stock-balance.webp){ .screenshot }
+<figcaption>Stock Balance runs in the background, so it opens empty until you set the filters and press Generate New Report. Once a run exists the button reads Rebuild. This run covers one warehouse over a month.</figcaption>
+</figure>
+
 ## The counter queues
 
 **Firearms In Stock** lists every Serial No with status Active whose Item is a firearm, with manufacturer, model, caliber, condition, warehouse, its storage **Location** in the shop (blank when the gun is not placed), the acquisition date and source, and a link out to the gun's FastBound item record. Filter by Stock Status, Warehouse or Manufacturer. Two manager actions live on the toolbar: **Sync Bound Book** compares our in-stock list against FastBound and offers to remove guns FastBound reports as disposed, and **Check FastBound differences** starts a background field-by-field scan. Managers also get a small `$` link beside each serial that opens the correct-cost dialog.
 
+<figure markdown>
+![Firearms In Stock](../screenshots/report-firearms-in-stock.webp){ .screenshot }
+<figcaption>The by-serial floor view, opened on its filter bar. Stock Status, Warehouse and Manufacturer decide which serials list underneath.</figcaption>
+</figure>
+
 **Pending 4473 Orders** is one row per Draft POS Invoice that has a firearm line, with the 4473 status, the NICS status, days pending, the invoice total and a Transfer flag. The **Brady Day 3** column is three business days after the sale was parked. Denied shows red, Delayed shows orange, and a Delayed row past its Brady date has its date highlighted too. Antique firearms are excluded. Filter by NICS Status. See [Form 4473 at the counter](../compliance/4473.md).
+
+<figure markdown>
+![Pending 4473 Orders](../screenshots/report-pending-4473.webp){ .screenshot }
+<figcaption>The parked-firearm queue, oldest first, with the Brady date.</figcaption>
+</figure>
 
 **Pending Transfer Pickups** lists every firearm received for a customer whose serial is still Active, oldest first, with the customer's mobile number and who shipped it. This is the call-the-customer queue. Filter by Customer.
 
@@ -38,6 +58,11 @@ Terminal card attempts on counter orders are a list rather than a report: **Card
 ## The back-office reports
 
 **Inventory Receipts** covers everything that entered stock in a date range, sorted into four categories (Firearm, Ammunition, Accessory, Other) and ten receipt classes (such as Purchase, Trade-in, Intake, Return, Adjustment, Revaluation, Transfer and Custody). It has three views. Receipts is a tree of voucher, then lines, then serial units. Summary rolls up category by class. Units is one flat row per unit and is the grain to export. Internal transfers and customer-custody guns are hidden until you tick **Include transfers** or **Include custody**. Summary cards show Cost Received, firearm unit count, ammunition and accessory cost, and three flag counts: no-cost units, units missing an A&D entry, and **Seller not settled**. The last one counts purchases from a private seller whose seller payment does not match the receipt, and a red line under the filters names each receipt and the amount. Gun parts are counted in the accessory figures.
+
+<figure markdown>
+![Inventory Receipts](../screenshots/report-inventory-receipts.webp){ .screenshot }
+<figcaption>Inventory Receipts, Receipts view. The summary cards total the whole period. Set Level and Collapse All, under the table, drive the voucher, lines and units tree.</figcaption>
+</figure>
 
 **Hand-Asserted 4473 Dispositions** is the standing review queue for every bound book entry a human vouched for rather than FastBound. Two doors write these: a manager forcing a stuck electronic 4473 through, and the counter recording a paper 4473 in Paper 4473 Mode. Each row shows when it was asserted, the serial, the disposition type, the invoice, who asserted it, their stated reason, and whether FastBound has since caught up. It shows the most recent 500 and has no filters. Read it periodically, or the control it audits means nothing.
 
