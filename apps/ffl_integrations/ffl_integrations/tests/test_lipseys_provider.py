@@ -550,6 +550,11 @@ if FrappeTestCase:
 			self.assertIn("fulfillment login, 2026-10-13", get("last_error"))
 			self.assertNotIn("@", get("last_error"))
 
+		def test_the_customer_number_checks_the_dealer_login_only(self):
+			frappe.db.set_single_value("Lipseys Settings", "customer_number", "123456")
+			self.assertEqual(LipseysConfig.from_settings("dealer").customer_number, "123456")
+			self.assertEqual(LipseysConfig.from_settings("fulfillment").customer_number, "")
+
 		def test_connection_test_signs_in_with_both_logins(self):
 			self.session.routes["Items/ValidateItem"] = syn.envelope(None, success=False)
 			from ffl_integrations.ffl_integrations.doctype.lipseys_settings.lipseys_settings import (

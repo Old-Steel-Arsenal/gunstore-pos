@@ -112,7 +112,9 @@ class LipseysConfig(RedactedRepr):
 			email=(s.get(email_field) or "").strip(),
 			password=s.get_password(password_field, raise_exception=False) or "",
 			account=account,
-			customer_number=(s.customer_number or "").strip(),
+			# The customer number names the dealer account; the drop-ship login is a
+			# separate Lipsey's account with its own number, so it is not checked.
+			customer_number=(s.customer_number or "").strip() if account == DEALER else "",
 			base_url=(s.base_url or DEFAULT_BASE_URL).rstrip("/"),
 		)
 
@@ -186,8 +188,9 @@ class LipseysClient:
 
 	def login(self) -> dict:
 		"""Sign in; keep the token. Returns the econtact ``data`` (name, cusNo,
-		locationName…). A configured customer number must match the account the
-		login answers for — a login for the wrong account must not place orders."""
+		locationName…). A configured customer number (dealer login only) must match
+		the account the login answers for — a login for the wrong account must not
+		place orders."""
 		c = self.config
 		if not (c.email and c.password):
 			raise LipseysConfigError(

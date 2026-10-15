@@ -249,8 +249,10 @@ the address you gave Lipsey's when you asked for API access.
 
 **Account tab.** **Allow live orders** is the master switch, off by default.
 While it is off nothing is sent to Lipsey's, and the catalog still syncs.
-**Customer number** is optional: filled in, a login that answers for another
-Lipsey's account is refused. **Dealer login** holds the **Email** and
+**Customer number** is optional: it is the dealer account's number, and filled
+in, a dealer login that answers for another Lipsey's account is refused. The
+drop-ship login is a separate Lipsey's account with its own number and is not
+checked against it. **Dealer login** holds the **Email** and
 **Password** you sign in to Lipsey's with. Stocking and procure-to-store orders
 are placed with it and ship to the address on that Lipsey's account, so the POS
 sends no address. With **Allow live orders** on, the form will not save without
