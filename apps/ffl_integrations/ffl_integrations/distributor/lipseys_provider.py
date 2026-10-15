@@ -260,9 +260,13 @@ class LipseysProvider(RemoteCatalogMixin, DistributorProvider):
 		return {"live_orders": bool(self._get_settings().get("ordering_enabled"))}
 
 	def connection_test(self) -> dict:
+		"""A Local-catalog site also proves the catalog feed on the dealer login."""
+		from ffl_integrations.catalog_local import is_local
 		from ffl_integrations.lipseys.api_client import probe
 
 		checks = [self.catalog_health_check()]
+		if is_local():
+			checks.append(self.feed_login_check())
 		s = self._get_settings()
 		if not s.get("ordering_enabled"):
 			checks.append({"label": "Ordering API", "ok": None,
@@ -275,6 +279,26 @@ class LipseysProvider(RemoteCatalogMixin, DistributorProvider):
 			checks.append({"label": "Ordering API (drop-ship login)", "ok": None,
 				"detail": "Not filled in: drop-ship orders are unavailable."})
 		return {"checks": checks}
+
+	@staticmethod
+	def feed_login_check() -> dict:
+		"""The local catalog's feed: log in with the dealer login and read the pricing
+		feed (a few MB; it proves the allowlist on a data call). The detail never
+		carries a credential."""
+		from ffl_integrations.catalog_local.drivers import lipseys as feed
+
+		label = "Catalog feed (dealer login)"
+		try:
+			if feed.credentials() is None:
+				return {"label": label, "ok": False, "detail": "The catalog is Local, but Lipseys "
+					"Settings has no dealer email and password."}
+			data = feed.fetch(feed.PRICING, expect=dict, max_bytes=feed.PRICING_MAX_BYTES,
+				deadline_s=feed.PRICING_DEADLINE_S)
+		except Exception as exc:  # noqa: BLE001 — one leg reports, the others still run
+			return {"label": label, "ok": False, "detail": str(exc)}
+		items = data.get("items")
+		return {"label": label, "ok": True,
+			"detail": f"Signed in; {len(items) if isinstance(items, list) else 0} items priced."}
 
 
 def get_provider() -> LipseysProvider:

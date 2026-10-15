@@ -23,13 +23,22 @@ a reset after the request left, a 5xx, an unreadable body) may or may not have
 landed, and Lipsey's documents no way to ask by PO number — so it is NEVER
 retried here; it raises ``LipseysPlacementUnknown`` for a human to check.
 
+The catalog feeds (``get_feed``, used by the local catalog) are GETs whose
+answer is streamed to a temp file under a byte cap and a wall-clock deadline,
+then parsed.
+
 ``frappe`` is imported only inside ``LipseysConfig.from_settings``.
 """
 from __future__ import annotations
 
+import json
 import logging
+import os
+import tempfile
+import time
 from dataclasses import dataclass
 from datetime import date
+from decimal import Decimal
 
 import requests
 
@@ -41,6 +50,7 @@ SETTINGS_DOCTYPE = "Lipseys Settings"
 DEFAULT_BASE_URL = "https://api.lipseys.com/api/Integration"
 DEFAULT_TIMEOUT = 30
 USER_AGENT = "opengunstore-lipseys/1"
+FEED_TMP_PREFIX = "lipseys-feed-"
 
 EP_LOGIN = "Authentication/Login"
 EP_VALIDATE_ITEM = "Items/ValidateItem"
@@ -215,6 +225,71 @@ class LipseysClient:
 				raise LipseysAuthError(f"Lipsey's {path}: not authorized after a fresh login "
 					f"({errors_of(env) or 'Not Authorized'}).", terminal=True)
 		return env
+
+	def get_feed(self, path: str, *, max_bytes: int, deadline_s: float) -> dict:
+		"""GET one catalog feed (Items/CatalogFeed, Items/PricingQuantityFeed) -> the
+		parsed envelope. ``authorized: false`` drops the token, logs in again and
+		reads once more; a second refusal is a plain ``LipseysError`` (the password
+		was accepted, so it is not an auth failure). A refused re-login raises
+		``LipseysAuthError`` as ``login`` does."""
+		if not self._token:
+			self.login()
+		env = self._get_json(path, max_bytes=max_bytes, deadline_s=deadline_s)
+		if env.get("authorized") is False:
+			self._token = None
+			self.login()
+			env = self._get_json(path, max_bytes=max_bytes, deadline_s=deadline_s)
+			if env.get("authorized") is False:
+				raise LipseysError(f"Lipsey's {path}: token refused after a fresh login.")
+		return env
+
+	def _get_json(self, path: str, *, max_bytes: int, deadline_s: float) -> dict:
+		"""Stream a GET to a temp file under a WALL-clock deadline and a byte cap (the
+		session timeout is per read: a trickling answer would otherwise run into the
+		job timeout), then parse it; the file is always deleted. A non-JSON answer (a
+		Cloudflare page) or an unreadable body raises ``LipseysError``; messages
+		name the endpoint only."""
+		url = f"{self.config.base_url.rstrip('/')}/{path}"
+		headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
+		if self._token:
+			headers["Token"] = self._token
+		deadline = time.monotonic() + deadline_s
+		fd, tmp = tempfile.mkstemp(prefix=FEED_TMP_PREFIX, suffix=".json")
+		try:
+			with os.fdopen(fd, "wb") as out:
+				try:
+					with self.session.get(url, headers=headers, timeout=self.config.timeout,
+							stream=True) as resp:
+						if resp.status_code != 200:
+							raise LipseysError(f"Lipsey's {path}: HTTP {resp.status_code}",
+								status_code=resp.status_code)
+						if "json" not in (resp.headers.get("Content-Type") or "").lower():
+							raise LipseysError(f"Lipsey's {path}: the answer is not JSON",
+								status_code=resp.status_code)
+						size = 0
+						for chunk in resp.iter_content(1 << 16):
+							size += len(chunk)
+							if size > max_bytes:
+								raise LipseysError(f"Lipsey's {path}: answer over {max_bytes:,} bytes")
+							if time.monotonic() > deadline:
+								raise LipseysError(f"Lipsey's {path}: download exceeded {deadline_s:.0f} s")
+							out.write(chunk)
+				except requests.RequestException as exc:
+					# The class name only: a library message can carry request details.
+					raise LipseysError(f"Lipsey's {path}: network error ({type(exc).__name__})") from None
+			try:
+				with open(tmp, "rb") as f:
+					body = json.load(f, parse_float=Decimal)
+			except ValueError:
+				raise LipseysError(f"Lipsey's {path}: the answer is not valid JSON") from None
+		finally:
+			try:
+				os.unlink(tmp)
+			except OSError:
+				pass
+		if not isinstance(body, dict):
+			raise LipseysError(f"Lipsey's {path}: unexpected answer shape")
+		return body
 
 	# ---- reads -------------------------------------------------------------
 

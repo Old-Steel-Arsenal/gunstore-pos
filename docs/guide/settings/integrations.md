@@ -215,8 +215,9 @@ that failed to place.
 
 `/app/lipseys-settings`, also opened by **Account & shipping** on the Lipsey's
 card of the [Distributors hub](../distributors/hub.md). Connects to Lipsey's
-ordering API. The catalog reaches the store through Data Service. The page has
-three tabs: Account, Ordering and Status.
+ordering API. The catalog reaches the store through Data Service, or, with a
+[Local catalog](../../data-service.md#local-catalog), from Lipsey's own feeds
+with the dealer login. The page has three tabs: Account, Ordering and Status.
 
 Lipsey's lets in only computers it has approved, so the API must be reached from
 the address you gave Lipsey's when you asked for API access.
@@ -229,7 +230,9 @@ Lipsey's account is refused. **Dealer login** holds the **Email** and
 are placed with it and ship to the address on that Lipsey's account, so the POS
 sends no address. With **Allow live orders** on, the form will not save without
 them. **Drop-ship login** is Lipsey's separate drop-ship account. Until it is
-filled in, the hub and the planner offer no drop-ship for Lipsey's. The
+filled in, the hub and the planner offer no drop-ship for Lipsey's. With a
+Local catalog, saving this page is also the retry after Lipsey's refused the
+dealer login: the catalog stops dialing until then. The
 collapsed **Advanced** section holds **API base URL**.
 
 **Ordering tab.** **No confirmation email from Lipsey's** stops Lipsey's own

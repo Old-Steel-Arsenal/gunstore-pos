@@ -41,15 +41,16 @@ The ATF Form Scraper, Manual Only and Data Service choices in FFL Settings are i
 
 A store that does not use the hosted service can run its own distributor catalog. The POS then downloads each distributor's feeds with the store's own credentials and serves the same catalog reads from its database, so quoting, ordering, drop-ship and listing sync work on top of it. No call for catalog data reaches the Data Service in this mode; FFL search and the update feed still use it if you also fill in the connection.
 
-Local mode is **experimental**: it is meant for a new self-hosted store, and live stores use the Data Service. Its feed drivers are partial: RSR and Sports South ship, Lipsey's is not included (its catalog comes only from a Data Service, even though the POS orders from Lipsey's), and the limits below (strict legal answers, no antique list, new installs only) are part of what makes it experimental. A store that depends on its catalog should stay on a Data Service until Local mode has run in production.
+Local mode is **experimental**: it is meant for a new self-hosted store, and live stores use the Data Service. Its feed drivers cover RSR, Sports South and Lipsey's, and the limits below (strict legal answers, no antique list, new installs only) are part of what makes it experimental. A store that depends on its catalog should stay on a Data Service until Local mode has run in production.
 
 **Set-up**
 1. In `deploy/prod/.env` set `COMPOSE_PROFILES=catalog` and run `./deploy/prod/up.sh up -d`. This starts the `queue-catalog` worker (the dedicated `catalog` queue). Without it the Distributor hub warns that the catalog worker is not running instead of silently not syncing. The upgrade scripts and the extension agent restart the worker with the others only while it is running; the recipes in the [self-hosting guide](self-hosting.md) do the same.
 2. In **Data Service Settings › Catalog source**, choose **Local** (new installs only; a site can later move from Local to a Data Service, see Limits).
 3. In **RSR Settings › Account › Catalog feed** (shown only in Local mode): FTP host (default `ftp.rsrgroup.com`), port (default `2222`), **Key dealer** (tick it when RSR set the account up as a key dealer: the files are read from `keydealer/`), FTP user name and password (RSR issues them with the account), and **Skip TLS certificate check** (leave it off; ticking it exposes the login to anyone in the network path).
 4. In **Sports South Settings › Account**: account number, API user name (blank means the account number), API password and API base URL (the default is right for most stores). This is the same login as ordering; the catalog reads Sports South's inventory web service with it.
-5. Each house needs an enabled Distributor row (provider `rsr` or `ss`). The scheduler syncs a house only when that row is enabled and its feed login is filled in (RSR: the FTP user name; Sports South: the account number).
-6. **Distributor hub › Test Connection** adds a "Catalog feed (FTPS)" row for RSR and a "Catalog feed (inventory.asmx)" row for Sports South.
+5. In **Lipseys Settings › Account**: the dealer login (email and password), the customer number (optional; when set, the login must answer for that account) and the API base URL (the default is right). This is the same login as ordering; the catalog reads Lipsey's catalog and pricing feeds with it. Lipsey's only answers from an address on its allowlist: ask Lipsey's to add the store's server address.
+6. Each house needs an enabled Distributor row (provider `rsr`, `ss` or `lipseys`). The scheduler syncs a house only when that row is enabled and its feed login is filled in (RSR: the FTP user name; Sports South: the account number; Lipsey's: the dealer email).
+7. **Distributor hub › Test Connection** adds a "Catalog feed (FTPS)" row for RSR, a "Catalog feed (inventory.asmx)" row for Sports South and a "Catalog feed (dealer login)" row for Lipsey's.
 
 **What syncs, and when**
 
@@ -63,10 +64,16 @@ Local mode is **experimental**: it is meant for a new self-hosted store, and liv
 | Sports South | snapshot | weekly full rebuild, heavy | a row missing from it is marked discontinued; a free-disk check of about 900 MiB before each large download |
 | Sports South | catalog | daily changes with a one-day overlap, after the first snapshot | |
 | Sports South | text | daily long descriptions, heavy | |
+| Lipsey's | catalog | about every 4 hours, heavy | the full item list (about 48 MB of JSON), after a free-disk check; a live row missing from it is marked discontinued; stock, cost and allocation are left to the quantity lane |
+| Lipsey's | quantity | about every hour, after the first catalog | stock, cost and allocation for every item; a live item the file omits gets 0 |
+
+Lipsey's lanes are timed from their last attempt, not their last success: a failing lane waits twice as long after each failure in a row (the catalog up to 24 hours, the quantity lane up to 8 hours), and a lane killed mid-run counts as a failure. When Lipsey's refuses the login, both lanes stop dialing until **Lipseys Settings** is saved again (the save is the retry). Sync now still waits 30 minutes (catalog) or 15 minutes (quantity) after the last attempt.
 
 **Distributor hub**
 
 Each card shows the local catalog's offer counts and, per lane, its last success, rows and a failed last run. **Sync now** (System Manager only) queues every lane of that house on the catalog queue now. It skips the schedule only, never a guard: a short, truncated or shrunk file is refused exactly as on a scheduled run (snapshot floor of 40,000 rows, more than 2% of rows vanishing, the catalog's half-size rule, the restrictions half-size rule). Sports South's weekly snapshot runs only when due.
+
+Lipsey's guards: a catalog under 12,900 rows, or with more than 1% of its rows unreadable (no item number, no type, or a missing FFL / NFA flag), is refused before any row changes. When more than 2% of the live rows vanish from a catalog, the file still loads but no row is retired and the run is recorded as failed until a forced run applies the diff. A pricing file whose item numbers match the catalog for fewer than 90% of its rows, or that leaves out more than 10% of the live rows, is refused.
 
 An administrator who has checked that a smaller restrictions file is real loads it from bench:
 
@@ -74,7 +81,7 @@ An administrator who has checked that a smaller restrictions file is real loads 
 bench --site <site> execute ffl_integrations.catalog_local.sync.run_lane --kwargs "{'code': 'rsr', 'lane': 'restrictions', 'force': True}"
 ```
 
-The same call with `{'code': 'ss', 'lane': 'snapshot', 'force': True}` rebuilds the Sports South snapshot now.
+The same call with `{'code': 'ss', 'lane': 'snapshot', 'force': True}` rebuilds the Sports South snapshot now, and with `{'code': 'lipseys', 'lane': 'catalog', 'force': True}` loads a Lipsey's catalog and retires the rows that vanished from it after an administrator has checked that the drop is real (a forced run does not lift a refused login: save Lipseys Settings for that).
 
 **Box minimum:** 2 GB of RAM for the catalog worker and the database on top of the rest of the stack, and 2 GB of free disk for the downloaded feeds and the catalog tables.
 
@@ -84,18 +91,20 @@ The same call with `{'code': 'ss', 'lane': 'snapshot', 'force': True}` rebuilds 
 
 **Sports South.** Requires FFL = Sports South's own item type (1 or 2 = a firearm). Class, the class the Data Service serves with its owner rules included: category 31 (lights) is Accessory whatever its flag or title; a flagged category 93 row whose title says pistol or pistols (the whole word) and names no NFA item is Handgun; any other category 93 row with the flag is NFA; any other FFL row with an NFA title is NFA; 26/64/96 Handgun; 40/48/57/58/59/94 Long Gun; 65 Other Firearm; 63/66/67 with the flag Other Firearm; 8/63/66/67/93 without it Gun Parts; other FFL rows Other Firearm; ammunition categories (4, 5, 6, 49, 69, 70, 71, 72, 90, 91) Ammunition; the rest Accessory.
 
+**Lipsey's.** Requires FFL = Lipsey's own `fflRequired` or `sotRequired` flag, and every Muzzleloader and Revolver row (see below). The department is Lipsey's `type`, ignoring case and spacing; an NFA row (`sotRequired`) filed outside the four NFA types is filed under "NFA - Other". Class, from the Data Service's reviewed type map: an FFL row in an NFA type, or with an NFA title, is NFA; other FFL rows follow the type's firearm node: Semi-Auto Pistol, Specialty Handgun and Revolver Handgun; Rifle, Shotgun and Combo Long Gun; Other Firearm, Muzzleloader, the receiver types (Lowers, Frames, Receiver Sets, Actions, Uppers) and any other type Other Firearm. Rows without the flag: the parts types (barrels, bolts, triggers, stocks, muzzle devices, slides and the like) Gun Parts, Accessory-Ammunition Ammunition, everything else Accessory. A type missing from the map is Other Firearm with the flag and Accessory without it. Images link Lipsey's own image URL; nothing is downloaded.
+
 **Owner rules.** Local mode applies the Data Service's two Sports South owner rules to the class, so a row's class is the one the Data Service serves: category 31 (lights) holds no guns, so a flagged light is an Accessory, its product's legal answer is "not a firearm", and it still ships only to a dealer (its flag stands); a flagged pistol-titled row filed in category 93 is a pistol (Handgun), not an NFA item, unless its title also names an NFA item. The Data Service also files products in a curated category tree that is not published. Where that tree would name a different firearm class (a rifle filed in a parts category), Local mode keeps the department's class; the legal answer (firearm or not) is the same.
 
 **Deliberate deviations (both stricter than the Data Service)**
 
 1. In RSR's upper and conversion-kit departments (41/42/43) an FFL-flagged row whose title names a receiver, lower, frame or barreled action is a firearm here (Other Firearm, or NFA when the title also names an NFA item). The Data Service keeps every row of those departments a part (its owner rule says they hold no guns). Selling a part as a firearm costs a 4473, and selling a firearm as a part is unlawful, so Local mode keeps the strict answer.
-2. Every Sports South black-powder gun in category 13 is FFL-required here, and no product is marked antique. The Data Service releases a confirmed antique from a list it keeps; Local mode has no such list, so such a gun ships to a dealer with a 4473 instead of to the buyer.
+2. Every Sports South black-powder gun in category 13, and every Lipsey's Muzzleloader and Revolver row, is FFL-required here, and no product is marked antique. The Data Service releases a confirmed antique or black-powder gun from a list it keeps; Local mode has no such list, so such a gun ships to a dealer with a 4473 instead of to the buyer.
 
 **Limits of the first version**
 - **Data Service → Local: new installs only.** A site that already syncs from the Data Service is not switched over: the form refuses that change once the site holds a product-change cursor, because the two sources number product changes differently.
 - **Local → Data Service: supported.** Fill in the endpoint, client ID and secret first (the form refuses the switch without them, so the catalog never goes off), then choose **Data Service** and save. Everything the local catalog held is a copy of the distributors' feeds, so nothing is lost. On save every registered product-change cursor is cleared: the category follower takes a fresh baseline on the service, and a drop-ship listing sync reads the service's feed from its start, so each listing is re-synced once from the new source. The local `dc_*` tables are left in place and no longer read; the catalog worker can be stopped (drop `catalog` from `COMPOSE_PROFILES`). Save the switch while no background job is running (pause the scheduler with `bench --site <site> disable-scheduler`, let running jobs finish, switch, then `enable-scheduler`): a drop-ship sync that started on the local catalog would otherwise write its old position back after the reset. The form probes the service on save and keeps the site on its local catalog if the service does not answer.
 - **No category tree.** The mirror stays silent and stores use their own Item Groups; with Categories mode Apply the product change feed still reports FFL-flag changes on catalog Items.
-- Not included: Lipsey's, Sports South's per-item text backfill, a confirmed-antique list for black-powder guns, national FFL search, retailer MAP and the update feed.
+- Not included: Sports South's per-item text backfill, a confirmed-antique list for black-powder guns, national FFL search, retailer MAP and the update feed.
 
 ## The catalog contract
 

@@ -122,7 +122,9 @@ TABLES = {
 	# UPC-reject counters, the restrictions file hash and line count (the
 	# partial-file guard's reference), and each lane's latest
 	# attempt ({lane: ISO UTC}, the tick's fairness order), and the Sports South
-	# quantity cursor (its server time, echoed back verbatim).
+	# quantity cursor (its server time, echoed back verbatim), and when the house's
+	# login was last saved (Lipsey's: an auth hold lifts once it is newer than the
+	# rejected attempt).
 	"dc_meta": f"""CREATE TABLE IF NOT EXISTS `dc_meta` (
 	`distributor` VARCHAR(32) {_BIN} NOT NULL,
 	`change_seq` BIGINT NOT NULL DEFAULT 0,
@@ -133,6 +135,7 @@ TABLES = {
 	`restrictions_lines` INT NOT NULL DEFAULT 0,
 	`lane_attempts` LONGTEXT NULL,
 	`qty_cursor` VARCHAR(64) {_BIN} NOT NULL DEFAULT '',
+	`creds_saved_at` DATETIME(6) NULL,
 	PRIMARY KEY (`distributor`)
 ) {_TABLE_OPTS}""",
 	# One row per lane run that reached its body. Source = `<house>_<lane>`
