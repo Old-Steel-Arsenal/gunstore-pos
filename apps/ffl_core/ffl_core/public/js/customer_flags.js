@@ -129,9 +129,23 @@
 
 	// Banned: resolve true only after a manager override.
 	function bannedBox(flags) {
+		// The register freezes the screen around a customer pick (once per onchange,
+		// and the Link fires onchange again when focus moves into this box) and
+		// unfreezes when the pick is answered. Keep the screen unfrozen while the box is
+		// open so it can be used; nothing is re-frozen afterwards — frappe's unfreeze is
+		// a no-op at zero, so ERPNext's own unfreezes stay harmless.
+		var lift = function () { while (frappe.dom.freeze_count > 0) frappe.dom.unfreeze(); };
+		lift();
+		var watch = setInterval(lift, 100);
 		return new Promise(function (resolve) {
 			var done = false;
-			var finish = function (ok) { if (!done) { done = true; resolve(ok); } };
+			var finish = function (ok) {
+				if (done) return;
+				done = true;
+				clearInterval(watch);
+				lift();
+				resolve(ok);
+			};
 			var d = new frappe.ui.Dialog({
 				title: __('Banned customer'),
 				indicator: 'red',
@@ -157,8 +171,10 @@
 						args: { customer: flags.name, reason: v.reason },
 						freeze: true,
 					}).then(function () {
-						delete cache[flags.name];
 						frappe.show_alert({ message: __('Ban overridden for 30 minutes.'), indicator: 'orange' });
+						// Fresh flags (the strip now says "override until …"), then go on.
+						return fetchFlags(flags.name).catch(function () { delete cache[flags.name]; });
+					}).then(function () {
 						finish(true);
 						d.hide();
 					});
@@ -209,7 +225,8 @@
 				var picked = null;
 				var html = rows.map(function (row) {
 					return '<div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border-color)">'
-						+ '<div><b>' + api.escText(row.customer_name) + '</b> <span class="text-muted">' + api.escText(row.name) + '</span>'
+						+ '<div><b>' + api.escText(row.customer_name) + '</b>'
+						+ (row.name !== row.customer_name ? ' <span class="text-muted">' + api.escText(row.name) + '</span>' : '')
 						+ (row.customer_status && row.customer_status !== 'Active'
 							? ' <span class="indicator-pill ' + (row.customer_status === 'Banned' ? 'red' : 'orange') + '">' + api.escText(__(row.customer_status)) + '</span>' : '')
 						+ '<div class="small text-muted">' + __('Same {0}', [api.escText(api.dupLabel(row, __))]) + '</div></div>'

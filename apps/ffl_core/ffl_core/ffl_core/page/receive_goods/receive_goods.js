@@ -576,7 +576,7 @@ class ReceiveGoodsApp {
 			seller_customer: f('#f-seller_customer', {
 				label: __('Seller (Customer)'), fieldtype: 'Link', options: 'Customer', fieldname: 'seller_customer',
 				description: __('Private party selling the firearm — the POS customer record.'),
-				change: () => { this._guardCustomer('seller_customer'); this._prefillSellerName(); this._reflectReadiness(); },
+				change: () => { this._guardCustomer('seller_customer').then((ok) => ok && this._prefillSellerName()); this._reflectReadiness(); },
 			}),
 			seller_id_type: f('#f-seller_id_type', {
 				label: __('Seller ID Type'), fieldtype: 'Select', fieldname: 'seller_id_type',
@@ -769,10 +769,11 @@ class ReceiveGoodsApp {
 	}
 
 	// Banned box / alerts (customer_flags.js) for a customer picked here; a Banned
-	// one is cleared from the field.
+	// one is cleared from the field. Promise<boolean>: may the page go on with them.
 	_guardCustomer(field) {
 		const cf = window.ffl && ffl.customerFlags;
-		if (cf && cf.guardControl) cf.guardControl(this.fields[field]).then(() => this._reflectReadiness());
+		if (!(cf && cf.guardControl)) return Promise.resolve(true);
+		return cf.guardControl(this.fields[field]).then((ok) => { this._reflectReadiness(); return ok; });
 	}
 
 	_prefillSellerName() {

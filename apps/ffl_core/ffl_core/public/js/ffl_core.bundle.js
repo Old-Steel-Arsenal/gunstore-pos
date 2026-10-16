@@ -1125,10 +1125,11 @@ ffl.FirearmItemPicker = class FirearmItemPicker {
 					options: 'Customer', reqd: 1, default: posCustomer,
 					description: __('Person trading in the firearm. Pre-filled from POS customer.'),
 					change: () => {
-						// Banned box / alerts (customer_flags.js); a Banned seller is cleared.
-						const ctl = dialog.fields_dict.source_name;
-						if (window.ffl && ffl.customerFlags && ffl.customerFlags.guardControl) ffl.customerFlags.guardControl(ctl);
-						prefillSeller();
+						// Banned box / alerts first (customer_flags.js): a Banned seller is
+						// cleared and nothing of theirs is filled in.
+						const cf = window.ffl && ffl.customerFlags;
+						const ok = cf && cf.guardControl ? cf.guardControl(dialog.fields_dict.source_name) : Promise.resolve(true);
+						ok.then((go) => go && prefillSeller());
 					},
 				},
 				{
