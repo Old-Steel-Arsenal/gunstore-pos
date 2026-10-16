@@ -4939,7 +4939,7 @@
           "ffl_core"
         ],
         "summary": "The Agreements section of the Customer form.",
-        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:448`",
+        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:449`",
         "operationId": "ffl_core.agreements.get_customer_agreements",
         "responses": {
           "200": {
@@ -4987,7 +4987,7 @@
           "webhooks"
         ],
         "summary": "What the signing page shows for a one-time link (Guest).",
-        "description": "Only the customer's name, the agreement's title and text, and the store's\nname — nothing else about the customer. Every invalid, used, void or\nexpired link gets the same error. 30 calls an hour per link and 600 per IP\naddress. A copy sent before its template's text changed is shown (and from\nthen on carries) the current text.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:538`",
+        "description": "Only the customer's name, the agreement's title and text, and the store's\nname — nothing else about the customer. Every invalid, used, void or\nexpired link gets the same error. 30 calls an hour per link and 600 per IP\naddress. A copy sent before its template's text changed is shown (and from\nthen on carries) the current text.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:539`",
         "operationId": "ffl_core.agreements.load_for_signing",
         "responses": {
           "200": {
@@ -5088,7 +5088,7 @@
           "ffl_core"
         ],
         "summary": "Manager records a copy the customer signed on paper.",
-        "description": "The scan must already be attached to this Customer Agreement; it is made\nprivate and becomes the signed copy. The copy turns Signed via Paper, its\nexpiry counts from the date on the paper, and who recorded it, when, and the\nfile go on the timeline. A missing signature can never be waived: without a\nsigned scan there is nothing to record.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:386`",
+        "description": "The scan must already be attached to this Customer Agreement; it is made\nprivate and becomes the signed copy. The copy turns Signed via Paper, its\nexpiry counts from the date on the paper, and who recorded it, when, and the\nfile go on the timeline. A missing signature can never be waived: without a\nsigned scan there is nothing to record.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:387`",
         "operationId": "ffl_core.agreements.record_paper_agreement",
         "responses": {
           "200": {
@@ -5161,7 +5161,7 @@
           "ffl_core"
         ],
         "summary": "Build a signed copy's PDF again (when the background job failed).",
-        "description": "**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:468`",
+        "description": "**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:469`",
         "operationId": "ffl_core.agreements.regenerate_signed_pdf",
         "responses": {
           "200": {
@@ -5247,7 +5247,7 @@
                   },
                   "deliver": {
                     "type": "string",
-                    "description": "``tablet`` — send the link to a paired signing tablet (``terminal``; ``ffl_core.signing_terminal``), which opens it by itself; ``qr`` — return the signing link and a QR code for the counter; ``email`` — email the link to the customer (refused when the customer has no email address); ``none`` — only create the Pending copy (a manager then records a paper copy on it).",
+                    "description": "``tablet`` — send the link to a paired signing tablet (``terminal``; ``ffl_core.signing_terminal``), which opens it by itself once the request commits (a caller that never commits sends nothing); ``qr`` — return the signing link and a QR code for the counter; ``email`` — email the link to the customer (refused when the customer has no email address); ``none`` — only create the Pending copy (a manager then records a paper copy on it).",
                     "default": "qr"
                   },
                   "replace": {
@@ -5279,7 +5279,7 @@
           "webhooks"
         ],
         "summary": "Sign an agreement through a one-time link (Guest).",
-        "description": "Checked before anything is written: the \"I agree\" tick, the typed name, the\ntoken (same error for every invalid one), the signature (a PNG of at most\n500 KB and 2000 px with ink on it) and the age rule. A link opened as a QR\ncode at the counter, or on a paired signing tablet (its device key sent as\n``terminal_secret``; the copy records which tablet), is recorded as signed on\na Tablet, an emailed one as Remote. The link is used up; the signed PDF is built and emailed afterwards.\nWhen the template's text changed after the page was opened, nothing is signed\nand the signer is asked to reload and read the new text. 10 calls an hour per\nlink and 300 per IP address.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:616`",
+        "description": "Checked before anything is written: the \"I agree\" tick, the typed name, the\ntoken (same error for every invalid one), the signature (a PNG of at most\n500 KB and 2000 px with ink on it) and the age rule. A link opened as a QR\ncode at the counter, or on a paired signing tablet (its device key sent as\n``terminal_secret``; the copy records which tablet), is recorded as signed on\na Tablet, an emailed one as Remote. The link is used up; the signed PDF is built and emailed afterwards.\nWhen the template's text changed after the page was opened, nothing is signed\nand the signer is asked to reload and read the new text. 10 calls an hour per\nlink and 300 per IP address.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:617`",
         "operationId": "ffl_core.agreements.submit_signature",
         "responses": {
           "200": {
@@ -5360,7 +5360,7 @@
           "ffl_core"
         ],
         "summary": "Manager voids a copy (sent by mistake, signed by the wrong person).",
-        "description": "A Pending copy's link stops working. The copy is kept, marked Void, and the\nreason goes on its timeline.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:358`",
+        "description": "A Pending copy's link stops working. The copy is kept, marked Void, and the\nreason goes on its timeline.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:359`",
         "operationId": "ffl_core.agreements.void_agreement",
         "responses": {
           "200": {
@@ -12436,7 +12436,7 @@
           "ffl_core"
         ],
         "summary": "Active signing tablets, for the Request agreement dialog.",
-        "description": "**Auth (derived from code):** Any authenticated user — no explicit role gate at function entry (deliberate open reads document this in Permissions).\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:78`",
+        "description": "**Auth (derived from code):** Any authenticated user — no explicit role gate at function entry (deliberate open reads document this in Permissions).\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:82`",
         "operationId": "ffl_core.signing_terminal.list_terminals",
         "responses": {
           "200": {
@@ -12466,7 +12466,7 @@
           "webhooks"
         ],
         "summary": "The tablet trades a pairing code for its device key (Guest).",
-        "description": "The code works once. Any tablet paired to the same terminal before stops\nworking. 10 tries per 10 minutes per IP address.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:110`",
+        "description": "The code works once. Any tablet paired to the same terminal before stops\nworking. 10 tries per 10 minutes per IP address; after 50 wrong codes from\nanywhere in 10 minutes, pairing pauses until the window passes.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:114`",
         "operationId": "ffl_core.signing_terminal.pair_terminal",
         "responses": {
           "200": {
@@ -12515,7 +12515,7 @@
           "ffl_core"
         ],
         "summary": "Manager starts pairing a tablet: a 6-digit code to type on it.",
-        "description": "**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:89`",
+        "description": "**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:93`",
         "operationId": "ffl_core.signing_terminal.start_pairing",
         "responses": {
           "200": {
@@ -12563,7 +12563,7 @@
           "webhooks"
         ],
         "summary": "What the tablet should show now (Guest, every 2 seconds).",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:137`",
+        "description": "Limited per tablet (2400 an hour) and per IP address (10000 an hour, a shop's\ntablets together).\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:161`",
         "operationId": "ffl_core.signing_terminal.terminal_poll",
         "responses": {
           "200": {

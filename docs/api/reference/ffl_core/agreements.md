@@ -18,7 +18,7 @@ The Agreements section of the Customer form.
 
 **Returns:** {"rows": [{"name", "template", "status", "signed_on", "signed_via", "expires_on", "signed_pdf"}] newest first, "can_manage": whether the caller may void or record paper copies}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:448`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:449`</sub>
 
 ## `load_for_signing`
 
@@ -40,7 +40,7 @@ then on carries) the current text.
 
 **Returns:** {"customer_name", "title", "body_html", "store_name", "minors_need_guardian", "minor_by_dob": true / false from the customer's date of birth, or null when the store keeps none (the page then asks)}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:538`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:539`</sub>
 
 ## `missing_for_items`
 
@@ -87,7 +87,7 @@ signed scan there is nothing to record.
 
 **Returns:** {"name", "status", "expires_on", "signed_pdf"}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:386`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:387`</sub>
 
 ## `regenerate_signed_pdf`
 
@@ -103,7 +103,7 @@ Build a signed copy's PDF again (when the background job failed).
 
 **Returns:** {"signed_pdf": file URL}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:468`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:469`</sub>
 
 ## `request_agreement`
 
@@ -123,7 +123,7 @@ tablet right now — nothing changes unless ``replace`` is 1: the answer is
 |---|---|---|---|---|
 | `customer` | string | yes | — | Customer name (document id). |
 | `template` | string | yes | — | Agreement Template name; must be active. |
-| `deliver` | string | no | `'qr'` | ``tablet`` — send the link to a paired signing tablet (``terminal``; ``ffl_core.signing_terminal``), which opens it by itself; ``qr`` — return the signing link and a QR code for the counter; ``email`` — email the link to the customer (refused when the customer has no email address); ``none`` — only create the Pending copy (a manager then records a paper copy on it). |
+| `deliver` | string | no | `'qr'` | ``tablet`` — send the link to a paired signing tablet (``terminal``; ``ffl_core.signing_terminal``), which opens it by itself once the request commits (a caller that never commits sends nothing); ``qr`` — return the signing link and a QR code for the counter; ``email`` — email the link to the customer (refused when the customer has no email address); ``none`` — only create the Pending copy (a manager then records a paper copy on it). |
 | `replace` | integer | no | `0` | 1 to re-issue even though the pending copy's link still works. |
 | `terminal` | string \| null | no | `None` | Signing Terminal name, for ``tablet``; must be active and paired. |
 
@@ -161,7 +161,7 @@ link and 300 per IP address.
 
 **Returns:** {"signed": true, "store_name"}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:616`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:617`</sub>
 
 ## `void_agreement`
 
@@ -181,4 +181,4 @@ reason goes on its timeline.
 
 **Returns:** {"name", "status": "Void"}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:358`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:359`</sub>

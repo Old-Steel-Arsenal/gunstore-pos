@@ -276,7 +276,8 @@ def request_agreement(customer: str, template: str, deliver: str = "qr", replace
 	    customer: Customer name (document id).
 	    template: Agreement Template name; must be active.
 	    deliver: ``tablet`` — send the link to a paired signing tablet
-	        (``terminal``; ``ffl_core.signing_terminal``), which opens it by itself;
+	        (``terminal``; ``ffl_core.signing_terminal``), which opens it by itself
+	        once the request commits (a caller that never commits sends nothing);
 	        ``qr`` — return the signing link and a QR code for the counter;
 	        ``email`` — email the link to the customer (refused when the customer
 	        has no email address); ``none`` — only create the Pending copy (a

@@ -58,6 +58,18 @@ class Pairing(FrappeTestCase):
 				with self.assertRaises(frappe.ValidationError, msg=code):
 					signing_terminal.pair_terminal(code)
 
+	def test_wrong_codes_from_anywhere_pause_pairing(self):
+		key = frappe.cache.make_key(signing_terminal._PAIR_FAILURES)
+		self.addCleanup(frappe.cache.delete, key)
+		frappe.cache.set(key, signing_terminal.PAIR_FAILURES_MAX - 1)
+		code = signing_terminal.start_pairing(self.term.name)["code"]
+		with _as("Guest"):
+			with self.assertRaisesRegex(frappe.ValidationError, "not valid"):
+				signing_terminal.pair_terminal("999999" if code != "999999" else "999998")
+			with self.assertRaisesRegex(frappe.ValidationError, "paused"):
+				signing_terminal.pair_terminal(code)   # even the right code waits
+		self.assertGreater(frappe.cache.ttl(key), 0)
+
 	def test_pairing_again_cuts_off_the_old_tablet(self):
 		old = _pair(self.term)
 		new = _pair(self.term)

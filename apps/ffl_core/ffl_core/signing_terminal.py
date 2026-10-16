@@ -30,13 +30,17 @@ from datetime import timedelta
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
-from frappe.utils import escape_html, get_datetime, now_datetime
+from frappe.utils import cint, escape_html, get_datetime, now_datetime
 
 from ffl_core.roles import CUSTOMER_MANAGER_ROLES
 from ffl_core.store_identity import company_brand
 
 DOCTYPE = "Signing Terminal"
 PAIR_MINUTES = 10
+# Wrong codes the whole site accepts per PAIR_MINUTES window before pairing pauses:
+# the per-IP limit alone would let guesses spread over many addresses add up.
+PAIR_FAILURES_MAX = 50
+_PAIR_FAILURES = "ffl-agr-pair-failures"
 DELIVERY_MINUTES = 10
 SEEN_EVERY = timedelta(minutes=1)
 _SECRET_RE = re.compile(r"^[A-Za-z0-9_-]{43}$")
@@ -111,7 +115,8 @@ def pair_terminal(code: str) -> dict:
 	"""The tablet trades a pairing code for its device key (Guest).
 
 	The code works once. Any tablet paired to the same terminal before stops
-	working. 10 tries per 10 minutes per IP address.
+	working. 10 tries per 10 minutes per IP address; after 50 wrong codes from
+	anywhere in 10 minutes, pairing pauses until the window passes.
 
 	Args:
 	    code: The 6 digits shown on the Signing Terminal record.
@@ -119,9 +124,12 @@ def pair_terminal(code: str) -> dict:
 	Returns:
 	    {"secret": the device key (shown this once), "terminal_name"}.
 	"""
+	if _failures() >= PAIR_FAILURES_MAX:
+		frappe.throw(_("Pairing is paused for a few minutes. Try again shortly."), title=_("Pairing code"))
 	code = (code or "").strip() if isinstance(code, str) else ""
 	entry = frappe.cache.get_value(_pair_key(code)) if _CODE_RE.match(code) else None
 	if not entry or not frappe.db.get_value(DOCTYPE, entry.get("terminal"), "active"):
+		_count_failure()
 		frappe.throw(_("That code is not valid. Ask a manager for a new one."), title=_("Pairing code"))
 	frappe.cache.delete_value(_pair_key(code))
 	secret = secrets.token_urlsafe(32)
@@ -132,10 +140,29 @@ def pair_terminal(code: str) -> dict:
 	return {"secret": secret, "terminal_name": entry["terminal"]}
 
 
+# A plain Redis counter, the way frappe's rate limiter keeps its own (not get_value's pickles).
+def _failures() -> int:
+	return cint(frappe.cache.get(frappe.cache.make_key(_PAIR_FAILURES)))
+
+
+def _count_failure() -> None:
+	key = frappe.cache.make_key(_PAIR_FAILURES)
+	# The window starts with the first failure; a counter that somehow has no expiry
+	# gets one, so pairing can never stay paused for good.
+	frappe.cache.set(key, 0, ex=PAIR_MINUTES * 60, nx=True)
+	frappe.cache.incrby(key, 1)
+	if frappe.cache.ttl(key) < 0:
+		frappe.cache.expire(key, PAIR_MINUTES * 60)
+
+
 @frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=10000, seconds=3600)
 @rate_limit(key="secret", limit=2400, seconds=3600)
 def terminal_poll(secret: str) -> dict:
 	"""What the tablet should show now (Guest, every 2 seconds).
+
+	Limited per tablet (2400 an hour) and per IP address (10000 an hour, a shop's
+	tablets together).
 
 	Args:
 	    secret: The tablet's device key.

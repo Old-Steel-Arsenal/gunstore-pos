@@ -14,7 +14,7 @@ Active signing tablets, for the Request agreement dialog.
 
 **Returns:** [{"name", "pos_profile", "paired"}], by name.
 
-<sub>`apps/ffl_core/ffl_core/signing_terminal.py:78`</sub>
+<sub>`apps/ffl_core/ffl_core/signing_terminal.py:82`</sub>
 
 ## `pair_terminal`
 
@@ -25,7 +25,8 @@ Active signing tablets, for the Request agreement dialog.
 The tablet trades a pairing code for its device key (Guest).
 
 The code works once. Any tablet paired to the same terminal before stops
-working. 10 tries per 10 minutes per IP address.
+working. 10 tries per 10 minutes per IP address; after 50 wrong codes from
+anywhere in 10 minutes, pairing pauses until the window passes.
 
 | arg | type | required | default | description |
 |---|---|---|---|---|
@@ -33,7 +34,7 @@ working. 10 tries per 10 minutes per IP address.
 
 **Returns:** {"secret": the device key (shown this once), "terminal_name"}.
 
-<sub>`apps/ffl_core/ffl_core/signing_terminal.py:110`</sub>
+<sub>`apps/ffl_core/ffl_core/signing_terminal.py:114`</sub>
 
 ## `start_pairing`
 
@@ -49,7 +50,7 @@ Manager starts pairing a tablet: a 6-digit code to type on it.
 
 **Returns:** {"code", "expires_in_minutes", "page": the URL to open on the tablet}.
 
-<sub>`apps/ffl_core/ffl_core/signing_terminal.py:89`</sub>
+<sub>`apps/ffl_core/ffl_core/signing_terminal.py:93`</sub>
 
 ## `terminal_poll`
 
@@ -59,10 +60,13 @@ Manager starts pairing a tablet: a 6-digit code to type on it.
 
 What the tablet should show now (Guest, every 2 seconds).
 
+Limited per tablet (2400 an hour) and per IP address (10000 an hour, a shop's
+tablets together).
+
 | arg | type | required | default | description |
 |---|---|---|---|---|
 | `secret` | string | yes | — | The tablet's device key. |
 
 **Returns:** {"paired": false} for an unknown or switched-off tablet (the page goes back to pairing); {"paired": true, "token"} when the counter sent a link (handed out once); otherwise {"paired": true, "idle": true, "terminal_name", "store_name"}.
 
-<sub>`apps/ffl_core/ffl_core/signing_terminal.py:137`</sub>
+<sub>`apps/ffl_core/ffl_core/signing_terminal.py:161`</sub>
