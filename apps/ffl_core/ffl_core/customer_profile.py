@@ -3,8 +3,9 @@
 The fields come from ``setup/customer_profile.py``; the doc events below are
 wired in ``hooks.doc_events["Customer"]``.
 
-* **Status** — a customer without one is Active; Banned needs a reason. (A later change
-  reads Banned at the counter; nothing here blocks a sale.)
+* **Status** — a customer without one is Active; Banned needs a reason and a
+  manager (``customer_flags.guard_ban_fields``); the counter gate and the
+  manager override live in ``customer_flags``.
 * **ID numbers and date of birth** — kept only while FFL Settings → Store
   Customer ID Numbers is on. Off, every save blanks ``date_of_birth`` and each
   ``customer_ids[].id_number``. This validate is the rule; the form hiding the
@@ -57,6 +58,8 @@ def validate_customer(doc, method=None) -> None:
 	if doc.customer_status == BANNED and not (doc.get("status_reason") or "").strip():
 		frappe.throw(_("Enter a reason before marking {0} as Banned.").format(
 			frappe.bold(escape_html(doc.customer_name or doc.name))), title=_("Reason required"))
+	from ffl_core.customer_flags import guard_ban_fields
+	guard_ban_fields(doc)
 	_refuse_alias_edits(doc)
 	blank_id_numbers_unless_enabled(doc)
 	_stamp_alerts(doc)

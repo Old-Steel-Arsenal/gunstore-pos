@@ -1124,7 +1124,12 @@ ffl.FirearmItemPicker = class FirearmItemPicker {
 					label: __('Customer'), fieldname: 'source_name', fieldtype: 'Link',
 					options: 'Customer', reqd: 1, default: posCustomer,
 					description: __('Person trading in the firearm. Pre-filled from POS customer.'),
-					change: () => prefillSeller(),
+					change: () => {
+						// Banned box / alerts (customer_flags.js); a Banned seller is cleared.
+						const ctl = dialog.fields_dict.source_name;
+						if (window.ffl && ffl.customerFlags && ffl.customerFlags.guardControl) ffl.customerFlags.guardControl(ctl);
+						prefillSeller();
+					},
 				},
 				{
 					label: __('First Name'), fieldname: 'source_first_name', fieldtype: 'Data', reqd: 1,

@@ -555,6 +555,7 @@ class ReceiveGoodsApp {
 				fieldname: 'transfer_for_customer',
 				description: __('Inbound customer transfer: who picks this gun up. '
 					+ 'Feeds the Pending Transfer Pickups report — leave blank for store stock.'),
+				change: () => this._guardCustomer('transfer_for_customer'),
 			}),
 			seller_first_name: f('#f-seller_first_name', {
 				label: __('Seller First Name'), fieldtype: 'Data', fieldname: 'seller_first_name',
@@ -575,7 +576,7 @@ class ReceiveGoodsApp {
 			seller_customer: f('#f-seller_customer', {
 				label: __('Seller (Customer)'), fieldtype: 'Link', options: 'Customer', fieldname: 'seller_customer',
 				description: __('Private party selling the firearm — the POS customer record.'),
-				change: () => { this._prefillSellerName(); this._reflectReadiness(); },
+				change: () => { this._guardCustomer('seller_customer'); this._prefillSellerName(); this._reflectReadiness(); },
 			}),
 			seller_id_type: f('#f-seller_id_type', {
 				label: __('Seller ID Type'), fieldtype: 'Select', fieldname: 'seller_id_type',
@@ -765,6 +766,13 @@ class ReceiveGoodsApp {
 			this.fields.consignment_commission_pct.set_value(pct > 0 ? pct : 20);
 			this._onAcquisitionTypeChange();
 		});
+	}
+
+	// Banned box / alerts (customer_flags.js) for a customer picked here; a Banned
+	// one is cleared from the field.
+	_guardCustomer(field) {
+		const cf = window.ffl && ffl.customerFlags;
+		if (cf && cf.guardControl) cf.guardControl(this.fields[field]).then(() => this._reflectReadiness());
 	}
 
 	_prefillSellerName() {

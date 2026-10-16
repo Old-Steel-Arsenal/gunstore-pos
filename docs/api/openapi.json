@@ -10928,13 +10928,274 @@
         }
       }
     },
+    "/api/method/ffl_core.customer_flags.banned_order_rows": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "Which Pending Order rows belong to a Banned customer, for the page's red badge.",
+        "description": "A web or GunBroker order is booked to a customer only once it has shipped, so\nits buyer is looked up the way that booking will: a Woo order by its billing\nemail (customer email, then merged-email alias); a GunBroker order by its linked\ncustomer, then the buyer's GunBroker id (field, then alias), then email.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:321`",
+        "operationId": "ffl_core.customer_flags.banned_order_rows",
+        "responses": {
+          "200": {
+            "description": "{\"woo\": [names], \"gb\": [names], \"customers\": [names]} — only the Banned ones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "woo_orders": {
+                    "description": "Woo Online Order names on the page."
+                  },
+                  "gb_orders": {
+                    "description": "GunBroker Order names on the page."
+                  },
+                  "customers": {
+                    "description": "Customer names of the counter rows."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.customer_flags.find_customers_by_id_number": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "Customers holding this ID number (a licence scanned at the register).",
+        "description": "Only while FFL Settings → Store Customer ID Numbers is on (otherwise none are\nstored, and the answer is an empty list). Compared without case, spaces or dashes.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:234`",
+        "operationId": "ffl_core.customer_flags.find_customers_by_id_number",
+        "responses": {
+          "200": {
+            "description": "[{\"name\", \"customer_name\", \"customer_status\"}], at most 5.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id_number": {
+                    "type": "string",
+                    "description": "The number read from the ID."
+                  }
+                },
+                "required": [
+                  "id_number"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.customer_flags.find_possible_duplicates": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "Existing customers a new one may duplicate, for the New Customer dialog.",
+        "description": "Matches the customer's email (or an email merged into it), mobile number\n(last 10 digits) and — while the store keeps ID numbers — an ID number.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:266`",
+        "operationId": "ffl_core.customer_flags.find_possible_duplicates",
+        "responses": {
+          "200": {
+            "description": "[{\"name\", \"customer_name\", \"customer_status\", \"matched\": [\"email\" | \"phone\" | \"id_number\"]}], at most 5.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Email typed in the dialog."
+                  },
+                  "phone": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Mobile number typed in the dialog."
+                  },
+                  "id_number": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Driver licence number from a scan (ignored when ID numbers are off)."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.customer_flags.get_customer_flags": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "What the counter panel shows when this customer is picked.",
+        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:136`",
+        "operationId": "ffl_core.customer_flags.get_customer_flags",
+        "responses": {
+          "200": {
+            "description": "{\"name\", \"customer_name\", \"status\", \"status_reason\" (only when not Active), \"banned\": Banned with no open override, \"override_until\": end of an open manager override or None, \"can_override\": whether the caller may override, \"alerts\": [{\"message\", \"created_by\", \"created_on\"}] (active ones, oldest first), \"tags\": [str], \"family\": {\"primary\": {\"name\", \"customer_name\"} or None, \"relationship\", \"members\": int}, \"ids\": [{\"id_type\", \"expiry_date\", \"expired\": bool}] for ID documents expired or expiring within 30 days}. Never carries an ID number or date of birth.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer": {
+                    "type": "string",
+                    "description": "Customer name (document id)."
+                  }
+                },
+                "required": [
+                  "customer"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.customer_flags.override_customer_ban": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "Manager lets a Banned customer be served for the next 30 minutes.",
+        "description": "Opens the window every counter screen and the server-side sale gate read\n(``ban_override_until`` / ``ban_override_by``) and records who and why on the\ncustomer's timeline. The customer stays Banned.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:194`",
+        "operationId": "ffl_core.customer_flags.override_customer_ban",
+        "responses": {
+          "200": {
+            "description": "{\"customer\": name, \"override_until\": the window's end, \"by\": the manager}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer": {
+                    "type": "string",
+                    "description": "Customer name (document id); must be Banned."
+                  },
+                  "reason": {
+                    "type": "string",
+                    "description": "Why the sale is allowed (required, kept on the timeline)."
+                  }
+                },
+                "required": [
+                  "customer",
+                  "reason"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/method/ffl_core.customer_profile.get_family": {
       "post": {
         "tags": [
           "ffl_core"
         ],
         "summary": "The family a customer belongs to, for the Customer form's Family section.",
-        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_profile.py:290`",
+        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_profile.py:293`",
         "operationId": "ffl_core.customer_profile.get_family",
         "responses": {
           "200": {
@@ -10982,7 +11243,7 @@
           "ffl_core"
         ],
         "summary": "What turning off Store Customer ID Numbers would erase, for the FFL Settings confirm.",
-        "description": "**Auth (derived from code):** Requires write permission on FFL Settings (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_profile.py:128`",
+        "description": "**Auth (derived from code):** Requires write permission on FFL Settings (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_profile.py:131`",
         "operationId": "ffl_core.customer_profile.get_stored_id_counts",
         "responses": {
           "200": {
@@ -11012,7 +11273,7 @@
           "ffl_core"
         ],
         "summary": "Merge a duplicate customer into the one to keep; the duplicate is deleted.",
-        "description": "The source's alerts and ID documents are copied onto the target (identical\nrows skipped), a date of birth the target lacks is filled, a Banned source\nmakes the target Banned, and the source's own family link is carried when\nthe target has none. The source's email, the emails on its Contacts, its\nGunBroker user id and its own aliases are recorded on the target as aliases\n(values the target already has are skipped), so a later Woo / GunBroker order\ncarrying one of them lands on the target instead of starting a duplicate.\nThen ERPNext's merge-rename moves every link —\ninvoices, orders, 4473s, payments, contacts, addresses, family members — to\nthe target and deletes the source; open sales documents get the target's\ndisplay name. Refused for the Woo web-store aggregate and the walk-in customer,\nwhen both are FFL dealers with different licence numbers, when only the source\nis a dealer, when either is a register's default customer, or when the merge\nwould nest one family inside another.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/customer_profile.py:316`",
+        "description": "The source's alerts and ID documents are copied onto the target (identical\nrows skipped), a date of birth the target lacks is filled, a Banned source\nmakes the target Banned, and the source's own family link is carried when\nthe target has none. The source's email, the emails on its Contacts, its\nGunBroker user id and its own aliases are recorded on the target as aliases\n(values the target already has are skipped), so a later Woo / GunBroker order\ncarrying one of them lands on the target instead of starting a duplicate.\nThen ERPNext's merge-rename moves every link —\ninvoices, orders, 4473s, payments, contacts, addresses, family members — to\nthe target and deletes the source; open sales documents get the target's\ndisplay name. Refused for the Woo web-store aggregate and the walk-in customer,\nwhen both are FFL dealers with different licence numbers, when only the source\nis a dealer, when either is a register's default customer, or when the merge\nwould nest one family inside another.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/customer_profile.py:319`",
         "operationId": "ffl_core.customer_profile.merge_customer",
         "responses": {
           "200": {
