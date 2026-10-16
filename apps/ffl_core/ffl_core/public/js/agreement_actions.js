@@ -34,9 +34,20 @@
 		return d;
 	}
 
-	function send(customer, template, deliver) {
-		return frappe.call({ method: M + 'request_agreement', args: { customer: customer, template: template, deliver: deliver },
-			freeze: true }).then(function (r) { return r.message; });
+	// The pending copy may still have a working link — the customer could be signing
+	// on the tablet right now. Ask before a new link cancels it.
+	function send(customer, template, deliver, replace) {
+		return frappe.call({ method: M + 'request_agreement', freeze: true,
+			args: { customer: customer, template: template, deliver: deliver, replace: replace ? 1 : 0 } })
+			.then(function (r) {
+				var m = r.message || {};
+				if (!m.link_open) return m;
+				return new Promise(function (resolve) {
+					frappe.confirm(__('A signing link for this agreement is still open (until {0}); the customer may be signing it now. Make a new one? The open link will stop working.',
+						[esc(frappe.datetime.str_to_user(m.token_expires))]),
+					function () { resolve(send(customer, template, deliver, true)); });
+				});
+			});
 	}
 
 	function request(customer, template, opts) {

@@ -68,8 +68,8 @@ class _Base(FrappeTestCase):
 		self.tpl = _template(valid_days=365)
 		self.cust = _customer()
 
-	def request(self, deliver="qr", tpl=None, customer=None):
-		r = agreements.request_agreement((customer or self.cust).name, (tpl or self.tpl).name, deliver)
+	def request(self, deliver="qr", tpl=None, customer=None, replace=1):
+		r = agreements.request_agreement((customer or self.cust).name, (tpl or self.tpl).name, deliver, replace)
 		token = r["sign_url"].split("#t=", 1)[1] if r.get("sign_url") else None
 		return r, token
 
@@ -134,6 +134,21 @@ class Templates(_Base):
 		self.assertEqual(tpl.version, 2)
 		self.assertEqual(frappe.db.get_value("Customer Agreement", {"template": tpl.name}, "body_snapshot"), snapshot)
 
+	def test_an_open_link_shows_the_current_text_and_a_stale_page_cannot_sign(self):
+		r, token = self.request()
+		self.tpl.reload()
+		self.tpl.body = "<p>Revised text for {{ customer_name }}.</p>"
+		self.tpl.save()
+		with _as("Guest"):
+			# A page opened before the change: signing is refused, the copy moves to the new text.
+			with self.assertRaisesRegex(frappe.ValidationError, "text was updated"):
+				self.sign(token)
+			body = agreements.load_for_signing(token)["body_html"]
+		self.assertIn("Revised text", body)
+		self.assertEqual(frappe.db.get_value("Customer Agreement", r["name"], "template_version"), 2)
+		self.sign(token)
+		self.assertEqual(frappe.db.get_value("Customer Agreement", r["name"], "status"), "Signed")
+
 	def test_text_is_rendered_with_the_whitelisted_context_and_sanitized(self):
 		tpl = _template(body="<p>{{ customer_name }} / {{ frappe.session.user }}</p><script>alert(1)</script>")
 		cust = _customer()
@@ -165,6 +180,18 @@ class Requesting(_Base):
 		self.assertEqual(doc.sign_token_hash, agreements._hash(token))
 		self.assertNotIn(token, frappe.as_json(doc.as_dict()))
 		self.assertGreater(doc.token_expires, now_datetime() + timedelta(hours=71))
+
+	def test_an_open_link_is_not_replaced_unless_asked(self):
+		r1, old = self.request()
+		r2, none = self.request(replace=0)
+		self.assertEqual((r2["name"], r2.get("link_open"), none), (r1["name"], True, None))
+		with _as("Guest"):
+			self.assertEqual(agreements.load_for_signing(old)["title"], self.tpl.name)
+		# An expired link is replaced without asking.
+		frappe.db.set_value("Customer Agreement", r1["name"], "token_expires", now_datetime() - timedelta(minutes=1))
+		r3, new = self.request(replace=0)
+		self.assertFalse(r3.get("link_open"))
+		self.assertTrue(new)
 
 	def test_requesting_again_reuses_the_pending_copy_and_kills_the_old_link(self):
 		r1, old = self.request()
@@ -329,25 +356,33 @@ class Signing(_Base):
 			with self.assertRaises(frappe.PermissionError):
 				frappe.client.get("Customer Agreement", r["name"])
 
-	def test_rate_limit_counts_by_ip(self):
+	def test_rate_limit_counts_per_link_not_per_shop(self):
+		"""30 loads of one link from one IP; another customer's link from the same
+		IP (the shop's Wi-Fi) still opens."""
 		from werkzeug.test import EnvironBuilder
 		from werkzeug.wrappers import Request
 
 		_, token = self.request()
+		_, other = self.request(customer=_customer())
+		ip = "10.66.66." + frappe.generate_hash(length=2).encode().hex()[:2]
 		frappe.local.request = Request(EnvironBuilder(method="POST").get_environ())
-		frappe.local.request_ip = "10.66.66." + frappe.generate_hash(length=2).encode().hex()[:2]
-		frappe.local.form_dict = frappe._dict(cmd="ffl_core.agreements.load_for_signing")
-		key = frappe.cache.make_key(f"rl:ffl_core.agreements.load_for_signing:{frappe.local.request_ip}") + b":3600"
+		frappe.local.request_ip = ip
+		cmd = "ffl_core.agreements.load_for_signing"
+		keys = [frappe.cache.make_key(f"rl:{cmd}:{ident}") + b":3600" for ident in (ip, f"{ip}:{token}", f"{ip}:{other}")]
 
 		def reset():
-			frappe.cache.delete(key)
+			for k in keys:
+				frappe.cache.delete(k)
 			frappe.local.request = None
 		self.addCleanup(reset)
 		with _as("Guest"):
 			for _ in range(30):
+				frappe.local.form_dict = frappe._dict(cmd=cmd, token=token)
 				agreements.load_for_signing(token)
 			with self.assertRaises(frappe.RateLimitExceededError):
 				agreements.load_for_signing(token)
+			frappe.local.form_dict = frappe._dict(cmd=cmd, token=other)
+			self.assertTrue(agreements.load_for_signing(other)["title"])
 
 
 class Minors(_Base):

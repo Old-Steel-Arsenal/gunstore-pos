@@ -4893,7 +4893,7 @@
           "ffl_core"
         ],
         "summary": "The Agreements section of the Customer form.",
-        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:397`",
+        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:404`",
         "operationId": "ffl_core.agreements.get_customer_agreements",
         "responses": {
           "200": {
@@ -4941,7 +4941,7 @@
           "webhooks"
         ],
         "summary": "What the signing page shows for a one-time link (Guest).",
-        "description": "Only the customer's name, the agreement's title and text, and the store's\nname — nothing else about the customer. Every invalid, used, void or\nexpired link gets the same error. 30 calls an hour per IP address.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:480`",
+        "description": "Only the customer's name, the agreement's title and text, and the store's\nname — nothing else about the customer. Every invalid, used, void or\nexpired link gets the same error. 30 calls an hour per link and 600 per IP\naddress. A copy sent before its template's text changed is shown (and from\nthen on carries) the current text.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:494`",
         "operationId": "ffl_core.agreements.load_for_signing",
         "responses": {
           "200": {
@@ -4990,7 +4990,7 @@
           "ffl_core"
         ],
         "summary": "Manager records a copy the customer signed on paper.",
-        "description": "The scan must already be attached to this Customer Agreement; it is made\nprivate and becomes the signed copy. The copy turns Signed via Paper, its\nexpiry counts from the date on the paper, and who recorded it, when, and the\nfile go on the timeline. A missing signature can never be waived: without a\nsigned scan there is nothing to record.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:335`",
+        "description": "The scan must already be attached to this Customer Agreement; it is made\nprivate and becomes the signed copy. The copy turns Signed via Paper, its\nexpiry counts from the date on the paper, and who recorded it, when, and the\nfile go on the timeline. A missing signature can never be waived: without a\nsigned scan there is nothing to record.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:342`",
         "operationId": "ffl_core.agreements.record_paper_agreement",
         "responses": {
           "200": {
@@ -5063,7 +5063,7 @@
           "ffl_core"
         ],
         "summary": "Build a signed copy's PDF again (when the background job failed).",
-        "description": "**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:417`",
+        "description": "**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:424`",
         "operationId": "ffl_core.agreements.regenerate_signed_pdf",
         "responses": {
           "200": {
@@ -5111,7 +5111,7 @@
           "ffl_core"
         ],
         "summary": "Send a customer an agreement to sign.",
-        "description": "Creates the customer's Pending copy of the template, or re-issues the one\nalready pending (its old link stops working and its text is rendered again).\n\n**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:237`",
+        "description": "Creates the customer's Pending copy of the template, or re-issues the one\nalready pending (its old link stops working and its text is rendered again).\nWhile that copy still has a working link — the customer may be signing on the\ntablet right now — nothing changes unless ``replace`` is 1: the answer is\n``{\"name\", \"link_open\": True, \"token_expires\"}`` so the counter can ask first.\n\n**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:237`",
         "operationId": "ffl_core.agreements.request_agreement",
         "responses": {
           "200": {
@@ -5151,6 +5151,11 @@
                     "type": "string",
                     "description": "``qr`` — return the signing link and a QR code for the counter; ``email`` — email the link to the customer (refused when the customer has no email address); ``none`` — only create the Pending copy (a manager then records a paper copy on it).",
                     "default": "qr"
+                  },
+                  "replace": {
+                    "type": "integer",
+                    "description": "1 to re-issue even though the pending copy's link still works.",
+                    "default": 0
                   }
                 },
                 "required": [
@@ -5169,7 +5174,7 @@
           "webhooks"
         ],
         "summary": "Sign an agreement through a one-time link (Guest).",
-        "description": "Checked before anything is written: the \"I agree\" tick, the typed name, the\ntoken (same error for every invalid one), the signature (a PNG of at most\n500 KB and 2000 px with ink on it) and the age rule. A link opened as a QR\ncode at the counter is recorded as signed on a Tablet, an emailed one as\nRemote. The link is used up; the signed PDF is built and emailed afterwards.\n10 calls an hour per IP address.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:541`",
+        "description": "Checked before anything is written: the \"I agree\" tick, the typed name, the\ntoken (same error for every invalid one), the signature (a PNG of at most\n500 KB and 2000 px with ink on it) and the age rule. A link opened as a QR\ncode at the counter is recorded as signed on a Tablet, an emailed one as\nRemote. The link is used up; the signed PDF is built and emailed afterwards.\nWhen the template's text changed after the page was opened, nothing is signed\nand the signer is asked to reload and read the new text. 10 calls an hour per\nlink and 300 per IP address.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:572`",
         "operationId": "ffl_core.agreements.submit_signature",
         "responses": {
           "200": {
@@ -5243,7 +5248,7 @@
           "ffl_core"
         ],
         "summary": "Manager voids a copy (sent by mistake, signed by the wrong person).",
-        "description": "A Pending copy's link stops working. The copy is kept, marked Void, and the\nreason goes on its timeline.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:307`",
+        "description": "A Pending copy's link stops working. The copy is kept, marked Void, and the\nreason goes on its timeline.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:314`",
         "operationId": "ffl_core.agreements.void_agreement",
         "responses": {
           "200": {

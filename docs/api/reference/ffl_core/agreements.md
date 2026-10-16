@@ -18,7 +18,7 @@ The Agreements section of the Customer form.
 
 **Returns:** {"rows": [{"name", "template", "status", "signed_on", "signed_via", "expires_on", "signed_pdf"}] newest first, "can_manage": whether the caller may void or record paper copies}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:397`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:404`</sub>
 
 ## `load_for_signing`
 
@@ -30,7 +30,9 @@ What the signing page shows for a one-time link (Guest).
 
 Only the customer's name, the agreement's title and text, and the store's
 name — nothing else about the customer. Every invalid, used, void or
-expired link gets the same error. 30 calls an hour per IP address.
+expired link gets the same error. 30 calls an hour per link and 600 per IP
+address. A copy sent before its template's text changed is shown (and from
+then on carries) the current text.
 
 | arg | type | required | default | description |
 |---|---|---|---|---|
@@ -38,7 +40,7 @@ expired link gets the same error. 30 calls an hour per IP address.
 
 **Returns:** {"customer_name", "title", "body_html", "store_name", "minors_need_guardian", "minor_by_dob": true / false from the customer's date of birth, or null when the store keeps none (the page then asks)}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:480`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:494`</sub>
 
 ## `record_paper_agreement`
 
@@ -65,7 +67,7 @@ signed scan there is nothing to record.
 
 **Returns:** {"name", "status", "expires_on", "signed_pdf"}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:335`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:342`</sub>
 
 ## `regenerate_signed_pdf`
 
@@ -81,7 +83,7 @@ Build a signed copy's PDF again (when the background job failed).
 
 **Returns:** {"signed_pdf": file URL}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:417`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:424`</sub>
 
 ## `request_agreement`
 
@@ -93,12 +95,16 @@ Send a customer an agreement to sign.
 
 Creates the customer's Pending copy of the template, or re-issues the one
 already pending (its old link stops working and its text is rendered again).
+While that copy still has a working link — the customer may be signing on the
+tablet right now — nothing changes unless ``replace`` is 1: the answer is
+``{"name", "link_open": True, "token_expires"}`` so the counter can ask first.
 
 | arg | type | required | default | description |
 |---|---|---|---|---|
 | `customer` | string | yes | — | Customer name (document id). |
 | `template` | string | yes | — | Agreement Template name; must be active. |
 | `deliver` | string | no | `'qr'` | ``qr`` — return the signing link and a QR code for the counter; ``email`` — email the link to the customer (refused when the customer has no email address); ``none`` — only create the Pending copy (a manager then records a paper copy on it). |
+| `replace` | integer | no | `0` | 1 to re-issue even though the pending copy's link still works. |
 
 **Returns:** {"name": the Customer Agreement, "deliver", "token_expires"} plus, for ``qr``, "sign_url" and "qr_svg" (an SVG data URI); for ``email``, "email". The link itself is never stored.
 
@@ -117,7 +123,9 @@ token (same error for every invalid one), the signature (a PNG of at most
 500 KB and 2000 px with ink on it) and the age rule. A link opened as a QR
 code at the counter is recorded as signed on a Tablet, an emailed one as
 Remote. The link is used up; the signed PDF is built and emailed afterwards.
-10 calls an hour per IP address.
+When the template's text changed after the page was opened, nothing is signed
+and the signer is asked to reload and read the new text. 10 calls an hour per
+link and 300 per IP address.
 
 | arg | type | required | default | description |
 |---|---|---|---|---|
@@ -130,7 +138,7 @@ Remote. The link is used up; the signed PDF is built and emailed afterwards.
 
 **Returns:** {"signed": true, "store_name"}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:541`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:572`</sub>
 
 ## `void_agreement`
 
@@ -150,4 +158,4 @@ reason goes on its timeline.
 
 **Returns:** {"name", "status": "Void"}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:307`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:314`</sub>

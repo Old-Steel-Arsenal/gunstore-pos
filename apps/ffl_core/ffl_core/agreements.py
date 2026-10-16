@@ -234,11 +234,14 @@ def _qr_data_uri(url: str) -> str:
 
 
 @frappe.whitelist(methods=["POST"])
-def request_agreement(customer: str, template: str, deliver: str = "qr") -> dict:
+def request_agreement(customer: str, template: str, deliver: str = "qr", replace: int = 0) -> dict:
 	"""Send a customer an agreement to sign.
 
 	Creates the customer's Pending copy of the template, or re-issues the one
 	already pending (its old link stops working and its text is rendered again).
+	While that copy still has a working link — the customer may be signing on the
+	tablet right now — nothing changes unless ``replace`` is 1: the answer is
+	``{"name", "link_open": True, "token_expires"}`` so the counter can ask first.
 
 	Args:
 	    customer: Customer name (document id).
@@ -247,6 +250,7 @@ def request_agreement(customer: str, template: str, deliver: str = "qr") -> dict
 	        ``email`` — email the link to the customer (refused when the customer
 	        has no email address); ``none`` — only create the Pending copy (a
 	        manager then records a paper copy on it).
+	    replace: 1 to re-issue even though the pending copy's link still works.
 
 	Returns:
 	    {"name": the Customer Agreement, "deliver", "token_expires"} plus, for
@@ -270,8 +274,11 @@ def request_agreement(customer: str, template: str, deliver: str = "qr") -> dict
 	company = _default_company()
 	with atomic("request agreement"):
 		existing = frappe.db.get_value(DOCTYPE, {"customer": customer, "template": template,
-			"status": "Pending"}, "name", for_update=True)
-		doc = frappe.get_doc(DOCTYPE, existing) if existing else frappe.new_doc(DOCTYPE)
+			"status": "Pending"}, ["name", "sign_token_hash", "token_expires"], as_dict=True, for_update=True)
+		if existing and existing.sign_token_hash and existing.token_expires \
+				and get_datetime(existing.token_expires) > now_datetime() and not cint(replace):
+			return {"name": existing.name, "link_open": True, "token_expires": str(existing.token_expires)}
+		doc = frappe.get_doc(DOCTYPE, existing.name) if existing else frappe.new_doc(DOCTYPE)
 		doc.update({
 			"customer": customer, "template": template, "template_version": tpl.version or 1,
 			"company": company, "status": "Pending",
@@ -475,14 +482,23 @@ def _minor_by_dob(doc) -> bool | None:
 	return _age_on(dob, nowdate()) < ADULT_AGE if dob else None
 
 
+# Rate limits: per link (IP + token), and a wide per-IP cap. A store's tablets and
+# walk-ins' phones share one public IP on a busy range day, so the per-IP cap is
+# sized for the whole shop; the per-link limit is what stops one link being hammered.
+# (Guessing a token is not the threat: it is 256 random bits.)
+
+
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=30, seconds=3600)
+@rate_limit(limit=600, seconds=3600)
+@rate_limit(key="token", limit=30, seconds=3600)
 def load_for_signing(token: str) -> dict:
 	"""What the signing page shows for a one-time link (Guest).
 
 	Only the customer's name, the agreement's title and text, and the store's
 	name — nothing else about the customer. Every invalid, used, void or
-	expired link gets the same error. 30 calls an hour per IP address.
+	expired link gets the same error. 30 calls an hour per link and 600 per IP
+	address. A copy sent before its template's text changed is shown (and from
+	then on carries) the current text.
 
 	Args:
 	    token: The token from the link's ``#t=`` fragment.
@@ -493,6 +509,7 @@ def load_for_signing(token: str) -> dict:
 	    date of birth, or null when the store keeps none (the page then asks)}.
 	"""
 	doc = _by_token(token)
+	_refresh_text(doc)
 	needs_guardian = bool(frappe.db.get_value(TEMPLATE, doc.template, "minors_need_guardian"))
 	return {
 		"customer_name": frappe.db.get_value("Customer", doc.customer, "customer_name") or doc.customer_name,
@@ -502,6 +519,19 @@ def load_for_signing(token: str) -> dict:
 		"minors_need_guardian": needs_guardian,
 		"minor_by_dob": _minor_by_dob(doc) if needs_guardian else None,
 	}
+
+
+def _refresh_text(doc) -> bool:
+	"""Re-render a Pending copy whose template text changed since it was sent.
+
+	Returns True when the text changed (the copy now carries the current version)."""
+	tpl = frappe.get_doc(TEMPLATE, doc.template)
+	if cint(doc.template_version) == cint(tpl.version or 1):
+		return False
+	cust = frappe.get_doc("Customer", doc.customer)
+	doc.db_set({"body_snapshot": render_body(tpl, cust, doc.company), "template_version": tpl.version or 1},
+		update_modified=False)
+	return True
 
 
 def _decode_signature(signature) -> bytes:
@@ -537,7 +567,8 @@ def _decode_signature(signature) -> bytes:
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=10, seconds=3600)
+@rate_limit(limit=300, seconds=3600)
+@rate_limit(key="token", limit=10, seconds=3600)
 def submit_signature(token: str, signature: str, agreed: int, signer_name: str,
 		participant_is_minor: int = 0, signer_relationship: str = "Self") -> dict:
 	"""Sign an agreement through a one-time link (Guest).
@@ -547,7 +578,9 @@ def submit_signature(token: str, signature: str, agreed: int, signer_name: str,
 	500 KB and 2000 px with ink on it) and the age rule. A link opened as a QR
 	code at the counter is recorded as signed on a Tablet, an emailed one as
 	Remote. The link is used up; the signed PDF is built and emailed afterwards.
-	10 calls an hour per IP address.
+	When the template's text changed after the page was opened, nothing is signed
+	and the signer is asked to reload and read the new text. 10 calls an hour per
+	link and 300 per IP address.
 
 	Args:
 	    token: The token from the link's ``#t=`` fragment.
@@ -569,6 +602,10 @@ def submit_signature(token: str, signature: str, agreed: int, signer_name: str,
 	if not isinstance(signature, str) or len(signature) > MAX_SIGNATURE_CHARS:
 		frappe.throw(_("The signature is too large."))
 	doc = _by_token(token, for_update=True)
+	if _refresh_text(doc):
+		commit()   # keep the new text past the error below: the reload shows it
+		frappe.throw(_("This agreement's text was updated while the page was open. Reload the page and "
+			"read it again before signing."), title=_("Text updated"))
 	png = _decode_signature(signature)
 	needs_guardian = bool(frappe.db.get_value(TEMPLATE, doc.template, "minors_need_guardian"))
 	minor, determined = 0, None
