@@ -60,8 +60,8 @@ Manager starts pairing a tablet: a 6-digit code to type on it.
 
 What the tablet should show now (Guest, every 2 seconds).
 
-Limited per tablet (2400 an hour) and per IP address (10000 an hour, a shop's
-tablets together).
+Limited per tablet (2400 an hour) and per IP address (30000 an hour: a shop's
+tablets together, about 16 of them polling all hour).
 
 | arg | type | required | default | description |
 |---|---|---|---|---|

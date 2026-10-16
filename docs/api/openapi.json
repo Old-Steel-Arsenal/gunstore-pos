@@ -12563,7 +12563,7 @@
           "webhooks"
         ],
         "summary": "What the tablet should show now (Guest, every 2 seconds).",
-        "description": "Limited per tablet (2400 an hour) and per IP address (10000 an hour, a shop's\ntablets together).\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:161`",
+        "description": "Limited per tablet (2400 an hour) and per IP address (30000 an hour: a shop's\ntablets together, about 16 of them polling all hour).\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:161`",
         "operationId": "ffl_core.signing_terminal.terminal_poll",
         "responses": {
           "200": {

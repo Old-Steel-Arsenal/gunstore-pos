@@ -156,13 +156,13 @@ def _count_failure() -> None:
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@rate_limit(limit=10000, seconds=3600)
+@rate_limit(limit=30000, seconds=3600)
 @rate_limit(key="secret", limit=2400, seconds=3600)
 def terminal_poll(secret: str) -> dict:
 	"""What the tablet should show now (Guest, every 2 seconds).
 
-	Limited per tablet (2400 an hour) and per IP address (10000 an hour, a shop's
-	tablets together).
+	Limited per tablet (2400 an hour) and per IP address (30000 an hour: a shop's
+	tablets together, about 16 of them polling all hour).
 
 	Args:
 	    secret: The tablet's device key.
