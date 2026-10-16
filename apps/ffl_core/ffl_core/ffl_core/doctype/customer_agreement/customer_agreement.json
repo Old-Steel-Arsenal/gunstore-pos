@@ -26,6 +26,7 @@
   "recorded_by",
   "signer_ip",
   "signer_user_agent",
+  "signing_terminal",
   "section_request",
   "requested_by",
   "delivery_channel",
@@ -192,6 +193,13 @@
    "read_only": 1
   },
   {
+   "fieldname": "signing_terminal",
+   "fieldtype": "Link",
+   "options": "Signing Terminal",
+   "label": "Signing Terminal",
+   "read_only": 1
+  },
+  {
    "fieldname": "section_request",
    "fieldtype": "Section Break",
    "label": "Request",
@@ -208,9 +216,9 @@
    "fieldname": "delivery_channel",
    "fieldtype": "Select",
    "label": "Sent As",
-   "options": "\nQR\nEmail",
+   "options": "\nQR\nEmail\nTerminal",
    "read_only": 1,
-   "description": "How the signing link last went out: QR = shown at the counter, Email = sent to the customer."
+   "description": "How the signing link last went out: QR = shown at the counter, Email = sent to the customer, Terminal = sent to a paired store tablet."
   },
   {
    "fieldname": "token_expires",
@@ -270,7 +278,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-10-16 12:00:00.000000",
+ "modified": "2026-10-17 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "FFL Core",
  "name": "Customer Agreement",

@@ -1,7 +1,9 @@
 // Waivers and agreements at the counter (rules: ffl_core/agreements.py).
 //
 //   ffl.agreements.request(customer, template?) — the Request agreement dialog:
-//     • Show QR code (default): the store's tablet, or the customer's phone, scans it
+//     • Send to tablet (default once a Signing Terminal is paired): the agreement
+//       opens on the store's signing tablet by itself (ffl_core/signing_terminal.py).
+//     • Show QR code: the store's tablet, or the customer's phone, scans it
 //       and signs on the page /agreement/sign. The link works once, for 72 hours.
 //     • Email link: the same link, sent to the customer's email address.
 //     • Record paper copy (managers): opens the customer's Pending copy, where the
@@ -36,65 +38,113 @@
 
 	// The pending copy may still have a working link — the customer could be signing
 	// on the tablet right now. Ask before a new link cancels it.
-	function send(customer, template, deliver, replace) {
+	function send(customer, template, deliver, replace, terminal) {
 		return frappe.call({ method: M + 'request_agreement', freeze: true,
-			args: { customer: customer, template: template, deliver: deliver, replace: replace ? 1 : 0 } })
+			args: { customer: customer, template: template, deliver: deliver, replace: replace ? 1 : 0, terminal: terminal || null } })
 			.then(function (r) {
 				var m = r.message || {};
 				if (!m.link_open) return m;
 				return new Promise(function (resolve) {
 					frappe.confirm(__('A signing link for this agreement is still open (until {0}); the customer may be signing it now. Make a new one? The open link will stop working.',
 						[esc(frappe.datetime.str_to_user(m.token_expires))]),
-					function () { resolve(send(customer, template, deliver, true)); });
+					function () { resolve(send(customer, template, deliver, true, terminal)); });
 				});
 			});
+	}
+
+	// Which signing tablet to send to: the one used last on this computer, else the one
+	// set up for this register, else the first paired one.
+	var LAST_TERMINAL = 'ffl-agreement-terminal';
+	function pickTerminal(terminals) {
+		var paired = terminals.filter(function (t) { return t.paired; });
+		var last = null;
+		try { last = localStorage.getItem(LAST_TERMINAL); } catch (e) { /* no storage */ }
+		var profile = window.cur_pos && cur_pos.frm && cur_pos.frm.doc && cur_pos.frm.doc.pos_profile;
+		var hit = paired.filter(function (t) { return t.name === last; })[0]
+			|| paired.filter(function (t) { return profile && t.pos_profile === profile; })[0]
+			|| paired[0];
+		return hit ? hit.name : '';
 	}
 
 	function request(customer, template, opts) {
 		opts = opts || {};
 		var done = opts.done || function () {};
 		var manager = isManager();
-		var d = new frappe.ui.Dialog({
-			title: __('Request agreement'),
-			fields: [
+		var who = opts.customer_name || customer;
+		return frappe.call({ method: 'ffl_core.signing_terminal.list_terminals' })
+			.then(function (r) { return (r.message || []).filter(function (t) { return t.paired; }); },
+				function () { return []; })
+			.then(function (terminals) { return dialog(terminals); });
+
+		function dialog(terminals) {
+			var tablets = terminals.length > 0;
+			var fields = [
 				{ fieldtype: 'Link', fieldname: 'template', label: __('Agreement'), options: 'Agreement Template', reqd: 1,
 					default: template || '', get_query: function () { return { filters: { active: 1 } }; } },
-				{ fieldtype: 'HTML', fieldname: 'help', options: '<p class="text-muted small">'
-					+ __('Show QR code: the customer signs on the store tablet or their phone. Email link: they sign from home.')
-					+ (manager ? ' ' + __('Record paper copy: attach a copy the customer signed on paper.') : '') + '</p>' },
-			],
-			primary_action_label: __('Show QR code'),
-			primary_action: function (v) {
+			];
+			if (tablets) {
+				fields.push({ fieldtype: 'Select', fieldname: 'terminal', label: __('Signing tablet'),
+					options: terminals.map(function (t) { return t.name; }), default: pickTerminal(terminals) });
+			}
+			fields.push({ fieldtype: 'HTML', fieldname: 'help', options: '<p class="text-muted small">'
+				+ (tablets ? __('Send to tablet: it opens on the store tablet for the customer to sign.') + ' ' : '')
+				+ __('Show QR code: the customer scans it with a tablet or their phone. Email link: they sign from home.')
+				+ (manager ? ' ' + __('Record paper copy: attach a copy the customer signed on paper.') : '') + '</p>' });
+			var showQrCode = function (v) {
 				send(customer, v.template, 'qr').then(function (r) {
 					d.hide();
-					showQr(r, opts.customer_name || customer).onhide = done;
+					showQr(r, who).onhide = done;
 				});
-			},
-			secondary_action_label: __('Email link'),
-			secondary_action: function () {
-				var v = d.get_values();
-				if (!v) return;
+			};
+			var d = new frappe.ui.Dialog({
+				title: __('Request agreement'),
+				fields: fields,
+				primary_action_label: tablets ? __('Send to tablet') : __('Show QR code'),
+				primary_action: function (v) {
+					if (!tablets) return showQrCode(v);
+					send(customer, v.template, 'tablet', false, v.terminal).then(function (r) {
+						try { localStorage.setItem(LAST_TERMINAL, v.terminal); } catch (e) { /* no storage */ }
+						d.hide();
+						frappe.show_alert({ message: __('Sent to {0}. {1} can sign there now.', [esc(r.terminal), esc(who)]), indicator: 'green' });
+						done();
+					});
+				},
+				secondary_action_label: tablets ? __('Show QR code') : __('Email link'),
+				secondary_action: function () {
+					var v = d.get_values();
+					if (!v) return;
+					if (tablets) return showQrCode(v);
+					emailLink(v);
+				},
+			});
+			var emailLink = function (v) {
 				send(customer, v.template, 'email').then(function (r) {
 					d.hide();
 					frappe.show_alert({ message: __('Signing link emailed to {0}', [esc(r.email)]), indicator: 'green' });
 					done();
 				});
-			},
-		});
-		if (manager) {
-			d.add_custom_action(__('Record paper copy'), function () {
-				var v = d.get_values();
-				if (!v) return;
-				send(customer, v.template, 'none').then(function (r) {
-					d.hide();
-					// A new tab: the register's cart (or the customer form) stays as it is.
-					window.open('/app/customer-agreement/' + encodeURIComponent(r.name) + '?ffl_record_paper=1', '_blank');
-					done();
+			};
+			if (tablets) {
+				d.add_custom_action(__('Email link'), function () {
+					var v = d.get_values();
+					if (v) emailLink(v);
 				});
-			});
+			}
+			if (manager) {
+				d.add_custom_action(__('Record paper copy'), function () {
+					var v = d.get_values();
+					if (!v) return;
+					send(customer, v.template, 'none').then(function (r) {
+						d.hide();
+						// A new tab: the register's cart (or the customer form) stays as it is.
+						window.open('/app/customer-agreement/' + encodeURIComponent(r.name) + '?ffl_record_paper=1', '_blank');
+						done();
+					});
+				});
+			}
+			d.show();
+			return d;
 		}
-		d.show();
-		return d;
 	}
 
 	function recordPaper(frm) {
@@ -130,6 +180,31 @@
 		d.show();
 		return d;
 	}
+
+	// The register: adding an Item that needs an agreement the customer has not signed
+	// prompts right away (the submit is refused anyway: agreements.refuse_missing_required).
+	// Once per sale and agreement; after ERPNext's own add-item work, never in its way.
+	var prompted = {};
+	frappe.ui.form.on('POS Invoice Item', {
+		item_code: function (frm, cdt, cdn) {
+			var row = locals[cdt] && locals[cdt][cdn];
+			var customer = frm.doc.customer;
+			if (!row || !row.item_code || !customer || frm.doc.is_return || frm.doc.docstatus !== 0) return;
+			frappe.call({ method: M + 'missing_for_items', args: { customer: customer, item_codes: [row.item_code] } })
+				.then(function (r) {
+					(r.message || []).forEach(function (tpl) {
+						var key = (frm.doc.name || '') + '|' + customer + '|' + tpl;
+						if (prompted[key]) return;
+						prompted[key] = true;
+						setTimeout(function () {
+							frappe.confirm(__('{0} needs {1} signed before this sale can complete. Send it now?',
+								['<b>' + esc(row.item_name || row.item_code) + '</b>', '<b>' + esc(tpl) + '</b>']),
+							function () { request(customer, tpl, { customer_name: frm.doc.customer_name }); });
+						}, 300);
+					});
+				}, function () { /* a hint; the submit gate holds */ });
+		},
+	});
 
 	// Counter panel chips (customer_flags.stripHtml): click to ask for the agreement.
 	$(document).on('click', '[data-ffl-agreement-template]', function (e) {

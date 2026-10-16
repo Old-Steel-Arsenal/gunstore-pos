@@ -55,3 +55,9 @@ h1 { font-size: 28px; line-height: 1.25; margin: 4px 0; }
 	.panel { grid-column: 2; grid-row: 2; max-height: none; border-top: 0; border-left: 1px solid var(--line); }
 	.pad { width: 100%; }
 }
+/* Signing tablet (www/agreement/terminal): pairing and the waiting screen. */
+.pair-field { width: min(100%, 320px); text-align: left; }
+.pair-field input { text-align: center; font-size: 32px; letter-spacing: 0.3em; height: 64px; }
+.pair-button { width: min(100%, 320px); }
+.idle-store { font-size: 22px; margin-bottom: 8px; }
+.terminal-name { color: var(--muted); font-size: 14px; margin-top: 32px; }

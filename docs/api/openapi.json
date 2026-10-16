@@ -728,6 +728,10 @@
             "type": "string",
             "description": "Signer Device"
           },
+          "signing_terminal": {
+            "type": "string",
+            "description": "Signing Terminal (Link: Signing Terminal)"
+          },
           "requested_by": {
             "type": "string",
             "description": "Requested By (Link: User)"
@@ -736,7 +740,8 @@
             "type": "string",
             "enum": [
               "QR",
-              "Email"
+              "Email",
+              "Terminal"
             ],
             "description": "Sent As"
           },
@@ -1616,6 +1621,47 @@
         },
         "required": [
           "extension_id"
+        ]
+      },
+      "Signing_Terminal": {
+        "type": "object",
+        "description": "Custom DocType (ffl_core); CRUD via /api/resource/Signing%20Terminal — see docs/api/frappe-rest.md.",
+        "properties": {
+          "terminal_name": {
+            "type": "string",
+            "description": "Tablet Name"
+          },
+          "active": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "Active"
+          },
+          "pos_profile": {
+            "type": "string",
+            "description": "Register (Link: POS Profile)"
+          },
+          "paired_on": {
+            "type": "string",
+            "description": "Paired On"
+          },
+          "paired_by": {
+            "type": "string",
+            "description": "Paired By (Link: User)"
+          },
+          "last_seen": {
+            "type": "string",
+            "description": "Last Seen"
+          },
+          "device_secret_hash": {
+            "type": "string",
+            "description": "Device Key (hash)"
+          }
+        },
+        "required": [
+          "terminal_name"
         ]
       },
       "Storage_Floor_Plan": {
@@ -4893,7 +4939,7 @@
           "ffl_core"
         ],
         "summary": "The Agreements section of the Customer form.",
-        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:404`",
+        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:449`",
         "operationId": "ffl_core.agreements.get_customer_agreements",
         "responses": {
           "200": {
@@ -4941,7 +4987,7 @@
           "webhooks"
         ],
         "summary": "What the signing page shows for a one-time link (Guest).",
-        "description": "Only the customer's name, the agreement's title and text, and the store's\nname — nothing else about the customer. Every invalid, used, void or\nexpired link gets the same error. 30 calls an hour per link and 600 per IP\naddress. A copy sent before its template's text changed is shown (and from\nthen on carries) the current text.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:494`",
+        "description": "Only the customer's name, the agreement's title and text, and the store's\nname — nothing else about the customer. Every invalid, used, void or\nexpired link gets the same error. 30 calls an hour per link and 600 per IP\naddress. A copy sent before its template's text changed is shown (and from\nthen on carries) the current text.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:539`",
         "operationId": "ffl_core.agreements.load_for_signing",
         "responses": {
           "200": {
@@ -4984,13 +5030,65 @@
         }
       }
     },
+    "/api/method/ffl_core.agreements.missing_for_items": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "Agreements these Items require that *customer* has not signed (the register's prompt).",
+        "description": "Only the Items' own ``ffl_required_agreement``; extension providers need the\nwhole sale and are checked at submit (:func:`refuse_missing_required`).\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:203`",
+        "operationId": "ffl_core.agreements.missing_for_items",
+        "responses": {
+          "200": {
+            "description": "Active Agreement Template names still to sign (pending or expired count as unsigned).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer": {
+                    "type": "string",
+                    "description": "Customer name (document id)."
+                  },
+                  "item_codes": {
+                    "description": "Item codes in the cart."
+                  }
+                },
+                "required": [
+                  "customer",
+                  "item_codes"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/method/ffl_core.agreements.record_paper_agreement": {
       "post": {
         "tags": [
           "ffl_core"
         ],
         "summary": "Manager records a copy the customer signed on paper.",
-        "description": "The scan must already be attached to this Customer Agreement; it is made\nprivate and becomes the signed copy. The copy turns Signed via Paper, its\nexpiry counts from the date on the paper, and who recorded it, when, and the\nfile go on the timeline. A missing signature can never be waived: without a\nsigned scan there is nothing to record.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:342`",
+        "description": "The scan must already be attached to this Customer Agreement; it is made\nprivate and becomes the signed copy. The copy turns Signed via Paper, its\nexpiry counts from the date on the paper, and who recorded it, when, and the\nfile go on the timeline. A missing signature can never be waived: without a\nsigned scan there is nothing to record.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:387`",
         "operationId": "ffl_core.agreements.record_paper_agreement",
         "responses": {
           "200": {
@@ -5063,7 +5161,7 @@
           "ffl_core"
         ],
         "summary": "Build a signed copy's PDF again (when the background job failed).",
-        "description": "**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:424`",
+        "description": "**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:469`",
         "operationId": "ffl_core.agreements.regenerate_signed_pdf",
         "responses": {
           "200": {
@@ -5111,7 +5209,7 @@
           "ffl_core"
         ],
         "summary": "Send a customer an agreement to sign.",
-        "description": "Creates the customer's Pending copy of the template, or re-issues the one\nalready pending (its old link stops working and its text is rendered again).\nWhile that copy still has a working link — the customer may be signing on the\ntablet right now — nothing changes unless ``replace`` is 1: the answer is\n``{\"name\", \"link_open\": True, \"token_expires\"}`` so the counter can ask first.\n\n**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:237`",
+        "description": "Creates the customer's Pending copy of the template, or re-issues the one\nalready pending (its old link stops working and its text is rendered again).\nWhile that copy still has a working link — the customer may be signing on the\ntablet right now — nothing changes unless ``replace`` is 1: the answer is\n``{\"name\", \"link_open\": True, \"token_expires\"}`` so the counter can ask first.\n\n**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:265`",
         "operationId": "ffl_core.agreements.request_agreement",
         "responses": {
           "200": {
@@ -5149,13 +5247,20 @@
                   },
                   "deliver": {
                     "type": "string",
-                    "description": "``qr`` — return the signing link and a QR code for the counter; ``email`` — email the link to the customer (refused when the customer has no email address); ``none`` — only create the Pending copy (a manager then records a paper copy on it).",
+                    "description": "``tablet`` — send the link to a paired signing tablet (``terminal``; ``ffl_core.signing_terminal``), which opens it by itself once the request commits (a caller that never commits sends nothing); ``qr`` — return the signing link and a QR code for the counter; ``email`` — email the link to the customer (refused when the customer has no email address); ``none`` — only create the Pending copy (a manager then records a paper copy on it).",
                     "default": "qr"
                   },
                   "replace": {
                     "type": "integer",
                     "description": "1 to re-issue even though the pending copy's link still works.",
                     "default": 0
+                  },
+                  "terminal": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Signing Terminal name, for ``tablet``; must be active and paired."
                   }
                 },
                 "required": [
@@ -5174,7 +5279,7 @@
           "webhooks"
         ],
         "summary": "Sign an agreement through a one-time link (Guest).",
-        "description": "Checked before anything is written: the \"I agree\" tick, the typed name, the\ntoken (same error for every invalid one), the signature (a PNG of at most\n500 KB and 2000 px with ink on it) and the age rule. A link opened as a QR\ncode at the counter is recorded as signed on a Tablet, an emailed one as\nRemote. The link is used up; the signed PDF is built and emailed afterwards.\nWhen the template's text changed after the page was opened, nothing is signed\nand the signer is asked to reload and read the new text. 10 calls an hour per\nlink and 300 per IP address.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:572`",
+        "description": "Checked before anything is written: the \"I agree\" tick, the typed name, the\ntoken (same error for every invalid one), the signature (a PNG of at most\n500 KB and 2000 px with ink on it) and the age rule. A link opened as a QR\ncode at the counter, or on a paired signing tablet (its device key sent as\n``terminal_secret``; the copy records which tablet), is recorded as signed on\na Tablet, an emailed one as Remote. The link is used up; the signed PDF is built and emailed afterwards.\nWhen the template's text changed after the page was opened, nothing is signed\nand the signer is asked to reload and read the new text. 10 calls an hour per\nlink and 300 per IP address.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:617`",
         "operationId": "ffl_core.agreements.submit_signature",
         "responses": {
           "200": {
@@ -5228,6 +5333,13 @@
                     "type": "string",
                     "description": "Self, or Parent / Guardian when signing for a minor.",
                     "default": "Self"
+                  },
+                  "terminal_secret": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "The signing tablet's device key, when signed on one."
                   }
                 },
                 "required": [
@@ -5248,7 +5360,7 @@
           "ffl_core"
         ],
         "summary": "Manager voids a copy (sent by mistake, signed by the wrong person).",
-        "description": "A Pending copy's link stops working. The copy is kept, marked Void, and the\nreason goes on its timeline.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:314`",
+        "description": "A Pending copy's link stops working. The copy is kept, marked Void, and the\nreason goes on its timeline.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:359`",
         "operationId": "ffl_core.agreements.void_agreement",
         "responses": {
           "200": {
@@ -12311,6 +12423,182 @@
                 },
                 "required": [
                   "item_code"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.signing_terminal.list_terminals": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "Active signing tablets, for the Request agreement dialog.",
+        "description": "**Auth (derived from code):** Any authenticated user — no explicit role gate at function entry (deliberate open reads document this in Permissions).\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:82`",
+        "operationId": "ffl_core.signing_terminal.list_terminals",
+        "responses": {
+          "200": {
+            "description": "[{\"name\", \"pos_profile\", \"paired\"}], by name.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.signing_terminal.pair_terminal": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "The tablet trades a pairing code for its device key (Guest).",
+        "description": "The code works once. Any tablet paired to the same terminal before stops\nworking. 10 tries per 10 minutes per IP address; after 50 wrong codes from\nanywhere in 10 minutes, pairing pauses until the window passes.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:114`",
+        "operationId": "ffl_core.signing_terminal.pair_terminal",
+        "responses": {
+          "200": {
+            "description": "{\"secret\": the device key (shown this once), \"terminal_name\"}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "The 6 digits shown on the Signing Terminal record."
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.signing_terminal.start_pairing": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "Manager starts pairing a tablet: a 6-digit code to type on it.",
+        "description": "**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:93`",
+        "operationId": "ffl_core.signing_terminal.start_pairing",
+        "responses": {
+          "200": {
+            "description": "{\"code\", \"expires_in_minutes\", \"page\": the URL to open on the tablet}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "terminal": {
+                    "type": "string",
+                    "description": "Signing Terminal name; must be active."
+                  }
+                },
+                "required": [
+                  "terminal"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.signing_terminal.terminal_poll": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "What the tablet should show now (Guest, every 2 seconds).",
+        "description": "Limited per tablet (2400 an hour) and per IP address (30000 an hour: a shop's\ntablets together, about 16 of them polling all hour).\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/signing_terminal.py:161`",
+        "operationId": "ffl_core.signing_terminal.terminal_poll",
+        "responses": {
+          "200": {
+            "description": "{\"paired\": false} for an unknown or switched-off tablet (the page goes back to pairing); {\"paired\": true, \"token\"} when the counter sent a link (handed out once); otherwise {\"paired\": true, \"idle\": true, \"terminal_name\", \"store_name\"}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "secret": {
+                    "type": "string",
+                    "description": "The tablet's device key."
+                  }
+                },
+                "required": [
+                  "secret"
                 ]
               }
             }

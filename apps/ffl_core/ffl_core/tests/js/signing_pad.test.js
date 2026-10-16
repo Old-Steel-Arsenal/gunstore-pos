@@ -68,3 +68,23 @@ test('serverMessage: frappe errors as plain text, 429 explained', () => {
 		'Type your full name.');
 	assert.match(pad.serverMessage(null, 500), /Something went wrong/);
 });
+
+test('device key: kept, read back, cleared; broken or blocked storage reads as not paired', () => {
+	const mem = {};
+	const storage = { getItem: (k) => (k in mem ? mem[k] : null), setItem: (k, v) => { mem[k] = String(v); },
+		removeItem: (k) => { delete mem[k]; } };
+	const d = pad.device(storage);
+	assert.strictEqual(d.get(), null);
+	assert.strictEqual(d.set('s'.repeat(43), 'Counter 1 iPad'), true);
+	assert.deepStrictEqual(d.get(), { secret: 's'.repeat(43), name: 'Counter 1 iPad' });
+	d.clear();
+	assert.strictEqual(d.get(), null);
+	mem['ffl-signing-terminal'] = '{not json';
+	assert.strictEqual(d.get(), null);
+	const blocked = { getItem: () => { throw new Error('denied'); }, setItem: () => { throw new Error('denied'); },
+		removeItem: () => { throw new Error('denied'); } };
+	const b = pad.device(blocked);
+	assert.strictEqual(b.get(), null);
+	assert.strictEqual(b.set('x', 'y'), false);
+	b.clear();
+});
