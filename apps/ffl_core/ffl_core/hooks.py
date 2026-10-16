@@ -105,7 +105,7 @@ fixtures = [
 	},
 	{
 		"dt": "Email Template",
-		"filters": [["name", "in", ["Sale Receipt"]]],
+		"filters": [["name", "in", ["Sale Receipt", "Agreement Signing Link", "Agreement Signed Copy"]]],
 	},
 	{
 		"dt": "Print Format",
@@ -176,6 +176,9 @@ app_include_js = [
 	# (installClassHook) and aamva.js above; customer_quick_entry.js calls it.
 	_hashed("js/customer_flags.js"),
 	_hashed("js/customer_quick_entry.js"),
+	# ffl.agreements.request: the Request agreement dialog (QR code / email / paper)
+	# the Customer form and the counter panel's agreement chips open.
+	_hashed("js/agreement_actions.js"),
 ]
 
 doc_events = {
@@ -255,7 +258,12 @@ doc_events = {
 	"Sales Invoice": {
 		# Units a web order is waiting on are not the counter's to sell (a counter
 		# order that ships from the shelf; web orders' own invoices are skipped).
-		"before_submit": "ffl_core.compliance.web_hold.refuse_held_units",
+		"before_submit": [
+			"ffl_core.compliance.web_hold.refuse_held_units",
+			# The customer must have signed what the sale's Items (or extensions) require
+			# (agreements.refuse_missing_required; no override — sign or a paper copy).
+			"ffl_core.agreements.refuse_missing_required",
+		],
 		# Dealer firearm invoices ship from the invoice unless a DN is in
 		# play — default Update Stock on at creation (once; unchecking sticks).
 		"before_insert": [
@@ -474,6 +482,9 @@ doc_events = {
 			# The guns' half of the same refusal: the last uniform-price gun a sold
 			# online order is owed (web or GunBroker) is not the counter's to sell.
 			"ffl_core.compliance.web_hold.refuse_claimed_firearm_units",
+			# Before anything books: the customer must have signed what the sale needs
+			# (agreements.refuse_missing_required; no override — sign or a paper copy).
+			"ffl_core.agreements.refuse_missing_required",
 			"ffl_core.compliance.trade_in_credit.book_trade_ins_on_submit",
 			# Counter pickup's 4473 ticket: the gun leaves only against a settled
 			# order (the money is on the Sales Invoice, not the ticket).
@@ -703,6 +714,8 @@ after_install = [
 	"ffl_core.setup.customer_identity.ensure",
 	# Customer Profile tab (status, alerts, IDs, family) + existing customers → Active.
 	"ffl_core.setup.customer_profile.ensure",
+	# Item "Agreement Required to Buy" + the Customer form's Agreements section.
+	"ffl_core.setup.agreements.ensure",
 	"ffl_core.setup.buyer_type.ensure",
 	"ffl_core.setup.selling.ensure",
 	# Custom fields only (no Item, no Warehouse, no master) — safe at
@@ -771,6 +784,8 @@ after_migrate = [
 	"ffl_core.setup.customer_identity.ensure",
 	# Customer Profile tab (status, alerts, IDs, family) + existing customers → Active.
 	"ffl_core.setup.customer_profile.ensure",
+	# Item "Agreement Required to Buy" + the Customer form's Agreements section.
+	"ffl_core.setup.agreements.ensure",
 	"ffl_core.setup.buyer_type.ensure",
 	"ffl_core.setup.shipping_charge.ensure",
 	# Pin "Allow Negative rates for Items" on so trade-in credit
@@ -897,6 +912,8 @@ scheduler_events = {
 		# What newer extension versions the update service offers — the
 		# Extensions page's Update button. Installs nothing.
 		"ffl_core.extensions.updates.check",
+		# Signed agreements past their expiry date → Expired (agreements.py).
+		"ffl_core.agreements.expire_agreements",
 	],
 }
 

@@ -6,7 +6,9 @@ ID documents, family; rules in ``customer_profile.py``):
 * **Flags** — :func:`get_customer_flags` is what the shared counter panel
   (``public/js/customer_flags.js``) shows when a customer is picked on the POS,
   Create Order, a trade-in or Receive Goods: status, active alerts, tags, family,
-  IDs that expire within :data:`ID_EXPIRY_WARN_DAYS`. Never an ID number.
+  IDs that expire within :data:`ID_EXPIRY_WARN_DAYS`, and where the customer
+  stands with the agreements shown on the panel (``agreements.counter_panel_rows``).
+  Never an ID number.
 * **Ban gate** — a Banned customer cannot be sold to at the counter.
   :func:`refuse_banned_customer` runs on POS Invoice, Sales Invoice and Sales
   Order ``validate`` and refuses a NEW document for a Banned customer (or an
@@ -38,6 +40,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, escape_html, get_datetime, getdate, now_datetime, nowdate
 
+from ffl_core.agreements import counter_panel_rows
 from ffl_core.compliance.channel_invoice import is_channel_mirrored_invoice
 from ffl_core.customer_profile import ACTIVE, BANNED, find_customer_by_email, find_customer_by_gb_id
 from ffl_core.feature_gate import customer_id_numbers_enabled
@@ -144,7 +147,10 @@ def get_customer_flags(customer: str) -> dict:
 	    "alerts": [{"message", "created_by", "created_on"}] (active ones, oldest
 	    first), "tags": [str], "family": {"primary": {"name", "customer_name"} or
 	    None, "relationship", "members": int}, "ids": [{"id_type", "expiry_date",
-	    "expired": bool}] for ID documents expired or expiring within 30 days}.
+	    "expired": bool}] for ID documents expired or expiring within 30 days,
+	    "agreements": [{"template", "state", "expires_on", "agreement"}] for each
+	    active Agreement Template shown on the counter panel — state is signed,
+	    expiring (within 30 days), expired, pending or missing}.
 	    Never carries an ID number or date of birth.
 	"""
 	frappe.has_permission("Customer", "read", doc=customer, throw=True)
@@ -171,6 +177,7 @@ def get_customer_flags(customer: str) -> dict:
 			"relationship": doc.get("relationship") if primary else None,
 			"members": frappe.db.count("Customer", {"primary_customer": doc.name})},
 		"ids": expiring_ids(doc.get("customer_ids") or []),
+		"agreements": counter_panel_rows(doc.name),
 	}
 
 

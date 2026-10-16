@@ -25,6 +25,23 @@ app: `ffl_core` · module: FFL Core · roles: Purchase User, Stock User, System 
 | `loaded_at` | Datetime | Loaded At |  |  |
 | `live_verified_at` | Datetime | Live-Verified At |  |  |
 
+## Agreement Template
+
+app: `ffl_core` · module: FFL Core · roles: Sales Manager, Sales User, System Manager
+
+The text of a waiver or agreement customers sign.
+
+| field | type | label | reqd | options |
+|---|---|---|---|---|
+| `title` | Data | Title | ✓ |  |
+| `active` | Check | Active |  |  |
+| `version` | Int | Version |  |  |
+| `valid_days` | Int | Valid For (Days) |  |  |
+| `show_on_counter_panel` | Check | Show on Counter Panel |  |  |
+| `minors_need_guardian` | Check | Minors Need a Parent or Guardian |  |  |
+| `body` | Text Editor | Agreement Text | ✓ |  |
+| `description` | Small Text | Staff Notes |  |  |
+
 ## Caliber
 
 app: `ffl_core` · module: FFL Core · roles: Sales User, Stock User, System Manager
@@ -171,6 +188,42 @@ app: `ffl_core` · module: FFL Core · roles: Sales Manager, Sales User, Stock M
 | `customer` | Data | Customer |  |  |
 | `total` | Currency | Items Total |  |  |
 | `payload` | Long Text | Payload (JSON) |  |  |
+
+## Customer Agreement
+
+app: `ffl_core` · module: FFL Core · roles: Sales Manager, Sales User, System Manager
+
+One customer's copy of an agreement: requested, signed (on a tablet, by a link or on paper), void or expired.
+
+| field | type | label | reqd | options |
+|---|---|---|---|---|
+| `customer` | Link | Customer | ✓ | Customer |
+| `customer_name` | Data | Customer Name |  |  |
+| `company` | Link | Company |  | Company |
+| `template` | Link | Agreement | ✓ | Agreement Template |
+| `template_version` | Int | Agreement Version |  |  |
+| `status` | Select | Status |  | Pending, Signed, Void, Expired |
+| `expires_on` | Date | Expires On |  |  |
+| `signed_on` | Datetime | Signed On |  |  |
+| `signed_via` | Select | Signed Via |  | , Tablet, Remote, Paper |
+| `signer_name` | Data | Signed By |  |  |
+| `signer_relationship` | Select | Signer Is |  | , Self, Parent, Guardian |
+| `participant_is_minor` | Check | Participant Under 18 |  |  |
+| `minor_determined_by` | Select | Age Taken From |  | , Date of Birth, Self-declared, Paper |
+| `signature` | Attach Image | Signature |  |  |
+| `signed_pdf` | Attach | Signed Copy (PDF) |  |  |
+| `paper_signed_on` | Date | Date on Paper |  |  |
+| `recorded_by` | Link | Paper Copy Recorded By |  | User |
+| `signer_ip` | Data | Signer IP |  |  |
+| `signer_user_agent` | Small Text | Signer Device |  |  |
+| `requested_by` | Link | Requested By |  | User |
+| `delivery_channel` | Select | Sent As |  | , QR, Email |
+| `token_expires` | Datetime | Link Expires |  |  |
+| `sign_token_hash` | Data | Sign Token Hash |  |  |
+| `void_reason` | Small Text | Void Reason |  |  |
+| `reference_doctype` | Link | Reference Type |  | DocType |
+| `reference_name` | Dynamic Link | Reference |  | reference_doctype |
+| `body_snapshot` | Long Text | Text |  |  |
 
 ## Customer Alert
 

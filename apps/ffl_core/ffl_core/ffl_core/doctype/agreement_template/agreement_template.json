@@ -1,0 +1,126 @@
+{
+ "actions": [],
+ "creation": "2026-10-16 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "active",
+  "version",
+  "column_break_settings",
+  "valid_days",
+  "show_on_counter_panel",
+  "minors_need_guardian",
+  "section_body",
+  "body",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "active",
+   "fieldtype": "Check",
+   "label": "Active",
+   "default": "1",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "version",
+   "fieldtype": "Int",
+   "label": "Version",
+   "default": "1",
+   "read_only": 1,
+   "in_list_view": 1,
+   "description": "Goes up when the text changes after someone has signed it. Signed copies keep the text they signed; they are not asked to sign again."
+  },
+  {
+   "fieldname": "column_break_settings",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "valid_days",
+   "fieldtype": "Int",
+   "label": "Valid For (Days)",
+   "default": "0",
+   "non_negative": 1,
+   "description": "0 = never expires. A range waiver is usually 365."
+  },
+  {
+   "fieldname": "show_on_counter_panel",
+   "fieldtype": "Check",
+   "label": "Show on Counter Panel",
+   "default": "0",
+   "description": "Show whether the customer has signed it when they are picked at the counter."
+  },
+  {
+   "fieldname": "minors_need_guardian",
+   "fieldtype": "Check",
+   "label": "Minors Need a Parent or Guardian",
+   "default": "0",
+   "description": "A participant under 18 cannot sign alone: a parent or guardian signs for them."
+  },
+  {
+   "fieldname": "section_body",
+   "fieldtype": "Section Break",
+   "label": "Text"
+  },
+  {
+   "fieldname": "body",
+   "fieldtype": "Text Editor",
+   "label": "Agreement Text",
+   "reqd": 1,
+   "description": "Placeholders: {{ customer_name }}, {{ first_name }}, {{ date }}, {{ store_name }}, {{ store_address }}, {{ valid_days }}."
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Staff Notes",
+   "description": "When the counter should ask for it. Never shown to the customer."
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-10-16 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FFL Core",
+ "name": "Agreement Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "create": 1,
+   "read": 1,
+   "write": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Sales Manager",
+   "create": 1,
+   "read": 1,
+   "write": 1,
+   "report": 1
+  },
+  {
+   "role": "Sales User",
+   "read": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "field:title",
+ "naming_rule": "By fieldname",
+ "title_field": "title",
+ "track_changes": 1,
+ "description": "The text of a waiver or agreement customers sign."
+}
