@@ -109,12 +109,14 @@
 	var api = ffl.customerFlags;
 	var METHOD = 'ffl_core.customer_flags.';
 	var cache = {};       // customer → last flags (the POS strip reads it)
+	var fetchedAt = {};   // customer → when its flags were read (ms)
+	var CACHE_MS = 60000; // a resumed draft re-reads flags older than this
 	var inflight = {};    // customer → pending check (a link fires change more than once)
 	var alerted = {};     // key → true once its alerts were shown
 
 	function fetchFlags(customer) {
 		return frappe.call({ method: METHOD + 'get_customer_flags', args: { customer: customer } })
-			.then(function (r) { cache[customer] = r.message; return r.message; });
+			.then(function (r) { cache[customer] = r.message; fetchedAt[customer] = Date.now(); return r.message; });
 	}
 
 	function showAlerts(flags, key) {
@@ -221,7 +223,10 @@
 		var key = (opts && opts.key) || customer;
 		return fetchFlags(customer).then(function (flags) {
 			if (!flags) return;
-			if (flags.status === 'Banned') {
+			// The Link fires change more than once per pick: one notice per pick.
+			if (flags.status === 'Banned' && !alerted['banned|' + key]) {
+				alerted['banned|' + key] = true;
+				setTimeout(function () { delete alerted['banned|' + key]; }, 2000);
 				frappe.msgprint({
 					title: __('Banned customer'), indicator: 'red',
 					message: __('{0} is Banned. The gun is still received into custody for them; a manager decides at pickup.',
@@ -351,9 +356,9 @@
 					if (html) cart.$customer_section.find('.customer-details').first().append(html);
 				};
 				paint();
-				// A resumed held draft (load_invoice) never fires the customer event, so
-				// nothing fetched its flags yet: fetch once, then paint if still showing.
-				if (c && !cache[c]) {
+				// A resumed held draft (load_invoice) never fires the customer event, so its
+				// flags may be missing or old: read them again, then paint if still showing.
+				if (c && !(cache[c] && Date.now() - (fetchedAt[c] || 0) < CACHE_MS)) {
 					fetchFlags(c).then(function () {
 						if (cart.customer_info && cart.customer_info.customer === c) paint();
 					}, function () { /* the strip is a hint */ });

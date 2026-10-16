@@ -122,8 +122,8 @@ def refuse_banned_customer(doc, method=None) -> None:
 	if is_blocked(customer):
 		name = frappe.db.get_value("Customer", customer, "customer_name") or customer
 		frappe.throw(_("{0} is Banned. A manager must open an override first: pick the "
-			"customer on the register and choose Override ban (30 min), then save this {1} "
-			"again.").format(
+			"customer on a counter screen (register or Create Order) and choose Override ban "
+			"(30 min), then save this {1} again.").format(
 			frappe.bold(escape_html(name)), _(doc.doctype)), title=_("Banned customer"))
 
 
