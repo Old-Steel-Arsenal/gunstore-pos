@@ -171,6 +171,10 @@ app_include_js = [
 	# aamva.js parses a driver-licence PDF417 payload (pure); customer_quick_entry.js
 	# subclasses ERPNext's CustomerQuickEntryForm (name parts once + Scan ID).
 	_hashed("js/aamva.js"),
+	# customer_flags.js: the counter customer panel (Banned box + manager override,
+	# alerts, status strip, Scan ID lookup, duplicate check) — needs pos_tender_guard.js
+	# (installClassHook) and aamva.js above; customer_quick_entry.js calls it.
+	_hashed("js/customer_flags.js"),
 	_hashed("js/customer_quick_entry.js"),
 ]
 
@@ -276,6 +280,9 @@ doc_events = {
 			"ffl_core.compliance.locked_lines.pin_locked_lines",
 		],
 		"validate": [
+			# No counter sale to a Banned customer without a manager's open override
+			# (customer_flags.refuse_banned_customer; returns and channel mirrors pass).
+			"ffl_core.customer_flags.refuse_banned_customer",
 			# Owner policy: consignment guns are never returnable — block before
 			# any other validation bothers running. See the function's own
 			# docstring for why this fires on every validate, not just submit.
@@ -351,6 +358,9 @@ doc_events = {
 		# A new order's freight tax basis from FFL Settings.
 		"before_insert": "ffl_core.compliance.shipping_charge.stamp_shipping_tax_basis",
 		"validate": [
+			# No counter sale to a Banned customer without a manager's open override
+			# (customer_flags.refuse_banned_customer; returns and channel mirrors pass).
+			"ffl_core.customer_flags.refuse_banned_customer",
 			"ffl_core.compliance.firearm.require_serial_for_firearm",
 			"ffl_core.compliance.interstate_tax.apply_interstate_tax",
 			# Keep after apply_interstate_tax — see the Sales Invoice note above.
@@ -414,6 +424,9 @@ doc_events = {
 		# webhook-owned 4473 fields on a Draft save. Restores them from the DB.
 		"before_save": "ffl_core.compliance.webhook_fields.protect_webhook_4473_fields",
 		"validate": [
+			# No counter sale to a Banned customer without a manager's open override
+			# (customer_flags.refuse_banned_customer; returns and channel mirrors pass).
+			"ffl_core.customer_flags.refuse_banned_customer",
 			# Owner policy: consignment guns are never returnable — block before
 			# any other validation bothers running. See the function's own
 			# docstring for why this fires on every validate, not just submit.
