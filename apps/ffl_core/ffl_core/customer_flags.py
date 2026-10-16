@@ -78,10 +78,7 @@ def guard_ban_fields(doc) -> None:
 	fields always keep their stored value on a save (only
 	:func:`override_customer_ban` writes them); changing to or from Banned, or a
 	Banned customer's reason, needs a manager (Administrator holds every role).
-	``flags.ignore_ban_guard`` is for server code that already checked.
 	"""
-	if doc.flags.get("ignore_ban_guard"):
-		return
 	before = None if doc.is_new() else doc.get_doc_before_save()
 	# Put back whatever is stored: a form loaded before an override was opened
 	# would otherwise erase it on save (the override does not bump `modified`).
@@ -124,8 +121,9 @@ def refuse_banned_customer(doc, method=None) -> None:
 			return
 	if is_blocked(customer):
 		name = frappe.db.get_value("Customer", customer, "customer_name") or customer
-		frappe.throw(_("{0} is Banned. A manager must approve the sale at the counter "
-			"(Override ban) before this {1} can be saved.").format(
+		frappe.throw(_("{0} is Banned. A manager must open an override first: pick the "
+			"customer on the register and choose Override ban (30 min), then save this {1} "
+			"again.").format(
 			frappe.bold(escape_html(name)), _(doc.doctype)), title=_("Banned customer"))
 
 

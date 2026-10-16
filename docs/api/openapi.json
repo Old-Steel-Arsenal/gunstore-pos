@@ -10934,7 +10934,7 @@
           "ffl_core"
         ],
         "summary": "Which Pending Order rows belong to a Banned customer, for the page's red badge.",
-        "description": "A web or GunBroker order is booked to a customer only once it has shipped, so\nits buyer is looked up the way that booking will: a Woo order by its billing\nemail (customer email, then merged-email alias); a GunBroker order by its linked\ncustomer, then the buyer's GunBroker id (field, then alias), then email.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:321`",
+        "description": "A web or GunBroker order is booked to a customer only once it has shipped, so\nits buyer is looked up the way that booking will: a Woo order by its billing\nemail (customer email, then merged-email alias); a GunBroker order by its linked\ncustomer, then the buyer's GunBroker id (field, then alias), then email.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:319`",
         "operationId": "ffl_core.customer_flags.banned_order_rows",
         "responses": {
           "200": {
@@ -10984,7 +10984,7 @@
           "ffl_core"
         ],
         "summary": "Customers holding this ID number (a licence scanned at the register).",
-        "description": "Only while FFL Settings → Store Customer ID Numbers is on (otherwise none are\nstored, and the answer is an empty list). Compared without case, spaces or dashes.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:234`",
+        "description": "Only while FFL Settings → Store Customer ID Numbers is on (otherwise none are\nstored, and the answer is an empty list). Compared without case, spaces or dashes.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:232`",
         "operationId": "ffl_core.customer_flags.find_customers_by_id_number",
         "responses": {
           "200": {
@@ -11032,7 +11032,7 @@
           "ffl_core"
         ],
         "summary": "Existing customers a new one may duplicate, for the New Customer dialog.",
-        "description": "Matches the customer's email (or an email merged into it), mobile number\n(last 10 digits) and — while the store keeps ID numbers — an ID number.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:266`",
+        "description": "Matches the customer's email (or an email merged into it), mobile number\n(last 10 digits) and — while the store keeps ID numbers — an ID number.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:264`",
         "operationId": "ffl_core.customer_flags.find_possible_duplicates",
         "responses": {
           "200": {
@@ -11094,7 +11094,7 @@
           "ffl_core"
         ],
         "summary": "What the counter panel shows when this customer is picked.",
-        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:136`",
+        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:134`",
         "operationId": "ffl_core.customer_flags.get_customer_flags",
         "responses": {
           "200": {
@@ -11142,7 +11142,7 @@
           "ffl_core"
         ],
         "summary": "Manager lets a Banned customer be served for the next 30 minutes.",
-        "description": "Opens the window every counter screen and the server-side sale gate read\n(``ban_override_until`` / ``ban_override_by``) and records who and why on the\ncustomer's timeline. The customer stays Banned.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:194`",
+        "description": "Opens the window every counter screen and the server-side sale gate read\n(``ban_override_until`` / ``ban_override_by``) and records who and why on the\ncustomer's timeline. The customer stays Banned.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:192`",
         "operationId": "ffl_core.customer_flags.override_customer_ban",
         "responses": {
           "200": {

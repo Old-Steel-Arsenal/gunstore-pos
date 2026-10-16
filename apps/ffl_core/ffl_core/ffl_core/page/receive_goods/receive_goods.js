@@ -555,7 +555,11 @@ class ReceiveGoodsApp {
 				fieldname: 'transfer_for_customer',
 				description: __('Inbound customer transfer: who picks this gun up. '
 					+ 'Feeds the Pending Transfer Pickups report — leave blank for store stock.'),
-				change: () => this._guardCustomer('transfer_for_customer'),
+				// A transfer gun arrives either way: warn about a Banned owner, never clear.
+				change: () => {
+					const cf = window.ffl && ffl.customerFlags;
+					if (cf && cf.warn) cf.warn(this.fields.transfer_for_customer.get_value());
+				},
 			}),
 			seller_first_name: f('#f-seller_first_name', {
 				label: __('Seller First Name'), fieldtype: 'Data', fieldname: 'seller_first_name',

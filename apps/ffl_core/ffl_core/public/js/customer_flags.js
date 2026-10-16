@@ -1,7 +1,8 @@
 // Counter customer panel: what the clerk must know the moment a customer is picked.
 //
-// One shared module for the four places a counter screen picks a customer — the
-// POS register, Create Order, the trade-in dialog and Receive Goods:
+// One shared module for the places a counter screen picks a customer — the POS
+// register, Create Order, the trade-in dialog and Receive Goods' seller (its
+// transfer owner only gets warn(): the gun arrives either way):
 //   ffl.customerFlags.check(customer, {key}) → Promise<boolean>
 // reads ffl_core.customer_flags.get_customer_flags and
 //   • Banned (no open manager override): a red box; the clerk cannot go on. A
@@ -212,6 +213,26 @@
 		});
 	}
 
+	// Warn only, never clear: for a pick that records a fact rather than a sale (a
+	// customer's transfer gun arriving at Receive Goods comes in either way). A
+	// Banned customer gets a red notice; alerts show as usual.
+	function warn(customer, opts) {
+		if (!customer) return Promise.resolve();
+		var key = (opts && opts.key) || customer;
+		return fetchFlags(customer).then(function (flags) {
+			if (!flags) return;
+			if (flags.status === 'Banned') {
+				frappe.msgprint({
+					title: __('Banned customer'), indicator: 'red',
+					message: __('{0} is Banned. The gun is still received into custody for them; a manager decides at pickup.',
+						['<b>' + api.escText(flags.customer_name) + '</b>'])
+						+ (flags.status_reason ? '<p>' + __('Reason') + ': ' + api.escText(flags.status_reason) + '</p>' : ''),
+				});
+			}
+			showAlerts(flags, key);
+		}, function () { /* a hint only */ });
+	}
+
 	// ---- New Customer: possible duplicates --------------------------------
 
 	// Promise<{use: name} | {create: true}>.
@@ -323,10 +344,20 @@
 		proto.update_customer_section = function () {
 			var out = update.apply(this, arguments);
 			try {
-				var c = this.customer_info && this.customer_info.customer;
-				var html = c && cache[c] ? api.stripHtml(cache[c], __) : '';
-				this.$customer_section.find('.ffl-customer-flags').remove();
-				if (html) this.$customer_section.find('.customer-details').first().append(html);
+				var cart = this, c = this.customer_info && this.customer_info.customer;
+				var paint = function () {
+					var html = c && cache[c] ? api.stripHtml(cache[c], __) : '';
+					cart.$customer_section.find('.ffl-customer-flags').remove();
+					if (html) cart.$customer_section.find('.customer-details').first().append(html);
+				};
+				paint();
+				// A resumed held draft (load_invoice) never fires the customer event, so
+				// nothing fetched its flags yet: fetch once, then paint if still showing.
+				if (c && !cache[c]) {
+					fetchFlags(c).then(function () {
+						if (cart.customer_info && cart.customer_info.customer === c) paint();
+					}, function () { /* the strip is a hint */ });
+				}
 			} catch (e) { /* never break the cart */ }
 			return out;
 		};
@@ -375,7 +406,7 @@
 	else wire();
 
 	Object.assign(api, {
-		check: check, guardControl: guardControl, fetch: fetchFlags,
+		check: check, guardControl: guardControl, warn: warn, fetch: fetchFlags,
 		strip: function (flags) { return api.stripHtml(flags, __); },
 		confirmNotDuplicate: confirmNotDuplicate, scanForCustomer: scanForCustomer, patchCart: patchCart,
 	});
