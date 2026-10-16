@@ -238,7 +238,7 @@
 	// Promise<customer name | null>.
 	function scanForCustomer() {
 		return new Promise(function (resolve) {
-			var result = null, timer = null;
+			var result = null, timer = null, picking = false, restoreScanner = function () {};
 			var d = new frappe.ui.Dialog({
 				title: __('Find customer by ID'),
 				fields: [{ fieldtype: 'Small Text', fieldname: 'scan', label: __('Scan the barcode on the back of the licence') }],
@@ -265,12 +265,15 @@
 							primary_action: function (v) { result = v.name; pick.hide(); },
 						});
 						pick.onhide = function () { resolve(result); };
-						d.onhide = null;
+						picking = true;   // the picker resolves instead
 						d.hide();
 						pick.show();
 					});
 			};
-			d.onhide = function () { resolve(result); };
+			d.onhide = function () {
+				restoreScanner();
+				if (!picking) resolve(result);
+			};
 			d.show();
 			var $in = d.fields_dict.scan.$input;
 			// Same scanner handling as the New Customer dialog: keep the POS item
@@ -279,10 +282,8 @@
 			if (window.onScan && data && data.options) {
 				var previous = data.options.ignoreIfFocusOn;
 				onScan.setOptions(document, { ignoreIfFocusOn: 'textarea' });
-				var restore = d.onhide;
-				d.onhide = function () {
+				restoreScanner = function () {
 					try { onScan.setOptions(document, { ignoreIfFocusOn: previous }); } catch (e) { /* ignore */ }
-					return restore && restore.apply(this, arguments);
 				};
 			}
 			$in.on('input', function () {
