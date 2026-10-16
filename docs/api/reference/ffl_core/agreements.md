@@ -18,7 +18,7 @@ The Agreements section of the Customer form.
 
 **Returns:** {"rows": [{"name", "template", "status", "signed_on", "signed_via", "expires_on", "signed_pdf"}] newest first, "can_manage": whether the caller may void or record paper copies}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:396`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:397`</sub>
 
 ## `load_for_signing`
 
@@ -38,7 +38,7 @@ expired link gets the same error. 30 calls an hour per IP address.
 
 **Returns:** {"customer_name", "title", "body_html", "store_name", "minors_need_guardian", "minor_by_dob": true / false from the customer's date of birth, or null when the store keeps none (the page then asks)}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:479`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:480`</sub>
 
 ## `record_paper_agreement`
 
@@ -65,7 +65,7 @@ signed scan there is nothing to record.
 
 **Returns:** {"name", "status", "expires_on", "signed_pdf"}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:334`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:335`</sub>
 
 ## `regenerate_signed_pdf`
 
@@ -81,7 +81,7 @@ Build a signed copy's PDF again (when the background job failed).
 
 **Returns:** {"signed_pdf": file URL}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:416`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:417`</sub>
 
 ## `request_agreement`
 
@@ -102,7 +102,7 @@ already pending (its old link stops working and its text is rendered again).
 
 **Returns:** {"name": the Customer Agreement, "deliver", "token_expires"} plus, for ``qr``, "sign_url" and "qr_svg" (an SVG data URI); for ``email``, "email". The link itself is never stored.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:236`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:237`</sub>
 
 ## `submit_signature`
 
@@ -130,7 +130,7 @@ Remote. The link is used up; the signed PDF is built and emailed afterwards.
 
 **Returns:** {"signed": true, "store_name"}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:540`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:541`</sub>
 
 ## `void_agreement`
 
@@ -150,4 +150,4 @@ reason goes on its timeline.
 
 **Returns:** {"name", "status": "Void"}.
 
-<sub>`apps/ffl_core/ffl_core/agreements.py:306`</sub>
+<sub>`apps/ffl_core/ffl_core/agreements.py:307`</sub>
