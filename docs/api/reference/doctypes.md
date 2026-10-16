@@ -216,8 +216,9 @@ One customer's copy of an agreement: requested, signed (on a tablet, by a link o
 | `recorded_by` | Link | Paper Copy Recorded By |  | User |
 | `signer_ip` | Data | Signer IP |  |  |
 | `signer_user_agent` | Small Text | Signer Device |  |  |
+| `signing_terminal` | Link | Signing Terminal |  | Signing Terminal |
 | `requested_by` | Link | Requested By |  | User |
-| `delivery_channel` | Select | Sent As |  | , QR, Email |
+| `delivery_channel` | Select | Sent As |  | , QR, Email, Terminal |
 | `token_expires` | Datetime | Link Expires |  |  |
 | `sign_token_hash` | Data | Sign Token Hash |  |  |
 | `void_reason` | Small Text | Void Reason |  |  |
@@ -476,6 +477,22 @@ One row per extension app on this bench: what it is, whether it is installed on 
 | `latest_requires_core` | Data | It Requires Core |  |  |
 | `latest_sha256` | Data | Its SHA-256 |  |  |
 | `latest_checked_at` | Datetime | Last Checked For Updates |  |  |
+
+## Signing Terminal
+
+app: `ffl_core` · module: FFL Core · roles: Sales Manager, Sales User, System Manager
+
+A store tablet paired to sign agreements: the counter sends an agreement to it and the customer signs there.
+
+| field | type | label | reqd | options |
+|---|---|---|---|---|
+| `terminal_name` | Data | Tablet Name | ✓ |  |
+| `active` | Check | Active |  |  |
+| `pos_profile` | Link | Register |  | POS Profile |
+| `paired_on` | Datetime | Paired On |  |  |
+| `paired_by` | Link | Paired By |  | User |
+| `last_seen` | Datetime | Last Seen |  |  |
+| `device_secret_hash` | Data | Device Key (hash) |  |  |
 
 ## Storage Floor Plan
 

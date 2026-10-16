@@ -1,4 +1,5 @@
-// Signature pad for the agreement signing page (www/agreement/sign.html).
+// Signature pad for the agreement signing page (www/agreement/sign.html), plus
+// the paired signing tablet's device key (www/agreement/terminal.html).
 //
 // Made for tablets first: fingers, Apple Pencil (iPad Safari), S Pen / stylus
 // (Android Chrome) and a mouse all arrive as Pointer Events. The pad keeps the
@@ -200,8 +201,27 @@
 		};
 	}
 
+	// The paired tablet's device key (www/agreement/terminal), kept in this browser.
+	// `storage` is localStorage in the browser; every access is guarded (a private
+	// window or blocked storage just means "not paired").
+	var DEVICE_KEY = 'ffl-signing-terminal';
+	function device(storage) {
+		return {
+			get: function () {
+				try {
+					var v = JSON.parse(storage.getItem(DEVICE_KEY) || 'null');
+					return v && typeof v.secret === 'string' ? v : null;
+				} catch (e) { return null; }
+			},
+			set: function (secret, name) {
+				try { storage.setItem(DEVICE_KEY, JSON.stringify({ secret: secret, name: name || '' })); return true; } catch (e) { return false; }
+			},
+			clear: function () { try { storage.removeItem(DEVICE_KEY); } catch (e) { /* nothing to clear */ } },
+		};
+	}
+
 	return {
-		EXPORT: EXPORT, MIN_SPAN: MIN_SPAN,
+		EXPORT: EXPORT, MIN_SPAN: MIN_SPAN, device: device,
 		normalize: normalize, backingSize: backingSize, toPixels: toPixels, bbox: bbox, hasInk: hasInk,
 		lineWidth: lineWidth, draw: draw, serverMessage: serverMessage, attach: attach,
 	};

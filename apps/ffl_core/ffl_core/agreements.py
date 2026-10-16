@@ -6,8 +6,9 @@ An **Agreement Template** holds the text (a range waiver, a rental agreement); a
 * **Request** — :func:`request_agreement` (counter) creates the customer's Pending
   copy, or re-issues the one already pending (the old link stops working), with the
   text rendered for this customer and frozen on the copy (``body_snapshot``). It
-  hands out a one-time signing link: shown as a QR code at the counter (the store's
-  tablet or the customer's phone scans it) or emailed to the customer. The link's
+  hands out a one-time signing link: sent to a paired signing tablet, which opens
+  it by itself (``ffl_core.signing_terminal``), shown as a QR code at the counter
+  (a tablet or the customer's phone scans it) or emailed to the customer. The link's
   token is 256 random bits; only its sha256 is stored, and it works for
   :data:`TOKEN_HOURS`.
 * **Sign** — the page ``/agreement/sign#t=<token>`` (``www/agreement/sign.*``, the
@@ -31,6 +32,7 @@ An **Agreement Template** holds the text (a range waiver, a rental agreement); a
   :class:`AgreementRequired` for an extension that needs a signature first.
   :func:`expire_agreements` (daily) turns copies past ``expires_on`` to Expired.
 * **Sale gate** — an Item can name the agreement its buyer must have signed
+  (the register prompts when such an Item is added: :func:`missing_for_items`)
   (``Item.ffl_required_agreement``, ``setup/agreements.py``), and extensions can add
   more through the ``gunshop_required_agreements`` hook. :func:`refuse_missing_required`
   refuses to submit a counter sale (POS Invoice / Sales Invoice) until the customer
@@ -75,7 +77,7 @@ _COPY_EMAIL = "Agreement Signed Copy"
 _PDF_TEMPLATE = "templates/agreement/agreement_pdf.html"
 # Every invalid token gets this, whatever the reason (the reason goes to the log).
 INVALID_LINK = "This signing link is not valid any more. Ask the store for a new one."
-DELIVERIES = ("qr", "email", "none")
+DELIVERIES = ("tablet", "qr", "email", "none")
 RELATIONSHIPS = ("Self", "Parent", "Guardian")
 
 
@@ -197,6 +199,32 @@ def required_templates(doc) -> list[str]:
 	return [n for n in names if n in active]
 
 
+@frappe.whitelist()
+def missing_for_items(customer: str, item_codes: list | str) -> list[str]:
+	"""Agreements these Items require that *customer* has not signed (the register's prompt).
+
+	Only the Items' own ``ffl_required_agreement``; extension providers need the
+	whole sale and are checked at submit (:func:`refuse_missing_required`).
+
+	Args:
+	    customer: Customer name (document id).
+	    item_codes: Item codes in the cart.
+
+	Returns:
+	    Active Agreement Template names still to sign (pending or expired count as unsigned).
+	"""
+	frappe.has_permission("Customer", "read", doc=customer, throw=True)
+	codes = frappe.parse_json(item_codes) if isinstance(item_codes, str) else (item_codes or [])
+	codes = [c for c in codes if isinstance(c, str)][:200]
+	if not codes or not frappe.db.has_column("Item", "ffl_required_agreement"):
+		return []
+	names = list(dict.fromkeys(frappe.get_all("Item", filters={"name": ("in", codes),
+		"ffl_required_agreement": ("is", "set")}, pluck="ffl_required_agreement")))
+	active = set(frappe.get_all(TEMPLATE, filters={"name": ("in", names), "active": 1}, pluck="name")) if names else set()
+	return [n for n in names if n in active
+		and agreement_status(customer, n)["state"] not in ("signed", "expiring")]
+
+
 def refuse_missing_required(doc, method=None) -> None:
 	"""POS Invoice / Sales Invoice before_submit: the customer must have signed what the sale needs.
 
@@ -234,7 +262,8 @@ def _qr_data_uri(url: str) -> str:
 
 
 @frappe.whitelist(methods=["POST"])
-def request_agreement(customer: str, template: str, deliver: str = "qr", replace: int = 0) -> dict:
+def request_agreement(customer: str, template: str, deliver: str = "qr", replace: int = 0,
+		terminal: str | None = None) -> dict:
 	"""Send a customer an agreement to sign.
 
 	Creates the customer's Pending copy of the template, or re-issues the one
@@ -246,11 +275,14 @@ def request_agreement(customer: str, template: str, deliver: str = "qr", replace
 	Args:
 	    customer: Customer name (document id).
 	    template: Agreement Template name; must be active.
-	    deliver: ``qr`` — return the signing link and a QR code for the counter;
+	    deliver: ``tablet`` — send the link to a paired signing tablet
+	        (``terminal``; ``ffl_core.signing_terminal``), which opens it by itself;
+	        ``qr`` — return the signing link and a QR code for the counter;
 	        ``email`` — email the link to the customer (refused when the customer
 	        has no email address); ``none`` — only create the Pending copy (a
 	        manager then records a paper copy on it).
 	    replace: 1 to re-issue even though the pending copy's link still works.
+	    terminal: Signing Terminal name, for ``tablet``; must be active and paired.
 
 	Returns:
 	    {"name": the Customer Agreement, "deliver", "token_expires"} plus, for
@@ -266,6 +298,11 @@ def request_agreement(customer: str, template: str, deliver: str = "qr", replace
 		frappe.throw(_("{0} is switched off.").format(escape_html(template)))
 	cust = frappe.get_doc("Customer", customer)
 	email = (cust.get("email_id") or "").strip()
+	if deliver == "tablet":
+		row = frappe.db.get_value("Signing Terminal", terminal or "", ["active", "device_secret_hash"], as_dict=True)
+		if not row or not row.active or not row.device_secret_hash:
+			frappe.throw(_("{0} is not a paired, active signing tablet. Pair it on its Signing Terminal record, or "
+				"show the QR code instead.").format(escape_html(terminal or "")), title=_("Signing tablet"))
 	if deliver == "email" and not email:
 		frappe.throw(_("{0} has no email address. Show the QR code instead, or add an email to the customer.")
 			.format(escape_html(cust.customer_name)), title=_("No email address"))
@@ -284,7 +321,7 @@ def request_agreement(customer: str, template: str, deliver: str = "qr", replace
 			"company": company, "status": "Pending",
 			"body_snapshot": render_body(tpl, cust, company),
 			"sign_token_hash": _hash(token) if token else None, "token_expires": expires,
-			"delivery_channel": {"qr": "QR", "email": "Email"}.get(deliver),
+			"delivery_channel": {"tablet": "Terminal", "qr": "QR", "email": "Email"}.get(deliver),
 			"requested_by": frappe.session.user,
 		})
 		doc.flags.via_agreements = True
@@ -293,6 +330,13 @@ def request_agreement(customer: str, template: str, deliver: str = "qr", replace
 	if not token:
 		return out
 	url = get_url("/agreement/sign#t=" + token)
+	if deliver == "tablet":
+		from ffl_core import signing_terminal
+		# After the commit: a tablet polling every 2 s must not fetch a link whose copy
+		# is not in the database yet.
+		frappe.db.after_commit.add(lambda: signing_terminal.deliver(terminal, token))
+		out["terminal"] = terminal
+		return out
 	if deliver == "qr":
 		out.update(sign_url=url, qr_svg=_qr_data_uri(url))
 		return out
@@ -570,14 +614,16 @@ def _decode_signature(signature) -> bytes:
 @rate_limit(limit=300, seconds=3600)
 @rate_limit(key="token", limit=10, seconds=3600)
 def submit_signature(token: str, signature: str, agreed: int, signer_name: str,
-		participant_is_minor: int = 0, signer_relationship: str = "Self") -> dict:
+		participant_is_minor: int = 0, signer_relationship: str = "Self",
+		terminal_secret: str | None = None) -> dict:
 	"""Sign an agreement through a one-time link (Guest).
 
 	Checked before anything is written: the "I agree" tick, the typed name, the
 	token (same error for every invalid one), the signature (a PNG of at most
 	500 KB and 2000 px with ink on it) and the age rule. A link opened as a QR
-	code at the counter is recorded as signed on a Tablet, an emailed one as
-	Remote. The link is used up; the signed PDF is built and emailed afterwards.
+	code at the counter, or on a paired signing tablet (its device key sent as
+	``terminal_secret``; the copy records which tablet), is recorded as signed on
+	a Tablet, an emailed one as Remote. The link is used up; the signed PDF is built and emailed afterwards.
 	When the template's text changed after the page was opened, nothing is signed
 	and the signer is asked to reload and read the new text. 10 calls an hour per
 	link and 300 per IP address.
@@ -590,6 +636,7 @@ def submit_signature(token: str, signature: str, agreed: int, signer_name: str,
 	    participant_is_minor: 1 when the signer declares the participant is under
 	        18 (ignored when the store keeps the customer's date of birth).
 	    signer_relationship: Self, or Parent / Guardian when signing for a minor.
+	    terminal_secret: The signing tablet's device key, when signed on one.
 
 	Returns:
 	    {"signed": true, "store_name"}.
@@ -619,7 +666,10 @@ def submit_signature(token: str, signature: str, agreed: int, signer_name: str,
 		frappe.throw(_("Choose who is signing."))
 	if minor and signer_relationship == "Self":
 		frappe.throw(_("The participant is under 18: a parent or guardian must sign, with their own name."))
-	via = "Remote" if doc.delivery_channel == "Email" and frappe.session.user == "Guest" else "Tablet"
+	from ffl_core.signing_terminal import terminal_for_secret
+	terminal = terminal_for_secret(terminal_secret)
+	via = "Tablet" if terminal else \
+		"Remote" if doc.delivery_channel == "Email" and frappe.session.user == "Guest" else "Tablet"
 	today = nowdate()
 	with guest_job_elevated(), atomic("sign agreement"):
 		f = frappe.get_doc({"doctype": "File", "file_name": f"{doc.name}-signature.png", "is_private": 1,
@@ -634,6 +684,7 @@ def submit_signature(token: str, signature: str, agreed: int, signer_name: str,
 			"signature": f.file_url, "expires_on": _expires_on(doc.template, today),
 			"signer_ip": _request_ip(),
 			"signer_user_agent": _user_agent(),
+			"signing_terminal": terminal,
 			"sign_token_hash": None, "token_expires": None,
 		})
 		doc.flags.via_agreements = True

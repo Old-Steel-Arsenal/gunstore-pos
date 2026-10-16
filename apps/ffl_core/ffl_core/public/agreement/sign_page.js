@@ -7,7 +7,13 @@
 	var $ = function (sel, el) { return (el || document).querySelector(sel); };
 	var app = $('#app');
 	var csrf = ($('meta[name="ffl-csrf"]') || {}).content || '';
-	var token = (new URLSearchParams(location.hash.replace(/^#/, ''))).get('t') || '';
+	var params = new URLSearchParams(location.hash.replace(/^#/, ''));
+	var token = params.get('t') || '';
+	// Opened by the store's signing tablet (www/agreement/terminal): sign with its
+	// device key, go back to the waiting screen afterwards, and follow a newer
+	// agreement the counter sends meanwhile.
+	var device = params.get('from') === 'terminal' ? SigningPad.device(window.localStorage).get() : null;
+	var TERMINAL_PAGE = '/agreement/terminal';
 	var form = $('[data-screen="sign"]');
 	var pad = null;
 	var data = null;
@@ -20,10 +26,11 @@
 	function fail(message) {
 		$('[data-error]').textContent = message;
 		show('error');
+		if (device) setTimeout(function () { location.replace(TERMINAL_PAGE); }, 8000);
 	}
 
-	function call(method, args) {
-		return fetch('/api/method/ffl_core.agreements.' + method, {
+	function call(method, args, module) {
+		return fetch('/api/method/ffl_core.' + (module || 'agreements') + '.' + method, {
 			method: 'POST', credentials: 'same-origin',
 			headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Frappe-CSRF-Token': csrf },
 			body: JSON.stringify(args),
@@ -86,6 +93,7 @@
 		call('submit_signature', {
 			token: token, signature: pad.toDataURL(), agreed: 1, signer_name: name,
 			participant_is_minor: minor() ? 1 : 0, signer_relationship: rel,
+			terminal_secret: device ? device.secret : null,
 		}).then(function (r) {
 			// Nothing of the agreement stays on the screen or in the address bar.
 			history.replaceState(null, '', location.pathname);
@@ -96,6 +104,10 @@
 			$('[data-body]').innerHTML = '';
 			$('[data-done-store]').textContent = r && r.store_name ? ' by ' + r.store_name : '';
 			show('done');
+			if (device) {
+				clearTimeout(watch);
+				setTimeout(function () { location.replace(TERMINAL_PAGE); }, 4000);
+			}
 		}, function (err) {
 			btn.disabled = false;
 			btn.textContent = 'Sign';
@@ -107,6 +119,18 @@
 	// changes only the fragment, which does not reload the page: start over for it.
 	window.addEventListener('hashchange', function () { location.reload(); });
 
+	// On the signing tablet: a newer agreement from the counter replaces this one
+	// (the newest wins, as on the waiting screen); a tablet cut off goes back there.
+	var watch = null;
+	function watchTerminal() {
+		if (!device) return;
+		call('terminal_poll', { secret: device.secret }, 'signing_terminal').then(function (r) {
+			if (!r || !r.paired) return location.replace(TERMINAL_PAGE);
+			if (r.token) return location.replace('/agreement/sign#t=' + encodeURIComponent(r.token) + '&from=terminal');
+			watch = setTimeout(watchTerminal, 2000);
+		}, function () { watch = setTimeout(watchTerminal, 6000); });
+	}
+
 	pad = SigningPad.attach($('[data-pad]'), { onchange: function () { problem(''); } });
 	$('[data-clear]').addEventListener('click', function () { pad.clear(); });
 	form.addEventListener('submit', submit);
@@ -115,5 +139,6 @@
 		fail('This page opens from a signing link. Ask the store for a new one.');
 		return;
 	}
-	call('load_for_signing', { token: token }).then(function (r) { data = r; render(); }, function (err) { fail(err.message); });
+	call('load_for_signing', { token: token }).then(function (r) { data = r; render(); watchTerminal(); },
+		function (err) { fail(err.message); });
 })();
