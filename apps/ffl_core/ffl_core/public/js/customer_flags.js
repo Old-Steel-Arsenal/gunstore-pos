@@ -10,9 +10,10 @@
 //     a 30-minute window (override_customer_ban) — and the answer becomes true.
 //     The server refuses the sale on its own too (refuse_banned_customer).
 //   • Active alerts: shown once per `key` (the POS uses the invoice + customer).
-//   • Everything else (status, family, tags, IDs about to expire): a one-line
-//     strip — ffl.customerFlags.strip(flags) — the register shows under the
-//     customer's name.
+//   • Everything else (status, family, tags, IDs about to expire, agreements
+//     shown on the panel): a one-line strip — ffl.customerFlags.strip(flags) —
+//     the register shows under the customer's name. An agreement still to sign
+//     is a clickable chip that opens ffl.agreements.request (agreement_actions.js).
 // The POS wiring is here too: the POS Invoice `customer` event (both the register
 // and the Desk form), the ItemCart customer section (strip + "Scan ID" lookup,
 // shown only while FFL Settings → Store Customer ID Numbers is on), wrapped on
@@ -38,8 +39,9 @@
 		});
 	}
 
-	// flags (get_customer_flags) → {blocked, alerts: [message], chips: [{label, tone}]}.
-	// tone: red | orange | yellow | blue | gray.
+	// flags (get_customer_flags) → {blocked, alerts: [message], chips: [{label, tone, request?}]}.
+	// tone: red | orange | yellow | green | blue | gray. request: {customer, template} —
+	// the chip asks for that agreement when clicked.
 	function summarize(flags, L) {
 		L = L || id;
 		var f = flags || {};
@@ -56,6 +58,17 @@
 				? { label: L('{0} expired {1}', [L(d.id_type), d.expiry_date]), tone: 'orange' }
 				: { label: L('{0} expires {1}', [L(d.id_type), d.expiry_date]), tone: 'yellow' });
 		});
+		(f.agreements || []).forEach(function (a) {
+			var ask = { customer: f.name, template: a.template };
+			if (a.state === 'missing') chips.push({ label: L('{0} needed', [a.template]), tone: 'orange', request: ask });
+			else if (a.state === 'expired') {
+				chips.push({ label: a.expires_on ? L('{0} expired {1}', [a.template, a.expires_on]) : L('{0} expired', [a.template]),
+					tone: 'orange', request: ask });
+			}
+			else if (a.state === 'pending') chips.push({ label: L('{0} sent, not signed', [a.template]), tone: 'yellow', request: ask });
+			else if (a.state === 'expiring') chips.push({ label: L('{0} expires {1}', [a.template, a.expires_on]), tone: 'yellow' });
+			else if (a.state === 'signed') chips.push({ label: L('{0} signed', [a.template]), tone: 'green' });
+		});
 		var fam = f.family || {};
 		if (fam.primary) {
 			chips.push({ label: L('Family of {0}', [fam.primary.customer_name || fam.primary.name]), tone: 'blue' });
@@ -70,14 +83,17 @@
 		};
 	}
 
-	var TONES = { red: 'red', orange: 'orange', yellow: 'yellow', blue: 'blue', gray: 'gray' };
+	var TONES = { red: 'red', orange: 'orange', yellow: 'yellow', green: 'green', blue: 'blue', gray: 'gray' };
 
 	// One line of Frappe indicator pills; '' when there is nothing to say.
 	function stripHtml(flags, L) {
 		var s = summarize(flags, L);
 		if (!s.chips.length && !s.alerts.length) return '';
 		var pills = s.chips.map(function (c) {
-			return '<span class="indicator-pill ' + (TONES[c.tone] || 'gray') + '" style="margin:2px 4px 0 0">'
+			var ask = c.request ? ' role="button" data-ffl-agreement-customer="' + escText(c.request.customer)
+				+ '" data-ffl-agreement-template="' + escText(c.request.template) + '"' : '';
+			return '<span class="indicator-pill ' + (TONES[c.tone] || 'gray') + '"' + ask
+				+ ' style="margin:2px 4px 0 0' + (ask ? '; cursor:pointer' : '') + '">'
 				+ escText(c.label) + '</span>';
 		});
 		if (s.alerts.length) {

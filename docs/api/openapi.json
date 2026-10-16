@@ -118,6 +118,60 @@
           "ffl_number"
         ]
       },
+      "Agreement_Template": {
+        "type": "object",
+        "description": "Custom DocType (ffl_core); CRUD via /api/resource/Agreement%20Template — see docs/api/frappe-rest.md.",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Title"
+          },
+          "active": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "Active"
+          },
+          "version": {
+            "type": "integer",
+            "description": "Version"
+          },
+          "valid_days": {
+            "type": "integer",
+            "description": "Valid For (Days)"
+          },
+          "show_on_counter_panel": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "Show on Counter Panel"
+          },
+          "minors_need_guardian": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "Minors Need a Parent or Guardian"
+          },
+          "body": {
+            "type": "string",
+            "description": "Agreement Text"
+          },
+          "description": {
+            "type": "string",
+            "description": "Staff Notes"
+          }
+        },
+        "required": [
+          "title",
+          "body"
+        ]
+      },
       "Caliber": {
         "type": "object",
         "description": "Custom DocType (ffl_core); CRUD via /api/resource/Caliber — see docs/api/frappe-rest.md.",
@@ -568,6 +622,153 @@
             "description": "Payload (JSON)"
           }
         }
+      },
+      "Customer_Agreement": {
+        "type": "object",
+        "description": "Custom DocType (ffl_core); CRUD via /api/resource/Customer%20Agreement — see docs/api/frappe-rest.md.",
+        "properties": {
+          "customer": {
+            "type": "string",
+            "description": "Customer (Link: Customer)"
+          },
+          "customer_name": {
+            "type": "string",
+            "description": "Customer Name"
+          },
+          "company": {
+            "type": "string",
+            "description": "Company (Link: Company)"
+          },
+          "template": {
+            "type": "string",
+            "description": "Agreement (Link: Agreement Template)"
+          },
+          "template_version": {
+            "type": "integer",
+            "description": "Agreement Version"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Pending",
+              "Signed",
+              "Void",
+              "Expired"
+            ],
+            "description": "Status"
+          },
+          "expires_on": {
+            "type": "string",
+            "description": "Expires On"
+          },
+          "signed_on": {
+            "type": "string",
+            "description": "Signed On"
+          },
+          "signed_via": {
+            "type": "string",
+            "enum": [
+              "Tablet",
+              "Remote",
+              "Paper"
+            ],
+            "description": "Signed Via"
+          },
+          "signer_name": {
+            "type": "string",
+            "description": "Signed By"
+          },
+          "signer_relationship": {
+            "type": "string",
+            "enum": [
+              "Self",
+              "Parent",
+              "Guardian"
+            ],
+            "description": "Signer Is"
+          },
+          "participant_is_minor": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "Participant Under 18"
+          },
+          "minor_determined_by": {
+            "type": "string",
+            "enum": [
+              "Date of Birth",
+              "Self-declared",
+              "Paper"
+            ],
+            "description": "Age Taken From"
+          },
+          "signature": {
+            "type": "string",
+            "description": "Signature"
+          },
+          "signed_pdf": {
+            "type": "string",
+            "description": "Signed Copy (PDF)"
+          },
+          "paper_signed_on": {
+            "type": "string",
+            "description": "Date on Paper"
+          },
+          "recorded_by": {
+            "type": "string",
+            "description": "Paper Copy Recorded By (Link: User)"
+          },
+          "signer_ip": {
+            "type": "string",
+            "description": "Signer IP"
+          },
+          "signer_user_agent": {
+            "type": "string",
+            "description": "Signer Device"
+          },
+          "requested_by": {
+            "type": "string",
+            "description": "Requested By (Link: User)"
+          },
+          "delivery_channel": {
+            "type": "string",
+            "enum": [
+              "QR",
+              "Email"
+            ],
+            "description": "Sent As"
+          },
+          "token_expires": {
+            "type": "string",
+            "description": "Link Expires"
+          },
+          "sign_token_hash": {
+            "type": "string",
+            "description": "Sign Token Hash"
+          },
+          "void_reason": {
+            "type": "string",
+            "description": "Void Reason"
+          },
+          "reference_doctype": {
+            "type": "string",
+            "description": "Reference Type (Link: DocType)"
+          },
+          "reference_name": {
+            "type": "string",
+            "description": "Reference (Link: reference_doctype)"
+          },
+          "body_snapshot": {
+            "type": "string",
+            "description": "Text"
+          }
+        },
+        "required": [
+          "customer",
+          "template"
+        ]
       },
       "Customer_Alert": {
         "type": "object",
@@ -4686,6 +4887,409 @@
     }
   },
   "paths": {
+    "/api/method/ffl_core.agreements.get_customer_agreements": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "The Agreements section of the Customer form.",
+        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:396`",
+        "operationId": "ffl_core.agreements.get_customer_agreements",
+        "responses": {
+          "200": {
+            "description": "{\"rows\": [{\"name\", \"template\", \"status\", \"signed_on\", \"signed_via\", \"expires_on\", \"signed_pdf\"}] newest first, \"can_manage\": whether the caller may void or record paper copies}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer": {
+                    "type": "string",
+                    "description": "Customer name (document id)."
+                  }
+                },
+                "required": [
+                  "customer"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.agreements.load_for_signing": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "What the signing page shows for a one-time link (Guest).",
+        "description": "Only the customer's name, the agreement's title and text, and the store's\nname — nothing else about the customer. Every invalid, used, void or\nexpired link gets the same error. 30 calls an hour per IP address.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:479`",
+        "operationId": "ffl_core.agreements.load_for_signing",
+        "responses": {
+          "200": {
+            "description": "{\"customer_name\", \"title\", \"body_html\", \"store_name\", \"minors_need_guardian\", \"minor_by_dob\": true / false from the customer's date of birth, or null when the store keeps none (the page then asks)}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "The token from the link's ``#t=`` fragment."
+                  }
+                },
+                "required": [
+                  "token"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.agreements.record_paper_agreement": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "Manager records a copy the customer signed on paper.",
+        "description": "The scan must already be attached to this Customer Agreement; it is made\nprivate and becomes the signed copy. The copy turns Signed via Paper, its\nexpiry counts from the date on the paper, and who recorded it, when, and the\nfile go on the timeline. A missing signature can never be waived: without a\nsigned scan there is nothing to record.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:334`",
+        "operationId": "ffl_core.agreements.record_paper_agreement",
+        "responses": {
+          "200": {
+            "description": "{\"name\", \"status\", \"expires_on\", \"signed_pdf\"}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The Pending Customer Agreement."
+                  },
+                  "file_url": {
+                    "type": "string",
+                    "description": "The attached scan (PDF or image)."
+                  },
+                  "signer_name": {
+                    "type": "string",
+                    "description": "Name as signed on the paper."
+                  },
+                  "paper_signed_on": {
+                    "type": "string",
+                    "description": "Date written on the paper (YYYY-MM-DD), not in the future."
+                  },
+                  "participant_is_minor": {
+                    "type": "integer",
+                    "description": "1 when the participant is under 18 (then a Parent or Guardian signed).",
+                    "default": 0
+                  },
+                  "signer_relationship": {
+                    "type": "string",
+                    "description": "Self, Parent or Guardian.",
+                    "default": "Self"
+                  }
+                },
+                "required": [
+                  "name",
+                  "file_url",
+                  "signer_name",
+                  "paper_signed_on"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.agreements.regenerate_signed_pdf": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "Build a signed copy's PDF again (when the background job failed).",
+        "description": "**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:416`",
+        "operationId": "ffl_core.agreements.regenerate_signed_pdf",
+        "responses": {
+          "200": {
+            "description": "{\"signed_pdf\": file URL}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "A Customer Agreement signed on a tablet or by link."
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.agreements.request_agreement": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "Send a customer an agreement to sign.",
+        "description": "Creates the customer's Pending copy of the template, or re-issues the one\nalready pending (its old link stops working and its text is rendered again).\n\n**Auth (derived from code):** Roles: Sales User / Sales Manager / Stock Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:236`",
+        "operationId": "ffl_core.agreements.request_agreement",
+        "responses": {
+          "200": {
+            "description": "{\"name\": the Customer Agreement, \"deliver\", \"token_expires\"} plus, for ``qr``, \"sign_url\" and \"qr_svg\" (an SVG data URI); for ``email``, \"email\". The link itself is never stored.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer": {
+                    "type": "string",
+                    "description": "Customer name (document id)."
+                  },
+                  "template": {
+                    "type": "string",
+                    "description": "Agreement Template name; must be active."
+                  },
+                  "deliver": {
+                    "type": "string",
+                    "description": "``qr`` — return the signing link and a QR code for the counter; ``email`` — email the link to the customer (refused when the customer has no email address); ``none`` — only create the Pending copy (a manager then records a paper copy on it).",
+                    "default": "qr"
+                  }
+                },
+                "required": [
+                  "customer",
+                  "template"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.agreements.submit_signature": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Sign an agreement through a one-time link (Guest).",
+        "description": "Checked before anything is written: the \"I agree\" tick, the typed name, the\ntoken (same error for every invalid one), the signature (a PNG of at most\n500 KB and 2000 px with ink on it) and the age rule. A link opened as a QR\ncode at the counter is recorded as signed on a Tablet, an emailed one as\nRemote. The link is used up; the signed PDF is built and emailed afterwards.\n10 calls an hour per IP address.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/agreements.py:540`",
+        "operationId": "ffl_core.agreements.submit_signature",
+        "responses": {
+          "200": {
+            "description": "{\"signed\": true, \"store_name\"}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "The token from the link's ``#t=`` fragment."
+                  },
+                  "signature": {
+                    "type": "string",
+                    "description": "The drawn signature as a PNG data URL."
+                  },
+                  "agreed": {
+                    "type": "integer",
+                    "description": "1 — the signer ticked \"I agree\"."
+                  },
+                  "signer_name": {
+                    "type": "string",
+                    "description": "Name typed by the signer."
+                  },
+                  "participant_is_minor": {
+                    "type": "integer",
+                    "description": "1 when the signer declares the participant is under 18 (ignored when the store keeps the customer's date of birth).",
+                    "default": 0
+                  },
+                  "signer_relationship": {
+                    "type": "string",
+                    "description": "Self, or Parent / Guardian when signing for a minor.",
+                    "default": "Self"
+                  }
+                },
+                "required": [
+                  "token",
+                  "signature",
+                  "agreed",
+                  "signer_name"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/ffl_core.agreements.void_agreement": {
+      "post": {
+        "tags": [
+          "ffl_core"
+        ],
+        "summary": "Manager voids a copy (sent by mistake, signed by the wrong person).",
+        "description": "A Pending copy's link stops working. The copy is kept, marked Void, and the\nreason goes on its timeline.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/agreements.py:306`",
+        "operationId": "ffl_core.agreements.void_agreement",
+        "responses": {
+          "200": {
+            "description": "{\"name\", \"status\": \"Void\"}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/FrappeError"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Customer Agreement name."
+                  },
+                  "reason": {
+                    "type": "string",
+                    "description": "Why (required)."
+                  }
+                },
+                "required": [
+                  "name",
+                  "reason"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/method/ffl_core.api.atf_link.create_party_from_atf": {
       "post": {
         "tags": [
@@ -8611,7 +9215,7 @@
           "webhooks"
         ],
         "summary": "RFC 7591 dynamic client registration (Frappe's), plus localhost loopback",
-        "description": "redirects. Open by design like Frappe's: the client still needs a user to\nsign in and approve before it gets any token.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\nSource: `apps/ffl_core/ffl_core/api/oauth_dcr.py:32`",
+        "description": "redirects. Open by design like Frappe's: the client still needs a user to\nsign in and approve before it gets any token.\n\n**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\nSource: `apps/ffl_core/ffl_core/api/oauth_dcr.py:32`",
         "operationId": "ffl_core.api.oauth_dcr.register_client",
         "responses": {
           "200": {
@@ -10934,7 +11538,7 @@
           "ffl_core"
         ],
         "summary": "Which Pending Order rows belong to a Banned customer, for the page's red badge.",
-        "description": "A web or GunBroker order is booked to a customer only once it has shipped, so\nits buyer is looked up the way that booking will: a Woo order by its billing\nemail (customer email, then merged-email alias); a GunBroker order by its linked\ncustomer, then the buyer's GunBroker id (field, then alias), then email.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:319`",
+        "description": "A web or GunBroker order is booked to a customer only once it has shipped, so\nits buyer is looked up the way that booking will: a Woo order by its billing\nemail (customer email, then merged-email alias); a GunBroker order by its linked\ncustomer, then the buyer's GunBroker id (field, then alias), then email.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:326`",
         "operationId": "ffl_core.customer_flags.banned_order_rows",
         "responses": {
           "200": {
@@ -10984,7 +11588,7 @@
           "ffl_core"
         ],
         "summary": "Customers holding this ID number (a licence scanned at the register).",
-        "description": "Only while FFL Settings → Store Customer ID Numbers is on (otherwise none are\nstored, and the answer is an empty list). Compared without case, spaces or dashes.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:232`",
+        "description": "Only while FFL Settings → Store Customer ID Numbers is on (otherwise none are\nstored, and the answer is an empty list). Compared without case, spaces or dashes.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:239`",
         "operationId": "ffl_core.customer_flags.find_customers_by_id_number",
         "responses": {
           "200": {
@@ -11032,7 +11636,7 @@
           "ffl_core"
         ],
         "summary": "Existing customers a new one may duplicate, for the New Customer dialog.",
-        "description": "Matches the customer's email (or an email merged into it), mobile number\n(last 10 digits) and — while the store keeps ID numbers — an ID number.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:264`",
+        "description": "Matches the customer's email (or an email merged into it), mobile number\n(last 10 digits) and — while the store keeps ID numbers — an ID number.\n\n**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:271`",
         "operationId": "ffl_core.customer_flags.find_possible_duplicates",
         "responses": {
           "200": {
@@ -11094,11 +11698,11 @@
           "ffl_core"
         ],
         "summary": "What the counter panel shows when this customer is picked.",
-        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:134`",
+        "description": "**Auth (derived from code):** Requires read permission on Customer (Frappe DocType permission check).\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:137`",
         "operationId": "ffl_core.customer_flags.get_customer_flags",
         "responses": {
           "200": {
-            "description": "{\"name\", \"customer_name\", \"status\", \"status_reason\" (only when not Active), \"banned\": Banned with no open override, \"override_until\": end of an open manager override or None, \"can_override\": whether the caller may override, \"alerts\": [{\"message\", \"created_by\", \"created_on\"}] (active ones, oldest first), \"tags\": [str], \"family\": {\"primary\": {\"name\", \"customer_name\"} or None, \"relationship\", \"members\": int}, \"ids\": [{\"id_type\", \"expiry_date\", \"expired\": bool}] for ID documents expired or expiring within 30 days}. Never carries an ID number or date of birth.",
+            "description": "{\"name\", \"customer_name\", \"status\", \"status_reason\" (only when not Active), \"banned\": Banned with no open override, \"override_until\": end of an open manager override or None, \"can_override\": whether the caller may override, \"alerts\": [{\"message\", \"created_by\", \"created_on\"}] (active ones, oldest first), \"tags\": [str], \"family\": {\"primary\": {\"name\", \"customer_name\"} or None, \"relationship\", \"members\": int}, \"ids\": [{\"id_type\", \"expiry_date\", \"expired\": bool}] for ID documents expired or expiring within 30 days, \"agreements\": [{\"template\", \"state\", \"expires_on\", \"agreement\"}] for each active Agreement Template shown on the counter panel — state is signed, expiring (within 30 days), expired, pending or missing}. Never carries an ID number or date of birth.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11142,7 +11746,7 @@
           "ffl_core"
         ],
         "summary": "Manager lets a Banned customer be served for the next 30 minutes.",
-        "description": "Opens the window every counter screen and the server-side sale gate read\n(``ban_override_until`` / ``ban_override_by``) and records who and why on the\ncustomer's timeline. The customer stays Banned.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:192`",
+        "description": "Opens the window every counter screen and the server-side sale gate read\n(``ban_override_until`` / ``ban_override_by``) and records who and why on the\ncustomer's timeline. The customer stays Banned.\n\n**Auth (derived from code):** Roles: Sales Manager / System Manager\n\nSource: `apps/ffl_core/ffl_core/customer_flags.py:199`",
         "operationId": "ffl_core.customer_flags.override_customer_ban",
         "responses": {
           "200": {
@@ -14882,7 +15486,7 @@
           "webhooks"
         ],
         "summary": "Single FastBound webhook entry point (guest, HMAC-verified).",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** FastBound's webhook JSON body; the event name selects the handler. The X-FastBound-Signature header must carry a valid HMAC over the raw body (secret configured in FastBound Settings).\n\nSource: `apps/ffl_integrations/ffl_integrations/fastbound/webhook.py:1138`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\n**Payload:** FastBound's webhook JSON body; the event name selects the handler. The X-FastBound-Signature header must carry a valid HMAC over the raw body (secret configured in FastBound Settings).\n\nSource: `apps/ffl_integrations/ffl_integrations/fastbound/webhook.py:1138`",
         "operationId": "ffl_integrations.fastbound.webhook.fastbound_event",
         "responses": {
           "200": {
@@ -16377,7 +16981,7 @@
           "webhooks"
         ],
         "summary": "GunBroker FixedPriceListingFailed webhook: a listing failed, so record why and re-check the gun.",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's ``{ItemTitle, ItemID, SKU, Quantity, \"Error Message\"}`` JSON. The item number, SKU and error text are read; the text is stored as plain text on the gun's (or item's) GunBroker sync error.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:446`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\n**Payload:** GunBroker's ``{ItemTitle, ItemID, SKU, Quantity, \"Error Message\"}`` JSON. The item number, SKU and error text are read; the text is stored as plain text on the gun's (or item's) GunBroker sync error.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:446`",
         "operationId": "ffl_integrations.gunbroker.webhooks.fixed_price_listing_failed",
         "responses": {
           "200": {
@@ -16408,7 +17012,7 @@
           "webhooks"
         ],
         "summary": "GunBroker ItemsSold webhook: an item sold, so pull the order now.",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's Order JSON. Only the order number is read; the order is then fetched from the GunBroker API by the order sync. The buyer details in the body are not stored or logged.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:382`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\n**Payload:** GunBroker's Order JSON. Only the order number is read; the order is then fetched from the GunBroker API by the order sync. The buyer details in the body are not stored or logged.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:382`",
         "operationId": "ffl_integrations.gunbroker.webhooks.items_sold",
         "responses": {
           "200": {
@@ -16439,7 +17043,7 @@
           "webhooks"
         ],
         "summary": "GunBroker ItemsUnsoldNotRelisted webhook: a listing ended with no sale, so re-check the gun.",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's Item JSON. Only the item number and SKU are read.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:432`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\n**Payload:** GunBroker's Item JSON. Only the item number and SKU are read.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:432`",
         "operationId": "ffl_integrations.gunbroker.webhooks.items_unsold_not_relisted",
         "responses": {
           "200": {
@@ -16470,7 +17074,7 @@
           "webhooks"
         ],
         "summary": "GunBroker OrderStatusUpdate webhook: an order changed, so pull it now.",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's order-status JSON (OrderID and the milestone dates). Only the order number is read.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:400`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\n**Payload:** GunBroker's order-status JSON (OrderID and the milestone dates). Only the order number is read.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:400`",
         "operationId": "ffl_integrations.gunbroker.webhooks.order_status_update",
         "responses": {
           "200": {
@@ -16501,7 +17105,7 @@
           "webhooks"
         ],
         "summary": "GunBroker WinningBidReceived webhook: an auction took a bid, so lock the gun now.",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** GunBroker's ``{item, currentBid}`` JSON. The item number, SKU, bid count, current bid and ending time are read; the gun is found by SKU, then item number.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:415`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\n**Payload:** GunBroker's ``{item, currentBid}`` JSON. The item number, SKU, bid count, current bid and ending time are read; the gun is found by SKU, then item number.\n\nSource: `apps/ffl_integrations/ffl_integrations/gunbroker/webhooks.py:415`",
         "operationId": "ffl_integrations.gunbroker.webhooks.winning_bid_received",
         "responses": {
           "200": {
@@ -18676,7 +19280,7 @@
           "webhooks"
         ],
         "summary": "Single WooCommerce webhook entry point (guest, HMAC-verified).",
-        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature or HTTP Basic credentials).\n\n**Payload:** WooCommerce's webhook JSON body; the X-WC-Webhook-Topic header selects the handler (order.created/updated, product.*, ...). The X-WC-Webhook-Signature header must carry a valid HMAC over the raw body (secret configured in Woo Sync Settings).\n\nSource: `apps/ffl_woo_sync/ffl_woo_sync/woocommerce/webhook.py:2833`",
+        "description": "**Auth (derived from code):** Guest — no session; the endpoint verifies the caller itself (HMAC signature, HTTP Basic credentials or a one-time token).\n\n**Payload:** WooCommerce's webhook JSON body; the X-WC-Webhook-Topic header selects the handler (order.created/updated, product.*, ...). The X-WC-Webhook-Signature header must carry a valid HMAC over the raw body (secret configured in Woo Sync Settings).\n\nSource: `apps/ffl_woo_sync/ffl_woo_sync/woocommerce/webhook.py:2833`",
         "operationId": "ffl_woo_sync.woocommerce.webhook.woo_event",
         "responses": {
           "200": {
