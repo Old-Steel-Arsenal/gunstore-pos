@@ -347,6 +347,9 @@ CORE_RECORDS = [
 	("Customers", [
 		("Customers", "DocType", "Customer"),
 		("Customer groups", "DocType", "Customer Group"),
+		("Agreements", "DocType", "Customer Agreement"),
+		("Agreement templates", "DocType", "Agreement Template"),
+		("Signing tablets", "DocType", "Signing Terminal"),
 	]),
 ]
 ONLINE_RECORDS = ("Online", [
